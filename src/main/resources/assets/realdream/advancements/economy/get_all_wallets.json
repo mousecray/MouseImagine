@@ -1,0 +1,100 @@
+{
+  "display": {
+    "icon": {
+      "item": "${mod_id}:infinity_wallet"
+    },
+    "title": {
+      "translate": "advancements.${mod_id}.economy.get_all_wallets.title"
+    },
+    "description": {
+      "translate": "advancements.${mod_id}.economy.get_all_wallets.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "${mod_id}:economy/get_wallet",
+  "criteria": {
+    "get_normal_wallet": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "${mod_id}:small_wallet"
+          },
+          {
+            "item": "${mod_id}:leather_wallet"
+          },
+          {
+            "item": "${mod_id}:fat_wallet"
+          },
+          {
+            "item": "${mod_id}:big_wallet"
+          },
+          {
+            "item": "${mod_id}:huge_wallet"
+          }
+        ]
+      }
+    },
+    "get_magic_wallet": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "${mod_id}:magic_wallet"
+          }
+        ]
+      }
+    },
+    "get_forest_wallet": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "${mod_id}:forest_wallet"
+          }
+        ]
+      }
+    },
+    "get_chest_wallet": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "${mod_id}:chest_wallet"
+          }
+        ]
+      }
+    },
+    "get_epic_wallet": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "${mod_id}:epic_wallet"
+          }
+        ]
+      }
+    },
+    "get_legendary_wallet": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "${mod_id}:legendary_wallet"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "get_normal_wallet",
+      "get_magic_wallet",
+      "get_forest_wallet",
+      "get_chest_wallet",
+      "get_epic_wallet",
+      "get_legendary_wallet"
+    ]
+  ]
+}

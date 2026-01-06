@@ -1,0 +1,24 @@
+{
+  "display": {
+    "icon": {
+      "item": "realdream:gold_coin"
+    },
+    "title": {
+      "translate": "advancements.realdream.economy.root.title"
+    },
+    "description": {
+      "translate": "advancements.realdream.economy.root.description"
+    },
+    "background": "realdream:textures/gui/advancements/backgrounds/economy.png",
+    "show_toast": false,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "get_any_coin": {
+      "trigger": "realdream:get_coin",
+      "conditions": {
+        "coin": {}
+      }
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "silence": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "${mod_id}:silence",
+        "stream": false
+      }
+    ]
+  },
+  "wallet.shuffle_hotbar": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "${mod_id}:wallet/shuffle_hotbar",
+        "stream": false
+      }
+    ]
+  },
+  "wallet.effect_use": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "${mod_id}:wallet/effect_use",
+        "stream": false
+      }
+    ]
+  },
+  "coin.drop": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "${mod_id}:coin/drop",
+        "stream": false
+      }
+    ]
+  },
+  "coin.pickup": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "${mod_id}:coin/pickup",
+        "stream": false
+      }
+    ]
+  },
+  "trade": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "${mod_id}:trade",
+        "stream": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "package": "ru.mousecray.${mod_id}.mixins",
+  "refmap": "mixins.${mod_id}.refmap.json",
+  "target": "@env(DEFAULT)",
+  "minVersion": "0.8.5",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "MixinEntityVillager",
+    "MixinWalletContainerSurvival"
+  ],
+  "server": [],
+  "client": [
+    "MixinWalletGuiContainerCreative",
+    "MixinWalletGuiSurvival"
+  ]
+}

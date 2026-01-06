@@ -1,0 +1,26 @@
+{
+  "display": {
+    "icon": {
+      "item": "${mod_id}:legendary_wallet"
+    },
+    "title": {
+      "translate": "advancements.${mod_id}.economy.full_legendary_wallet.title"
+    },
+    "description": {
+      "translate": "advancements.${mod_id}.economy.full_legendary_wallet.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "${mod_id}:economy/get_wallet",
+  "criteria": {
+    "full_legendary_wallet": {
+      "trigger": "${mod_id}:full_wallet",
+      "conditions": {
+        "wallet": {
+          "type": 17
+        }
+      }
+    }
+  }
+}

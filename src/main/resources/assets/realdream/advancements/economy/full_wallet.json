@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "item": "${mod_id}:huge_wallet"
+    },
+    "title": {
+      "translate": "advancements.${mod_id}.economy.full_wallet.title"
+    },
+    "description": {
+      "translate": "advancements.${mod_id}.economy.full_wallet.description"
+    },
+    "show_toast": true
+  },
+  "parent": "${mod_id}:economy/get_wallet",
+  "criteria": {
+    "full_wallet": {
+      "trigger": "${mod_id}:full_wallet",
+      "conditions": {
+        "wallet": {}
+      }
+    }
+  }
+}

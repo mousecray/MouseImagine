@@ -1,0 +1,6 @@
+{
+  "parent": "${mod_id}:item/coin",
+  "textures": {
+    "layer0": "${mod_id}:items/coins/wood_coin"
+  }
+}

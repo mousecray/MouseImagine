@@ -1,0 +1,81 @@
+{
+  "display": {
+    "icon": {
+      "item": "realdream:fat_wallet"
+    },
+    "title": {
+      "translate": "advancements.realdream.economy.get_wallet.title"
+    },
+    "description": {
+      "translate": "advancements.realdream.economy.get_wallet.description"
+    },
+    "show_toast": true
+  },
+  "parent": "realdream:economy/root",
+  "criteria": {
+    "get_wallet": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "realdream:leak_small_wallet"
+          },
+          {
+            "item": "realdream:leak_leather_wallet"
+          },
+          {
+            "item": "realdream:leak_fat_wallet"
+          },
+          {
+            "item": "realdream:leak_big_wallet"
+          },
+          {
+            "item": "realdream:leak_huge_wallet"
+          },
+          {
+            "item": "realdream:leak_chest_wallet"
+          },
+          {
+            "item": "realdream:leak_magic_wallet"
+          },
+          {
+            "item": "realdream:leak_forest_wallet"
+          },
+          {
+            "item": "realdream:small_wallet"
+          },
+          {
+            "item": "realdream:leather_wallet"
+          },
+          {
+            "item": "realdream:fat_wallet"
+          },
+          {
+            "item": "realdream:big_wallet"
+          },
+          {
+            "item": "realdream:huge_wallet"
+          },
+          {
+            "item": "realdream:magic_wallet"
+          },
+          {
+            "item": "realdream:chest_wallet"
+          },
+          {
+            "item": "realdream:forest_wallet"
+          },
+          {
+            "item": "realdream:epic_wallet"
+          },
+          {
+            "item": "realdream:legendary_wallet"
+          },
+          {
+            "item": "realdream:infinity_wallet"
+          }
+        ]
+      }
+    }
+  }
+}

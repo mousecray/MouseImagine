@@ -1,0 +1,6 @@
+{
+  "parent": "${mod_id}:item/wallet",
+  "textures": {
+    "layer0": "${mod_id}:items/wallets/leak_magic_wallet"
+  }
+}
