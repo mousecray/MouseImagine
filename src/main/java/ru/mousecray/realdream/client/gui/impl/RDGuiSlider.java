@@ -6,6 +6,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.realdream.client.gui.GuiTexturePack;
 import ru.mousecray.realdream.client.gui.RDClickType;
+import ru.mousecray.realdream.client.gui.RDGuiElement;
 import ru.mousecray.realdream.client.gui.RDFontSize;
 import ru.mousecray.realdream.client.gui.RDGuiButton;
 import ru.mousecray.realdream.client.gui.container.RDGuiPanel;
@@ -31,12 +32,11 @@ public class RDGuiSlider<T extends RDGuiSlider<T>> extends RDGuiPanel<T> {
     private Consumer<RDGuiMouseClickEvent<T>> onClick = null;
     private Consumer<RDGuiMouseDragEvent<T>>  onDrag  = null;
 
-    RDGuiMouseClickEvent<T> clickEvent = new RDGuiMouseClickEvent<>(RDClickType.CLICK);
-    RDGuiMouseDragEvent<T>  dragEvent  = new RDGuiMouseDragEvent<>();
+    private final RDGuiMouseClickEvent<T> clickEvent = new RDGuiMouseClickEvent<>(RDClickType.CLICK);
+    private final RDGuiMouseDragEvent<T>  dragEvent  = new RDGuiMouseDragEvent<>();
 
     private IGuiVector lastParentDefaultSize, lastParentContentSize;
 
-    @SuppressWarnings("rawtypes")
     public RDGuiSlider(GuiShape shape, GuiTexturePack trackTexture, GuiTexturePack knobTexture, GuiVector knobSize, int min, int max, boolean isVertical) {
         super(shape);
         this.isVertical = isVertical;
@@ -44,37 +44,47 @@ public class RDGuiSlider<T extends RDGuiSlider<T>> extends RDGuiPanel<T> {
         this.max = Math.max(max, min);
         range = this.max - min;
 
-        RDGuiButton<?> track = new RDGuiButton<RDGuiButton>("", shape, trackTexture,
-                SoundEvents.UI_BUTTON_CLICK, RDFontSize.NORMAL
-        ) {
+        class TrackButton extends RDGuiButton<TrackButton> {
+            public TrackButton() {
+                super("", shape, trackTexture, SoundEvents.UI_BUTTON_CLICK, RDFontSize.NORMAL);
+            }
+
             @Override
-            public void onClick(@Nonnull RDGuiMouseClickEvent<RDGuiButton> e) {
+            public void onClick(@Nonnull RDGuiMouseClickEvent<TrackButton> e) {
                 updateFromMouseX(e.getMouseX(), e.getMouseY());
                 fireClickEvent(e);
             }
-        };
+        }
+
+        TrackButton track = new TrackButton();
         track.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT));
         addChild(track, null, null, null);
 
-        knob = new RDGuiButton<RDGuiButton>("", new GuiShape(0, 0, knobSize.x(), knobSize.y()),
-                knobTexture, SoundEvents.UI_BUTTON_CLICK, RDFontSize.NORMAL) {
+        class KnobButton extends RDGuiButton<KnobButton> {
+            public KnobButton() {
+                super("", new GuiShape(0, 0, knobSize.x(), knobSize.y()),
+                        knobTexture, SoundEvents.UI_BUTTON_CLICK, RDFontSize.NORMAL);
+            }
 
             @Override
-            protected void onMouseDragged(@Nonnull RDGuiMouseDragEvent<RDGuiButton> e) {
+            protected void onMouseDragged(@Nonnull RDGuiMouseDragEvent<KnobButton> e) {
                 if (e.isCancelled()) return;
                 updateFromMouseX(e.getMouseX(), e.getMouseY());
                 fireDragEvent(e);
             }
 
             @Override
-            public void onClick(@Nonnull RDGuiMouseClickEvent<RDGuiButton> e) {
+            public void onClick(@Nonnull RDGuiMouseClickEvent<KnobButton> e) {
                 if (e.isCancelled()) return;
                 updateFromMouseX(e.getMouseX(), e.getMouseY());
                 fireClickEvent(e);
             }
-        };
-        knob.setScaleRules(new GuiScaleRules(GuiScaleType.FIXED));
-        addChild(knob, null, null, null);
+        }
+
+        KnobButton knobBtn = new KnobButton();
+        this.knob = knobBtn;
+        knobBtn.setScaleRules(new GuiScaleRules(GuiScaleType.FIXED));
+        addChild(knobBtn, null, null, null);
 
         setValue(min);
     }

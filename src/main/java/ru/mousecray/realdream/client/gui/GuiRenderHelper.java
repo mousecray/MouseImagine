@@ -293,4 +293,73 @@ public class GuiRenderHelper {
 
         target.offset(available.x(), available.y());
     }
+    
+    public static void calculateFlowComponentShapeWithPad(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available, MutableGuiShape calculatedElementShape, MutableGuiShape elementShape, GuiScaleRules scaleRules, GuiPadding padding) {
+        calculateFlowComponentShape(
+                calculatedElementShape,
+                parentDefaultSize, parentContentSize, elementShape, scaleRules, available
+        );
+
+        float padL = calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getLeft());
+        float padT = calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getTop());
+        float padR = calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getRight());
+        float padB = calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getBottom());
+
+        calculatedElementShape.grow(padL, padT, -padL - padR, -padT - padB);
+    }
+
+    public static void measureChildWithMargin(
+            IGuiVector parentDefaultSize, IGuiVector innerSize,
+            RDGuiElement<?> child, GuiMargin margin,
+            float[] marginResult, MutableGuiVector measureResult
+    ) {
+        float ml = calculateFlowComponentX(parentDefaultSize, innerSize, margin.getLeft());
+        float mt = calculateFlowComponentY(parentDefaultSize, innerSize, margin.getTop());
+        float mr = calculateFlowComponentX(parentDefaultSize, innerSize, margin.getRight());
+        float mb = calculateFlowComponentY(parentDefaultSize, innerSize, margin.getBottom());
+
+        if (marginResult != null && marginResult.length >= 4) {
+            marginResult[0] = ml;
+            marginResult[1] = mt;
+            marginResult[2] = mr;
+            marginResult[3] = mb;
+        }
+
+        float availW = Math.max(0, innerSize.x() - ml - mr);
+        float availH = Math.max(0, innerSize.y() - mt - mb);
+
+        child.measurePreferred(parentDefaultSize, innerSize, availW, availH, measureResult);
+    }
+
+    public static void checkFixedScaleRules(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MutableGuiVector result, GuiScaleRules scaleRules, MutableGuiShape elementShape) {
+        if (scaleRules.isParent()) {
+            result.withX(suggestedX);
+            result.withY(suggestedY);
+        } else {
+            calculateFlowComponentVector(result, parentDefaultSize, parentContentSize, result);
+
+            if (scaleRules.isParentHorizontal()) result.withX(suggestedX);
+            if (scaleRules.isParentVertical()) result.withY(suggestedY);
+
+            float aspect = elementShape.height() > 0 ? elementShape.width() / elementShape.height() : 1f;
+            if (scaleRules.isOriginVertical()) result.withX(result.y() * aspect);
+            else if (scaleRules.isOriginHorizontal()) result.withY(result.x() / aspect);
+        }
+    }
+
+    public static void measurePreferredWithScaleRules(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MutableGuiVector result, MutableGuiShape elementShape, GuiScaleRules scaleRules) {
+        result.withX(elementShape.width());
+        result.withY(elementShape.height());
+
+        boolean fullFixedOrParent = scaleRules.isFixed() || scaleRules.isParent();
+
+        if (!scaleRules.isFixed()) {
+            checkFixedScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, scaleRules, elementShape);
+        }
+
+        if (!fullFixedOrParent) {
+            if (scaleRules.isFixedHorizontal()) result.withX(elementShape.width());
+            if (scaleRules.isFixedVertical()) result.withY(elementShape.height());
+        }
+    }
 }

@@ -37,6 +37,7 @@ public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElemen
     private final MutableGuiShape elementShape, calculatedElementShape = new MutableGuiShape();
     private final MutableGuiVector measureTemp        = new MutableGuiVector();
     private final MutableGuiShape  childAvailableTemp = new MutableGuiShape();
+    private final float[]          marginTemp         = new float[4];
 
     private RDGuiScreen   screen;
     private RDGuiPanel<?> parent;
@@ -103,17 +104,7 @@ public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElemen
 
     @Override
     public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
-        calculateFlowComponentShape(
-                calculatedElementShape,
-                parentDefaultSize, parentContentSize, elementShape, scaleRules, available
-        );
-
-        float padL = calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getLeft());
-        float padT = calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getTop());
-        float padR = calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getRight());
-        float padB = calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getBottom());
-
-        calculatedElementShape.grow(padL, padT, -padL - padR, -padT - padB);
+        calculateFlowComponentShapeWithPad(parentDefaultSize, parentContentSize, available, calculatedElementShape, elementShape, scaleRules, padding);
 
         if (calculatedElementShape.width() <= 0 || calculatedElementShape.height() <= 0) return;
 
@@ -125,17 +116,8 @@ public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElemen
 
     private void layoutFree(IGuiVector parentDefaultSize, MutableGuiShape inner) {
         for (RDGuiElement<?> child : children) {
-            GuiMargin m = childMargins.getOrDefault(child, new GuiMargin(0));
-
-            float ml = calculateFlowComponentX(parentDefaultSize, inner.size(), m.getLeft());
-            float mr = calculateFlowComponentX(parentDefaultSize, inner.size(), m.getRight());
-            float mt = calculateFlowComponentY(parentDefaultSize, inner.size(), m.getTop());
-            float mb = calculateFlowComponentY(parentDefaultSize, inner.size(), m.getBottom());
-
-            float availW = Math.max(0, inner.width() - ml - mr);
-            float availH = Math.max(0, inner.height() - mt - mb);
-
-            child.measurePreferred(parentDefaultSize, inner.size(), availW, availH, measureTemp);
+            measureChildWithMargin(parentDefaultSize, inner.size(), child, getChildMargin(child), marginTemp, measureTemp);
+            float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
 
             float childW = measureTemp.x();
             float childH = measureTemp.y();
@@ -162,16 +144,9 @@ public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElemen
         int   fillCount = 0;
 
         for (RDGuiElement<?> child : children) {
-            GuiMargin m  = childMargins.getOrDefault(child, new GuiMargin(0));
-            float     ml = calculateFlowComponentX(parentDefaultSize, inner.size(), m.getLeft());
-            float     mr = calculateFlowComponentX(parentDefaultSize, inner.size(), m.getRight());
-            float     mt = calculateFlowComponentY(parentDefaultSize, inner.size(), m.getTop());
-            float     mb = calculateFlowComponentY(parentDefaultSize, inner.size(), m.getBottom());
+            measureChildWithMargin(parentDefaultSize, inner.size(), child, getChildMargin(child), marginTemp, measureTemp);
+            float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
 
-            float childAvailH = inner.height() - mt - mb;
-            float suggestedX  = child.getScaleRules().isParentHorizontal() ? 0f : Float.MAX_VALUE;
-
-            child.measurePreferred(parentDefaultSize, inner.size(), suggestedX, childAvailH, measureTemp);
             float prefW = measureTemp.x();
 
             if (child.getScaleRules().isParentHorizontal()) fillCount++;
@@ -183,11 +158,8 @@ public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElemen
 
         float curX = inner.x();
         for (RDGuiElement<?> child : children) {
-            GuiMargin m  = childMargins.getOrDefault(child, new GuiMargin(0));
-            float     ml = calculateFlowComponentX(parentDefaultSize, inner.size(), m.getLeft());
-            float     mr = calculateFlowComponentX(parentDefaultSize, inner.size(), m.getRight());
-            float     mt = calculateFlowComponentY(parentDefaultSize, inner.size(), m.getTop());
-            float     mb = calculateFlowComponentY(parentDefaultSize, inner.size(), m.getBottom());
+            measureChildWithMargin(parentDefaultSize, inner.size(), child, getChildMargin(child), marginTemp, measureTemp);
+            float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
 
             float childAvailH = inner.height() - mt - mb;
 
@@ -217,16 +189,9 @@ public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElemen
         int   fillCount = 0;
 
         for (RDGuiElement<?> child : children) {
-            GuiMargin m  = childMargins.getOrDefault(child, new GuiMargin(0));
-            float     ml = calculateFlowComponentX(parentDefaultSize, inner.size(), m.getLeft());
-            float     mr = calculateFlowComponentX(parentDefaultSize, inner.size(), m.getRight());
-            float     mt = calculateFlowComponentY(parentDefaultSize, inner.size(), m.getTop());
-            float     mb = calculateFlowComponentY(parentDefaultSize, inner.size(), m.getBottom());
+            measureChildWithMargin(parentDefaultSize, inner.size(), child, getChildMargin(child), marginTemp, measureTemp);
+            float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
 
-            float childAvailW = inner.width() - ml - mr;
-            float suggestedY  = child.getScaleRules().isParentVertical() ? 0f : Float.MAX_VALUE;
-
-            child.measurePreferred(parentDefaultSize, inner.size(), childAvailW, suggestedY, measureTemp);
             float prefH = measureTemp.y();
 
             if (child.getScaleRules().isParentVertical()) fillCount++;
@@ -238,11 +203,8 @@ public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElemen
 
         float curY = inner.y();
         for (RDGuiElement<?> child : children) {
-            GuiMargin m  = childMargins.getOrDefault(child, new GuiMargin(0));
-            float     ml = calculateFlowComponentX(parentDefaultSize, inner.size(), m.getLeft());
-            float     mr = calculateFlowComponentX(parentDefaultSize, inner.size(), m.getRight());
-            float     mt = calculateFlowComponentY(parentDefaultSize, inner.size(), m.getTop());
-            float     mb = calculateFlowComponentY(parentDefaultSize, inner.size(), m.getBottom());
+            measureChildWithMargin(parentDefaultSize, inner.size(), child, getChildMargin(child), marginTemp, measureTemp);
+            float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
 
             float childAvailW = inner.width() - ml - mr;
 
@@ -269,16 +231,9 @@ public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElemen
 
     private void layoutAnchor(IGuiVector parentDefaultSize, MutableGuiShape inner) {
         for (RDGuiElement<?> child : children) {
-            GuiMargin m  = childMargins.getOrDefault(child, new GuiMargin(0));
-            float     ml = calculateFlowComponentX(parentDefaultSize, inner.size(), m.getLeft());
-            float     mr = calculateFlowComponentX(parentDefaultSize, inner.size(), m.getRight());
-            float     mt = calculateFlowComponentY(parentDefaultSize, inner.size(), m.getTop());
-            float     mb = calculateFlowComponentY(parentDefaultSize, inner.size(), m.getBottom());
+            measureChildWithMargin(parentDefaultSize, inner.size(), child, getChildMargin(child), marginTemp, measureTemp);
+            float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
 
-            float availW = Math.max(0, inner.width() - ml - mr);
-            float availH = Math.max(0, inner.height() - mt - mb);
-
-            child.measurePreferred(parentDefaultSize, inner.size(), availW, availH, measureTemp);
             float childW = measureTemp.x();
             float childH = measureTemp.y();
 
@@ -340,33 +295,13 @@ public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElemen
         }
     }
 
+    private GuiMargin getChildMargin(RDGuiElement<?> child) {
+        return childMargins.getOrDefault(child, new GuiMargin(0));
+    }
+
     @Override
     public void measurePreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MutableGuiVector result) {
-        result.withX(elementShape.width());
-        result.withY(elementShape.height());
-
-        boolean fullFixedOrParent = scaleRules.isFixed() || scaleRules.isParent();
-
-        if (!scaleRules.isFixed()) {
-            if (scaleRules.isParent()) {
-                result.withX(suggestedX);
-                result.withY(suggestedY);
-            } else {
-                calculateFlowComponentVector(result, parentDefaultSize, parentContentSize, result);
-
-                if (scaleRules.isParentHorizontal()) result.withX(suggestedX);
-                if (scaleRules.isParentVertical()) result.withY(suggestedY);
-
-                float aspect = elementShape.height() > 0 ? elementShape.width() / elementShape.height() : 1f;
-                if (scaleRules.isOriginVertical()) result.withX(result.y() * aspect);
-                else if (scaleRules.isOriginHorizontal()) result.withY(result.x() / aspect);
-            }
-        }
-
-        if (!fullFixedOrParent) {
-            if (scaleRules.isFixedHorizontal()) result.withX(elementShape.width());
-            if (scaleRules.isFixedVertical()) result.withY(elementShape.height());
-        }
+        measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
     }
 
     @Override

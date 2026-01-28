@@ -360,14 +360,7 @@ public abstract class RDGuiButton<T extends RDGuiButton<T>> extends GuiButton im
 
     @Override
     public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
-        calculateFlowComponentShape(calculatedElementShape, parentDefaultSize, parentContentSize, elementShape, scaleRules, available);
-
-        float padL = calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getLeft());
-        float padT = calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getTop());
-        float padR = calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getRight());
-        float padB = calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getBottom());
-
-        calculatedElementShape.grow(padL, padT, -padL - padR, -padT - padB);
+        calculateFlowComponentShapeWithPad(parentDefaultSize, parentContentSize, available, calculatedElementShape, elementShape, scaleRules, padding);
 
         if (textOffset != null) {
             calculateFlowComponentVector(calculatedTextOffsetTemp, parentDefaultSize, parentContentSize, textOffset);
@@ -384,29 +377,7 @@ public abstract class RDGuiButton<T extends RDGuiButton<T>> extends GuiButton im
             IGuiVector parentDefaultSize, IGuiVector parentContentSize,
             float suggestedX, float suggestedY, MutableGuiVector result
     ) {
-        result.withX(elementShape.width());
-        result.withY(elementShape.height());
-
-        boolean fullFixedOrParent = scaleRules.isFixed() || scaleRules.isParent();
-
-        if (scaleRules.isFixed()) {
-        } else if (scaleRules.isParent()) {
-            result.withX(suggestedX);
-            result.withY(suggestedY);
-        } else {
-            calculateFlowComponentVector(result, parentDefaultSize, parentContentSize, result);
-
-            if (scaleRules.isParentHorizontal()) result.withX(suggestedX);
-            if (scaleRules.isParentVertical()) result.withY(suggestedY);
-
-            float aspect = elementShape.height() > 0 ? elementShape.width() / elementShape.height() : 1f;
-            if (scaleRules.isOriginVertical()) result.withX(result.y() * aspect);
-            else if (scaleRules.isOriginHorizontal()) result.withY(result.x() / aspect);
-        }
-
-        if (!fullFixedOrParent) {
-            if (scaleRules.isFixedHorizontal()) result.withX(elementShape.width());
-            if (scaleRules.isFixedVertical()) result.withY(elementShape.height());
-        }
+        measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
     }
+
 }
