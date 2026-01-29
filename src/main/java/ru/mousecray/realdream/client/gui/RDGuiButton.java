@@ -41,7 +41,7 @@ public abstract class RDGuiButton<T extends RDGuiButton<T>> extends GuiButton im
     private final RDGuiSoundEvent<T>     soundEvent = new RDGuiSoundEvent<>();
 
     protected final MutableGuiShape elementShape, calculatedElementShape = new MutableGuiShape();
-    private final   MutableGuiVector calculatedTextOffsetTemp = new MutableGuiVector();
+    protected final MutableGuiVector calculatedTextOffsetTemp = new MutableGuiVector();
     protected final RDFontSize       fontSize;
 
     @Nullable protected GuiButtonActionState     actionState     = null;
@@ -198,9 +198,11 @@ public abstract class RDGuiButton<T extends RDGuiButton<T>> extends GuiButton im
 
     @Override
     public void onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY) {
-        RDGuiEventFactory.pushMouseDragEvent(dragEvent, self(), mc, mouseX, mouseY, direction, diffX, diffY, tickDown);
-        onAnyEventFire(dragEvent);
-        if (!dragEvent.isCancelled()) onMouseDragged(dragEvent);
+        if (tickDown >= 0) {
+            RDGuiEventFactory.pushMouseDragEvent(dragEvent, self(), mc, mouseX, mouseY, direction, diffX, diffY, tickDown);
+            onAnyEventFire(dragEvent);
+            if (!dragEvent.isCancelled()) onMouseDragged(dragEvent);
+        }
     }
 
     protected final void onPlaySound0(Minecraft mc, SoundHandler soundHandler, @Nullable SoundEvent sound, SoundSourceType source) {
@@ -380,4 +382,10 @@ public abstract class RDGuiButton<T extends RDGuiButton<T>> extends GuiButton im
         measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
     }
 
+    @Override
+    public void offsetCalculatedShape(float dx, float dy) {
+        calculatedElementShape.offset(dx, dy);
+        x = (int) calculatedElementShape.x();
+        y = (int) calculatedElementShape.y();
+    }
 }

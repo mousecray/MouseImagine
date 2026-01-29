@@ -49,4 +49,5 @@ public interface RDGuiElement<T extends RDGuiElement<T>> {
     MutableGuiVector getTextOffset();
     void setScaleRules(GuiScaleRules scaleRules);
     void measurePreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MutableGuiVector result);
+    void offsetCalculatedShape(float dx, float dy);
 }

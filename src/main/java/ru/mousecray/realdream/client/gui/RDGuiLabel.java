@@ -9,10 +9,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.SoundEvent;
 import org.lwjgl.opengl.GL11;
 import ru.mousecray.realdream.client.gui.container.RDGuiPanel;
-import ru.mousecray.realdream.client.gui.dim.GuiPadding;
-import ru.mousecray.realdream.client.gui.dim.GuiScaleRules;
-import ru.mousecray.realdream.client.gui.dim.GuiScaleType;
-import ru.mousecray.realdream.client.gui.dim.GuiShape;
+import ru.mousecray.realdream.client.gui.dim.*;
 import ru.mousecray.realdream.client.gui.event.*;
 import ru.mousecray.realdream.client.gui.state.GuiButtonActionState;
 import ru.mousecray.realdream.client.gui.state.GuiButtonPersistentState;
@@ -47,8 +44,7 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
     private             int                      partialTick;
     private             boolean                  hovered;
 
-    private final GuiShape elementShape;
-    private       GuiShape calculatedElementShape;
+    protected final MutableGuiShape elementShape = new MutableGuiShape(), calculatedElementShape = new MutableGuiShape();
 
     private GuiScaleRules scaleRules = new GuiScaleRules(GuiScaleType.FLOW);
 
@@ -62,21 +58,21 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
     public RDGuiLabel(String text, FontRenderer fontRenderer, GuiShape elementShape, int color, RDFontSize fontSize, @Nullable SoundEvent soundClick) {
         super(
                 fontRenderer, 0,
-                (int) elementShape.getX(), (int) elementShape.getY(),
-                (int) elementShape.getWidth(), (int) elementShape.getHeight(),
+                (int) elementShape.x(), (int) elementShape.y(),
+                (int) elementShape.width(), (int) elementShape.height(),
                 color
         );
         this.fontRenderer = fontRenderer;
-        this.elementShape = elementShape;
+        this.elementShape.withShape(elementShape);
         this.soundClick = soundClick;
         this.fontSize = fontSize;
 
         addLine(text);
     }
 
-    @Override public GuiShape getElementShape()           { return elementShape; }
-    @Override public GuiShape getCalculatedElementShape() { return calculatedElementShape; }
-    @Override public String getText()                     { return String.join("\n", labels); }
+    @Override public MutableGuiShape getElementShape()           { return elementShape; }
+    @Override public MutableGuiShape getCalculatedElementShape() { return calculatedElementShape; }
+    @Override public String getText()                            { return String.join("\n", labels); }
 
 
     @Override
@@ -94,6 +90,35 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
     @Override @Nullable public GuiButtonActionState getActionState()         { return actionState; }
     @Override @Nullable public GuiButtonPersistentState getPersistentState() { return persistentState; }
     @Override public GuiTexturePack getTexturePack()                         { return GuiTexturePack.EMPTY; }
+
+    @Override public void setTexturePack(GuiTexturePack texturePack)         { }
+    @Override public void setElementShape(IGuiShape elementShape)            { this.elementShape.withShape(elementShape); }
+    @Override public GuiScaleRules getScaleRules()                           { return scaleRules; }
+    @Override public void setScaleRules(GuiScaleRules scaleRules)            { this.scaleRules = scaleRules; }
+    @Override public void setPadding(GuiPadding padding)                     { this.padding = padding; }
+    @Override public GuiPadding getPadding()                                 { return padding; }
+    @Override public void setScreen(RDGuiScreen screen)                      { this.screen = screen; }
+    @Override public RDGuiScreen getScreen()                                 { return screen; }
+    @Override public void setParent(RDGuiPanel<?> parent)                    { this.parent = parent; }
+    @Override public RDGuiPanel<?> getParent()                               { return parent; }
+    @Override public void setTextOffset(IGuiVector offset)                   { }
+    @Override public MutableGuiVector getTextOffset()                        { return new MutableGuiVector(); }
+
+
+    @Override
+    public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
+        GuiRenderHelper.calculateFlowComponentShapeWithPad(parentDefaultSize, parentContentSize, available, calculatedElementShape, elementShape, scaleRules, padding);
+        x = (int) calculatedElementShape.x();
+        y = (int) calculatedElementShape.y();
+        width = (int) calculatedElementShape.width();
+        height = (int) calculatedElementShape.height();
+    }
+
+    @Override
+    public void measurePreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MutableGuiVector result) {
+        GuiRenderHelper.measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
+    }
+
 
     @Override
     public boolean applyState(@Nullable GuiButtonPersistentState state) {
@@ -114,7 +139,7 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
         visible = state != null;
     }
 
-    @Override protected final void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
+    @Override public final void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
         if (++partialTick >= 20) partialTick = 0;
         if (tickDown >= 0) ++tickDown;
 
@@ -126,13 +151,11 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
         MoveDirection direction = MoveDirection.getMoveDirection(diffX, diffY);
         RDGuiEventFactory.pushMouseMoveEvent(moveEvent, self(), mc, mouseX, mouseY, direction);
         if (tickDown >= 0 && direction != null) {
-            RDGuiEventFactory.pushMouseDragEvent(dragEvent, self(), mc, mouseX, mouseY, direction, diffX, diffY, tickDown);
-            onAnyEventFire(dragEvent);
-            if (!dragEvent.isCancelled()) onMouseDragged(dragEvent);
+            onMouseDragged0(mc, mouseX, mouseY, direction, diffX, diffY);
         }
     }
 
-    @Override protected final void onMouseEnter0(Minecraft mc, int mouseX, int mouseY) {
+    @Override public final void onMouseEnter0(Minecraft mc, int mouseX, int mouseY) {
         onAnyEventFire(moveEvent);
         if (!moveEvent.isCancelled()) {
             if (persistentState == null
@@ -144,7 +167,7 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
         }
     }
 
-    @Override protected final void onMouseLeave0(Minecraft mc, int mouseX, int mouseY) {
+    @Override public final void onMouseLeave0(Minecraft mc, int mouseX, int mouseY) {
         onAnyEventFire(moveEvent);
         if (!moveEvent.isCancelled()) {
             if (actionState == GuiButtonActionState.HOVER) applyActionState(null);
@@ -153,7 +176,7 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
         }
     }
 
-    @Override protected final void onMouseReleased0(Minecraft mc, int mouseX, int mouseY) {
+    @Override public final void onMouseReleased0(Minecraft mc, int mouseX, int mouseY) {
         RDGuiEventFactory.pushMouseClickEvent(releaseEvent, self(), mc, mouseX, mouseY);
         onAnyEventFire(releaseEvent);
         if (!releaseEvent.isCancelled()) {
@@ -171,7 +194,13 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
         }
     }
 
-    @Override protected final void onMousePressed0(Minecraft mc, int mouseX, int mouseY) {
+    @Override public void onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY) {
+        RDGuiEventFactory.pushMouseDragEvent(dragEvent, self(), mc, mouseX, mouseY, direction, diffX, diffY, tickDown);
+        onAnyEventFire(dragEvent);
+        if (!dragEvent.isCancelled()) onMouseDragged(dragEvent);
+    }
+
+    @Override public final void onMousePressed0(Minecraft mc, int mouseX, int mouseY) {
         RDGuiEventFactory.pushMouseClickEvent(pressEvent, self(), mc, mouseX, mouseY);
         onAnyEventFire(pressEvent);
         if (!pressEvent.isCancelled()) {
@@ -220,7 +249,13 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
         return mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
     }
 
-    protected abstract void onClick(RDGuiMouseClickEvent<T> event);
+    @Override @Nullable
+    public RDGuiElement<?> findTopHovered(Minecraft mc, int mouseX, int mouseY) {
+        return mouseHover(mc, mouseX, mouseY) ? this : null;
+    }
+
+    public abstract void onClick(RDGuiMouseClickEvent<T> event);
+
     protected void onDrag(RDGuiMouseDragEvent<T> event) { }
 
     protected void onUpdate(RDGuiTickEvent<T> event)    { }
@@ -242,35 +277,35 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
         onPlaySound0(Minecraft.getMinecraft(), Minecraft.getMinecraft().getSoundHandler(), soundClick, SoundSourceType.PRESS);
     }
 
-    protected final void onDrawLabelBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    @Override public final void onDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         RDGuiEventFactory.pushTickEvent(drawBGEvent, self(), mc, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawBGEvent);
         if (persistentState != null && !drawBGEvent.isCancelled()) drawLabelBackgroundLayer(drawBGEvent);
     }
 
-    protected final void onDrawLabelForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    @Override public final void onDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         RDGuiEventFactory.pushTickEvent(drawFGEvent, self(), mc, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawFGEvent);
         if (persistentState != null && !drawFGEvent.isCancelled()) drawLabelForegroundLayer(drawFGEvent);
     }
 
-    protected final void onDrawLabelText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    @Override public final void onDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         RDGuiEventFactory.pushTickEvent(drawTextEvent, self(), mc, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawTextEvent);
         if (persistentState != null && !drawTextEvent.isCancelled()) drawLabelTextLayer(drawTextEvent);
     }
 
-    protected final void onDrawLabelLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    @Override public final void onDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         RDGuiEventFactory.pushTickEvent(drawLastEvent, self(), mc, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawLastEvent);
         if (persistentState != null && !drawLastEvent.isCancelled()) drawLabelLastLayer(drawLastEvent);
     }
 
     protected final void onDrawLabel(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        onDrawLabelBackground(mc, mouseX, mouseY, partialTicks);
-        onDrawLabelForeground(mc, mouseX, mouseY, partialTicks);
-        onDrawLabelText(mc, mouseX, mouseY, partialTicks);
-        onDrawLabelLast(mc, mouseX, mouseY, partialTicks);
+        onDrawBackground(mc, mouseX, mouseY, partialTicks);
+        onDrawForeground(mc, mouseX, mouseY, partialTicks);
+        onDrawText(mc, mouseX, mouseY, partialTicks);
+        onDrawLast(mc, mouseX, mouseY, partialTicks);
     }
 
     protected void drawLabelLastLayer(RDGuiTickEvent<T> event)       { }
@@ -291,13 +326,13 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
 
         float scale        = 1.0F;
         float inverseScale = 1.0F;
-        if (fontSize != RDFontSize.NORMAL) {
-            scale = fontSize.getScale();
+        if (fontSize != RDFontSize.NORMAL || textScaleMultiplayer != 1.0F) {
+            scale = fontSize.getScale() * textScaleMultiplayer;
             inverseScale = 1.0F / scale;
         }
 
-        float i = y * inverseScale + height * inverseScale / 2f * inverseScale;
-        float j = i - labels.size() * (fontRenderer.FONT_HEIGHT * inverseScale + 1) / 2f * inverseScale;
+        float centerY = (y + height / 2f) * inverseScale;
+        float j       = centerY - labels.size() * (fontRenderer.FONT_HEIGHT + 1) * inverseScale / 2f;
 
         GlStateManager.pushMatrix();
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
@@ -306,9 +341,9 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
         GlStateManager.scale(scale, scale, 1.0F);
         for (int k = 0; k < labels.size(); ++k) {
             if (centered) {
-                GuiRenderHelper.drawCenteredString(fontRenderer, labels.get(k), x * inverseScale + width * inverseScale / 2f * inverseScale, j + k * ((fontRenderer.FONT_HEIGHT * inverseScale) + 1), color, true);
+                GuiRenderHelper.drawCenteredString(fontRenderer, labels.get(k), x * inverseScale + width * inverseScale / 2f, j + k * (fontRenderer.FONT_HEIGHT + 1) * inverseScale, color, true);
             } else {
-                GuiRenderHelper.drawString(fontRenderer, labels.get(k), x * inverseScale, j + k * ((fontRenderer.FONT_HEIGHT * inverseScale) + 1), color, true);
+                GuiRenderHelper.drawString(fontRenderer, labels.get(k), x * inverseScale, j + k * (fontRenderer.FONT_HEIGHT + 1) * inverseScale, color, true);
             }
         }
         GlStateManager.popMatrix();
@@ -317,11 +352,13 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
     @Nonnull @Override
     public GuiLabel setCentered() {
         centered = true;
-        return super.setCentered();
+        return this;
     }
 
     @Override
-    public void drawLabel(@Nonnull Minecraft mc, int mouseX, int mouseY) {
-        onDrawLabel(mc, mouseX, mouseY, Minecraft.getMinecraft().getRenderPartialTicks());
+    public void offsetCalculatedShape(float dx, float dy) {
+        calculatedElementShape.offset(dx, dy);
+        x = (int) calculatedElementShape.x();
+        y = (int) calculatedElementShape.y();
     }
 }

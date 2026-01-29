@@ -6,7 +6,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.realdream.client.gui.GuiTexturePack;
 import ru.mousecray.realdream.client.gui.RDClickType;
-import ru.mousecray.realdream.client.gui.RDGuiElement;
 import ru.mousecray.realdream.client.gui.RDFontSize;
 import ru.mousecray.realdream.client.gui.RDGuiButton;
 import ru.mousecray.realdream.client.gui.container.RDGuiPanel;
@@ -82,7 +81,7 @@ public class RDGuiSlider<T extends RDGuiSlider<T>> extends RDGuiPanel<T> {
         }
 
         KnobButton knobBtn = new KnobButton();
-        this.knob = knobBtn;
+        knob = knobBtn;
         knobBtn.setScaleRules(new GuiScaleRules(GuiScaleType.FIXED));
         addChild(knobBtn, null, null, null);
 
@@ -133,9 +132,10 @@ public class RDGuiSlider<T extends RDGuiSlider<T>> extends RDGuiPanel<T> {
         onDrag = consumer;
     }
 
-    public void onChange(Consumer<Integer> consumer) {
+    public T onChange(Consumer<Integer> consumer) {
         onDrag(e -> consumer.accept(getValue()));
         onClick(e -> consumer.accept(getValue()));
+        return self();
     }
 
     public int getValue() { return value; }

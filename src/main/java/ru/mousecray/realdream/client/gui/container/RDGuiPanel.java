@@ -24,7 +24,9 @@ import static ru.mousecray.realdream.client.gui.GuiRenderHelper.*;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElement<T> {
-    private final List<RDGuiElement<?>> children = new ArrayList<>();
+    protected final List<RDGuiElement<?>> children = new ArrayList<>();
+
+    public List<RDGuiElement<?>> getChildren() { return children; }
 
     private final Map<RDGuiElement<?>, GuiMargin>      childMargins = new HashMap<>();
     private final Map<RDGuiElement<?>, AnchorPosition> childAnchors = new HashMap<>();
@@ -357,6 +359,11 @@ public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElemen
 
     @Override
     public void onDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        drawPanelBackground(mc, mouseX, mouseY, partialTicks);
+        for (RDGuiElement<?> child : children) child.onDrawBackground(mc, mouseX, mouseY, partialTicks);
+    }
+
+    protected void drawPanelBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         GuiTexture texture = texturePack.getCalculatedTexture(getActionState(), getPersistentState());
         if (texture != null) {
             texture.draw(
@@ -365,7 +372,6 @@ public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElemen
                     calculatedElementShape.width(), calculatedElementShape.height()
             );
         }
-        for (RDGuiElement<?> child : children) child.onDrawBackground(mc, mouseX, mouseY, partialTicks);
     }
 
     @Override
@@ -389,6 +395,14 @@ public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElemen
             else if (child instanceof GuiButton) screen.getButtonList().add((GuiButton) child);
             else if (child instanceof GuiLabel) screen.getLabelList().add((GuiLabel) child);
             else if (child instanceof RDGuiTextField<?>) screen.getFieldsList().add((RDGuiTextField<?>) child);
+        }
+    }
+
+    @Override
+    public void offsetCalculatedShape(float dx, float dy) {
+        calculatedElementShape.offset(dx, dy);
+        for (RDGuiElement<?> child : children) {
+            child.offsetCalculatedShape(dx, dy);
         }
     }
 }

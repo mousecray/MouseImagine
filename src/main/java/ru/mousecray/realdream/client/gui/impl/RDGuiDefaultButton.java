@@ -8,6 +8,7 @@ import ru.mousecray.realdream.client.gui.GuiTexturePack;
 import ru.mousecray.realdream.client.gui.RDFontSize;
 import ru.mousecray.realdream.client.gui.RDGuiButton;
 import ru.mousecray.realdream.client.gui.dim.GuiShape;
+import ru.mousecray.realdream.client.gui.dim.GuiVector;
 import ru.mousecray.realdream.client.gui.event.RDGuiMouseClickEvent;
 import ru.mousecray.realdream.client.gui.state.GuiButtonActionState;
 import ru.mousecray.realdream.client.gui.state.GuiButtonPersistentState;
@@ -26,9 +27,9 @@ public class RDGuiDefaultButton extends RDGuiButton<RDGuiDefaultButton> {
             ResourceLocation texture, GuiVector textureSize, GuiShape textureShape,
             RDFontSize fontSize, Consumer<RDGuiMouseClickEvent<RDGuiDefaultButton>> onClick) {
         super(
-                text, elementShape, elementShape,
+                text, elementShape,
                 GuiTexturePack.Builder
-                        .create(texture, textureSize, textureShape.getPos(), textureShape.getSize())
+                        .create(texture, textureSize, textureShape.pos(), textureShape.size())
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
                         .addTexture(GuiButtonActionState.HOVER, 1)
                         .addTexture(GuiButtonActionState.PRESSED, 2)
@@ -39,7 +40,7 @@ public class RDGuiDefaultButton extends RDGuiButton<RDGuiDefaultButton> {
     }
 
     @Override
-    protected void onClick(@Nonnull RDGuiMouseClickEvent<RDGuiDefaultButton> event) {
+    public void onClick(@Nonnull RDGuiMouseClickEvent<RDGuiDefaultButton> event) {
         if (onClick != null) onClick.accept(event);
     }
 }

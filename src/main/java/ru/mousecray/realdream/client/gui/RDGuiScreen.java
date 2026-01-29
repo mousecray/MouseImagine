@@ -53,9 +53,9 @@ public abstract class RDGuiScreen extends GuiScreen {
     @Override
     public void initGui() {
         super.initGui();
-        guiLeft = (int) guiContentShape.getX();
-        guiTop = (int) guiContentShape.getY();
-        rootPanel.calculate(guiDefaultSize, , , );
+        guiLeft = (int) guiContentShape.x();
+        guiTop = (int) guiContentShape.y();
+        rootPanel.calculate(guiDefaultSize, guiContentShape.size(), guiContentShape);
         buttonList.clear();
         labelList.clear();
         textFieldList.clear();
@@ -98,64 +98,52 @@ public abstract class RDGuiScreen extends GuiScreen {
         ObjectArrayList<GuiTextField> guiFields  = new ObjectArrayList<>(textFieldList);
         ObjectArrayList<GuiLabel>     guiLabels  = new ObjectArrayList<>(labelList);
         for (GuiButton guiButton : guiButtons) {
-            //noinspection rawtypes
-            RDGuiButton gb = (RDGuiButton) guiButton;
-            gb.onDrawButtonBackground(mc, mouseX, mouseY, partialTicks);
+            RDGuiButton<?> gb = (RDGuiButton<?>) guiButton;
+            gb.onDrawBackground(mc, mouseX, mouseY, partialTicks);
         }
         for (GuiTextField guiTextField : guiFields) {
-            //noinspection rawtypes
-            RDGuiTextField gf = (RDGuiTextField) guiTextField;
-            gf.onDrawTextBoxBackground(mc, mouseX, mouseY, partialTicks);
+            RDGuiTextField<?> gf = (RDGuiTextField<?>) guiTextField;
+            gf.onDrawBackground(mc, mouseX, mouseY, partialTicks);
         }
         for (GuiLabel guiLabel : guiLabels) {
-            //noinspection rawtypes
-            RDGuiLabel gl = (RDGuiLabel) guiLabel;
-            gl.onDrawLabelBackground(mc, mouseX, mouseY, partialTicks);
+            RDGuiLabel<?> gl = (RDGuiLabel<?>) guiLabel;
+            gl.onDrawBackground(mc, mouseX, mouseY, partialTicks);
         }
         for (GuiButton guiButton : guiButtons) {
-            //noinspection rawtypes
-            RDGuiButton gb = (RDGuiButton) guiButton;
-            gb.onDrawButtonForeground(mc, mouseX, mouseY, partialTicks);
+            RDGuiButton<?> gb = (RDGuiButton<?>) guiButton;
+            gb.onDrawForeground(mc, mouseX, mouseY, partialTicks);
         }
         for (GuiTextField guiTextField : guiFields) {
-            //noinspection rawtypes
-            RDGuiTextField gf = (RDGuiTextField) guiTextField;
-            gf.onDrawTextBoxForeground(mc, mouseX, mouseY, partialTicks);
+            RDGuiTextField<?> gf = (RDGuiTextField<?>) guiTextField;
+            gf.onDrawForeground(mc, mouseX, mouseY, partialTicks);
         }
         for (GuiLabel guiLabel : guiLabels) {
-            //noinspection rawtypes
-            RDGuiLabel gl = (RDGuiLabel) guiLabel;
-            gl.onDrawLabelForeground(mc, mouseX, mouseY, partialTicks);
+            RDGuiLabel<?> gl = (RDGuiLabel<?>) guiLabel;
+            gl.onDrawForeground(mc, mouseX, mouseY, partialTicks);
         }
         for (GuiButton guiButton : guiButtons) {
-            //noinspection rawtypes
-            RDGuiButton gb = (RDGuiButton) guiButton;
-            gb.onDrawButtonText(mc, mouseX, mouseY, partialTicks);
+            RDGuiButton<?> gb = (RDGuiButton<?>) guiButton;
+            gb.onDrawText(mc, mouseX, mouseY, partialTicks);
         }
         for (GuiTextField guiTextField : guiFields) {
-            //noinspection rawtypes
-            RDGuiTextField gf = (RDGuiTextField) guiTextField;
-            gf.onDrawTextBoxText(mc, mouseX, mouseY, partialTicks);
+            RDGuiTextField<?> gf = (RDGuiTextField<?>) guiTextField;
+            gf.onDrawText(mc, mouseX, mouseY, partialTicks);
         }
         for (GuiLabel guiLabel : guiLabels) {
-            //noinspection rawtypes
-            RDGuiLabel gl = (RDGuiLabel) guiLabel;
-            gl.onDrawLabelText(mc, mouseX, mouseY, partialTicks);
+            RDGuiLabel<?> gl = (RDGuiLabel<?>) guiLabel;
+            gl.onDrawText(mc, mouseX, mouseY, partialTicks);
         }
         for (GuiButton guiButton : guiButtons) {
-            //noinspection rawtypes
-            RDGuiButton gb = (RDGuiButton) guiButton;
-            gb.onDrawButtonLast(mc, mouseX, mouseY, partialTicks);
+            RDGuiButton<?> gb = (RDGuiButton<?>) guiButton;
+            gb.onDrawLast(mc, mouseX, mouseY, partialTicks);
         }
         for (GuiTextField guiTextField : guiFields) {
-            //noinspection rawtypes
-            RDGuiTextField gf = (RDGuiTextField) guiTextField;
-            gf.onDrawTextBoxLast(mc, mouseX, mouseY, partialTicks);
+            RDGuiTextField<?> gf = (RDGuiTextField<?>) guiTextField;
+            gf.onDrawLast(mc, mouseX, mouseY, partialTicks);
         }
         for (GuiLabel guiLabel : guiLabels) {
-            //noinspection rawtypes
-            RDGuiLabel gl = (RDGuiLabel) guiLabel;
-            gl.onDrawLabelLast(mc, mouseX, mouseY, partialTicks);
+            RDGuiLabel<?> gl = (RDGuiLabel<?>) guiLabel;
+            gl.onDrawLast(mc, mouseX, mouseY, partialTicks);
         }
 
         RenderHelper.enableGUIStandardItemLighting();
@@ -183,10 +171,10 @@ public abstract class RDGuiScreen extends GuiScreen {
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             mc.getTextureManager().bindTexture(TEXTURES);
             GuiRenderHelper.drawTexture(
-                    guiShape.getX(), guiShape.getY(),
-                    BACKGROUND_SHAPE.getX(), BACKGROUND_SHAPE.getY(), BACKGROUND_SHAPE.getWidth(), BACKGROUND_SHAPE.getHeight(),
-                    guiShape.getWidth(), guiShape.getHeight(),
-                    FULL_TEXTURE_SIZE.getX(), FULL_TEXTURE_SIZE.getY()
+                    guiShape.x(), guiShape.y(),
+                    BACKGROUND_SHAPE.x(), BACKGROUND_SHAPE.y(), BACKGROUND_SHAPE.width(), BACKGROUND_SHAPE.height(),
+                    guiShape.width(), guiShape.height(),
+                    FULL_TEXTURE_SIZE.x(), FULL_TEXTURE_SIZE.y()
             );
         }
     }
@@ -199,27 +187,47 @@ public abstract class RDGuiScreen extends GuiScreen {
     protected void drawContent(float partialTicks, int mouseX, int mouseY) { }
 
     protected <T extends RDGuiTextField<T>> T addTextField(T field) {
-        rootPanel.addChild(field, null, null, null);
+        return addTextField(field, null, null, null);
+    }
+
+    protected <T extends RDGuiTextField<T>> T addTextField(T field, @Nullable GuiMargin margin, @Nullable AnchorPosition anchor, @Nullable GuiVector offset) {
+        rootPanel.addChild(field, margin, anchor, offset);
         return field;
     }
 
     protected <T extends RDGuiLabel<T>> T addLabel(T label) {
-        rootPanel.addChild(label, null, null, null);
+        return addLabel(label, null, null, null);
+    }
+
+    protected <T extends RDGuiLabel<T>> T addLabel(T label, @Nullable GuiMargin margin, @Nullable AnchorPosition anchor, @Nullable GuiVector offset) {
+        rootPanel.addChild(label, margin, anchor, offset);
         return label;
     }
 
-    protected RDGuiSlider addSlider(RDGuiSlider button) {
-        rootPanel.addChild(button, null, null, null);
-        return button;
+    protected <T extends RDGuiSlider<T>> T addSlider(T slider) {
+        return addSlider(slider, null, null, null);
+    }
+
+    protected <T extends RDGuiSlider<T>> T addSlider(T slider, @Nullable GuiMargin margin, @Nullable AnchorPosition anchor, @Nullable GuiVector offset) {
+        rootPanel.addChild(slider, margin, anchor, offset);
+        return slider;
     }
 
     protected <T extends RDGuiButton<T>> T addButton(T button) {
-        rootPanel.addChild(button, null, null, null);
+        return addButton(button, null, null, null);
+    }
+
+    protected <T extends RDGuiButton<T>> T addButton(T button, @Nullable GuiMargin margin, @Nullable AnchorPosition anchor, @Nullable GuiVector offset) {
+        rootPanel.addChild(button, margin, anchor, offset);
         return button;
     }
 
-    protected RDGuiPanel<?> addPanel(RDGuiPanel<?> panel) {
-        rootPanel.addChild(panel, null, null, null);
+    protected <T extends RDGuiPanel<T>> T addPanel(T panel) {
+        return addPanel(panel, null, null, null);
+    }
+
+    protected <T extends RDGuiPanel<T>> T addPanel(T panel, @Nullable GuiMargin margin, @Nullable AnchorPosition anchor, @Nullable GuiVector offset) {
+        rootPanel.addChild(panel, margin, anchor, offset);
         return panel;
     }
 
@@ -236,12 +244,13 @@ public abstract class RDGuiScreen extends GuiScreen {
 
     protected void resetGui() {
         currentElementID = 0;
-        rootPanel = new RDGuiPanel(new GuiShape(0, 0, guiDefaultSize.getX(), guiDefaultSize.getY()), new GuiShape(0, 0, guiDefaultSize.getX(), guiDefaultSize.getY()), LayoutType.ANCHOR) {
+        rootPanel = new RDGuiPanel(new GuiShape(0, 0, guiDefaultSize.x(), guiDefaultSize.y())) {
             @Override
             public RDGuiPanel self() {
                 return this;
             }
         };
+        rootPanel.setLayoutType(LayoutType.ANCHOR);
         rootPanel.setScreen(this);
         rootPanel.setScaleRules(new GuiScaleRules(GuiScaleType.FLOW));
         buttonList.clear();
@@ -342,11 +351,11 @@ public abstract class RDGuiScreen extends GuiScreen {
         int newSizeX = (int) (height / 0.8D);
         guiShape = new GuiShape((width - newSizeX) / 2f, (height - newSizeY - 20) / 2f, newSizeX, newSizeY);
         guiBound = new GuiVector(
-                guiShape.getWidth() * guiDefaultBound.getX() / guiDefaultSize.getX(),
-                guiShape.getHeight() * guiDefaultBound.getY() / guiDefaultSize.getY());
+                guiShape.width() * guiDefaultBound.x() / guiDefaultSize.x(),
+                guiShape.height() * guiDefaultBound.y() / guiDefaultSize.y());
         guiContentShape = new GuiShape(
-                guiShape.getX() + guiBound.getX(), guiShape.getY() + guiBound.getY(),
-                guiShape.getWidth() - guiBound.getX() * 2, guiShape.getHeight() - guiBound.getY() * 2
+                guiShape.x() + guiBound.x(), guiShape.y() + guiBound.y(),
+                guiShape.width() - guiBound.x() * 2, guiShape.height() - guiBound.y() * 2
         );
         if (!net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new GuiScreenEvent.InitGuiEvent.Pre(this, buttonList))) {
             resetGui();

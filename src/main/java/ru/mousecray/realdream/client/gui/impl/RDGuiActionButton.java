@@ -27,9 +27,9 @@ public class RDGuiActionButton extends RDGuiButton<RDGuiActionButton> {
             ResourceLocation texture, GuiVector textureSize, GuiShape textureShape,
             RDFontSize fontSize, Consumer<RDGuiMouseClickEvent<RDGuiActionButton>> onClick) {
         super(
-                text, elementShape, elementShape,
+                text, elementShape,
                 GuiTexturePack.Builder
-                        .create(texture, textureSize, textureShape.getPos(), textureShape.getSize())
+                        .create(texture, textureSize, textureShape.pos(), textureShape.size())
                         .addTexture(GuiButtonPersistentState.DISABLED, 0)
                         .addTexture(GuiButtonPersistentState.NORMAL, 1)
                         .addTexture(GuiButtonActionState.HOVER, 2)
@@ -42,7 +42,7 @@ public class RDGuiActionButton extends RDGuiButton<RDGuiActionButton> {
     }
 
     @Override
-    protected void onClick(@Nonnull RDGuiMouseClickEvent<RDGuiActionButton> event) {
+    public void onClick(@Nonnull RDGuiMouseClickEvent<RDGuiActionButton> event) {
         if (onClick != null) onClick.accept(event);
     }
 }

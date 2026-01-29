@@ -6,7 +6,10 @@ import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 import ru.mousecray.realdream.client.gui.GuiRenderHelper;
 import ru.mousecray.realdream.client.gui.RDFontSize;
+import ru.mousecray.realdream.client.gui.dim.GuiScaleRules;
+import ru.mousecray.realdream.client.gui.dim.GuiScaleType;
 import ru.mousecray.realdream.client.gui.dim.GuiShape;
+import ru.mousecray.realdream.client.gui.dim.GuiVector;
 import ru.mousecray.realdream.client.gui.event.RDGuiMouseClickEvent;
 import ru.mousecray.realdream.client.gui.event.RDGuiTickEvent;
 import ru.mousecray.realdream.client.gui.impl.RDGuiSelectedButton;
@@ -30,9 +33,10 @@ public class WalletCoinButton extends RDGuiSelectedButton<WalletCoinButton> {
         );
         this.coinValue = coinValue;
         cachedName = new ItemStack(coinValue.getType().getItem(), 1).getDisplayName();
-        setTextOffset(0, getDrawShape().getHeight() / 3.5f);
+        setTextOffset(new GuiVector(0, getElementShape().height() / 3.5f));
         int length = coinValue.getFormattedValue(CoinValue.FormatType.SHORT).length();
         if (length > 4) setTextScaleMultiplayer((float) Math.max(0.5, 4d / length));
+        setScaleRules(new GuiScaleRules(GuiScaleType.ORIGIN_VERTICAL));
     }
 
     public void setCount(CoinValue count) {
@@ -47,10 +51,10 @@ public class WalletCoinButton extends RDGuiSelectedButton<WalletCoinButton> {
 
     @Override
     protected void drawButtonForegroundLayer(@Nonnull RDGuiTickEvent<WalletCoinButton> event) {
-        float width           = getDrawShape().getWidth();
-        float height          = getDrawShape().getHeight();
-        float x               = getDrawShape().getX();
-        float y               = getDrawShape().getY();
+        float width           = getCalculatedElementShape().width();
+        float height          = getCalculatedElementShape().height();
+        float x               = getCalculatedElementShape().x();
+        float y               = getCalculatedElementShape().y();
         float partialTicks    = event.getPartialTick();
         float itemDefaultSize = 16.0f;
         float scale           = Math.min(width / itemDefaultSize, height / itemDefaultSize) / 1.5f;

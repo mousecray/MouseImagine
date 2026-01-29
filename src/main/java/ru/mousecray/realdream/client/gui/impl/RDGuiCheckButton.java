@@ -9,6 +9,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 import ru.mousecray.realdream.client.gui.*;
 import ru.mousecray.realdream.client.gui.dim.GuiShape;
+import ru.mousecray.realdream.client.gui.dim.GuiVector;
 import ru.mousecray.realdream.client.gui.event.RDGuiMouseClickEvent;
 import ru.mousecray.realdream.client.gui.event.RDGuiTickEvent;
 import ru.mousecray.realdream.client.gui.state.GuiButtonActionState;
@@ -30,9 +31,8 @@ public class RDGuiCheckButton extends RDGuiButton<RDGuiCheckButton> {
         super(
                 text,
                 elementShape.grow(-fontRenderer.getStringWidth(text) - 1, 0, 0, 0),
-                elementShape,
                 GuiTexturePack.Builder
-                        .create(texture, textureSize, textureShape.getPos(), textureShape.getSize())
+                        .create(texture, textureSize, textureShape.pos(), textureShape.size())
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
                         .addTexture(GuiButtonActionState.HOVER, 1)
                         .addTexture(GuiButtonActionState.PRESSED, 2)
@@ -60,7 +60,7 @@ public class RDGuiCheckButton extends RDGuiButton<RDGuiCheckButton> {
     }
 
     @Override
-    protected void onClick(@Nonnull RDGuiMouseClickEvent<RDGuiCheckButton> event) {
+    public void onClick(@Nonnull RDGuiMouseClickEvent<RDGuiCheckButton> event) {
         applyState(
                 getPersistentState() == GuiButtonPersistentState.SELECTED
                         ? GuiButtonPersistentState.NORMAL : GuiButtonPersistentState.SELECTED
@@ -72,17 +72,7 @@ public class RDGuiCheckButton extends RDGuiButton<RDGuiCheckButton> {
     protected void drawButtonTextLayer(@Nonnull RDGuiTickEvent<RDGuiCheckButton> event) {
         if (displayString != null) {
             FontRenderer fontrenderer = event.getMc().fontRenderer;
-            int          color;
-            if (packedFGColour != 0) color = packedFGColour;
-            else if (actionState != null) {
-                color = colorContainer.getColor(actionState.combine(persistentState));
-                if (color == -1) {
-                    color = colorContainer.getColor(actionState);
-                    if (color == -1) color = colorContainer.getColor(persistentState);
-                }
-            } else color = colorContainer.getColor(persistentState);
-
-            if (color == -1) color = colorContainer.getDefaultColor();
+            int          color = colorContainer.getCalculatedColor(actionState, persistentState, packedFGColour);
 
             float scale        = fontSize.getScale() * textScaleMultiplayer;
             float inverseScale = 1.0F / scale;
@@ -94,8 +84,8 @@ public class RDGuiCheckButton extends RDGuiButton<RDGuiCheckButton> {
             GlStateManager.scale(scale, scale, 1.0F);
             GuiRenderHelper.drawString(
                     fontrenderer, displayString,
-                    elementShape.getX() * inverseScale + drawOffsetX * inverseScale + textOffsetX * inverseScale,
-                    elementShape.getY() * inverseScale + drawShape.getHeight() * inverseScale / 2f - (fontrenderer.FONT_HEIGHT) / 2f + drawOffsetY * inverseScale + textOffsetY * inverseScale,
+                    (calculatedElementShape.x() - fontrenderer.getStringWidth(displayString) - 1) * inverseScale + calculatedTextOffsetTemp.x() * inverseScale,
+                    calculatedElementShape.y() * inverseScale + calculatedElementShape.height() * inverseScale / 2f - (fontrenderer.FONT_HEIGHT) / 2f + calculatedTextOffsetTemp.y() * inverseScale,
                     color, fontSize != RDFontSize.SMALL
             );
             GlStateManager.popMatrix();

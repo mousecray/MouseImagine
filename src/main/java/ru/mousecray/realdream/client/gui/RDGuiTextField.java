@@ -15,7 +15,8 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
-import ru.mousecray.realdream.client.gui.dim.GuiShape;
+import ru.mousecray.realdream.client.gui.container.RDGuiPanel;
+import ru.mousecray.realdream.client.gui.dim.*;
 import ru.mousecray.realdream.client.gui.event.*;
 import ru.mousecray.realdream.client.gui.state.GuiButtonActionState;
 import ru.mousecray.realdream.client.gui.state.GuiButtonPersistentState;
@@ -41,11 +42,12 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
             releaseEvent = new RDGuiMouseClickEvent<>(RDClickType.RELEASE),
             clickEvent   = new RDGuiMouseClickEvent<>(RDClickType.CLICK);
     private final   RDGuiMouseMoveEvent<T> moveEvent      = new RDGuiMouseMoveEvent<>();
+    private final   RDGuiMouseDragEvent<T> dragEvent      = new RDGuiMouseDragEvent<>();
     private final   RDGuiTextTypedEvent<T> textTypedEvent = new RDGuiTextTypedEvent<>();
     private final   RDGuiSoundEvent<T>     soundEvent     = new RDGuiSoundEvent<>();
-    private final   GuiShape               elementShape;
-    private         GuiShape               calculatedElementShape;
-    protected final RDFontSize             fontSize;
+    protected final MutableGuiShape        elementShape   = new MutableGuiShape(),
+            calculatedElementShape                        = new MutableGuiShape();
+    protected final RDFontSize fontSize;
 
     protected StateColorContainer colorContainer = StateColorContainer.Builder
             .create(14737632)
@@ -56,18 +58,24 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
     @Nullable private GuiButtonPersistentState persistentState = GuiButtonPersistentState.NORMAL;
     private final     GuiTexturePack           texturePack;
 
-    private                 int        partialTick;
-    @Nullable private final SoundEvent soundClick;
-    @Nullable private       String     placeholder;
-    private                 boolean    hovered;
+    private                 int           tickDown    = -1;
+    private                 int           partialTick;
+    private                 boolean       isSelecting = false;
+    @Nullable private final SoundEvent    soundClick;
+    @Nullable private       String        placeholder;
+    private                 boolean       hovered;
+    private                 GuiScaleRules scaleRules  = new GuiScaleRules(GuiScaleType.FLOW);
+    private                 RDGuiPanel<?> parent;
+    private                 GuiPadding    padding     = new GuiPadding(0);
+    private                 RDGuiScreen   screen;
 
     public RDGuiTextField(FontRenderer fontRenderer,
                           @Nullable String placeholder, @Nullable String defaultText,
                           GuiShape elementShape,
                           @Nullable GuiTexturePack texturePack,
                           @Nullable SoundEvent soundClick, RDFontSize fontSize) {
-        super(0, fontRenderer, (int) elementShape.getX(), (int) elementShape.getY(), (int) elementShape.getWidth(), (int) elementShape.getHeight());
-        this.elementShape = elementShape;
+        super(0, fontRenderer, (int) elementShape.x(), (int) elementShape.y(), (int) elementShape.width(), (int) elementShape.height());
+        this.elementShape.withShape(elementShape);
         this.fontSize = fontSize;
         if (defaultText == null) defaultText = "";
         setText(defaultText);
@@ -78,22 +86,44 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
         this.soundClick = soundClick;
     }
 
-    @Override public void setId(int id)                      { this.id = id; }
+    @Override public void setId(int id)                          { this.id = id; }
+    @Override public int getId()                                 { return id; }
 
-    @SuppressWarnings("unchecked") @Override public T self() { return (T) this; }
-    @Override public GuiShape getDrawShape()                 { return elementShape; }
-    @Override public GuiShape getElementShape()              { return elementShape; }
-    @Override public GuiShape getCalculatedDrawShape()       { return calculatedElementShape; }
-    @Override public GuiShape getCalculatedElementShape()    { return calculatedElementShape; }
-    @Override public GuiVector getPos()                      { return elementShape.getPos(); }
-    @Override public GuiVector getSize()                     { return elementShape.getSize(); }
-    @Nullable public String getPlaceholder()                 { return placeholder; }
-    public void setPlaceholder(@Nullable String placeholder) { this.placeholder = placeholder; }
+    @SuppressWarnings("unchecked") @Override public T self()     { return (T) this; }
+    public MutableGuiShape getDrawShape()                        { return elementShape; }
+    @Override public MutableGuiShape getElementShape()           { return elementShape; }
+    public MutableGuiShape getCalculatedDrawShape()              { return calculatedElementShape; }
+    @Override public MutableGuiShape getCalculatedElementShape() { return calculatedElementShape; }
+    @Nullable public String getPlaceholder()                     { return placeholder; }
+    public void setPlaceholder(@Nullable String placeholder)     { this.placeholder = placeholder; }
 
     @Override
-    public void calculate(GuiVector defaultSize, GuiVector contentSize) {
-        //TODO:
+    public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
+        GuiRenderHelper.calculateFlowComponentShapeWithPad(parentDefaultSize, parentContentSize, available, calculatedElementShape, elementShape, scaleRules, padding);
+        x = (int) calculatedElementShape.x();
+        y = (int) calculatedElementShape.y();
+        width = (int) calculatedElementShape.width();
+        height = (int) calculatedElementShape.height();
     }
+
+    @Override
+    public void measurePreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MutableGuiVector result) {
+        GuiRenderHelper.measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
+    }
+
+    @Override public void setTexturePack(GuiTexturePack texturePack)         { }
+    @Override public void setElementShape(IGuiShape elementShape)            { this.elementShape.withShape(elementShape); }
+    @Override public GuiScaleRules getScaleRules()                           { return scaleRules; }
+    @Override public void setScaleRules(GuiScaleRules scaleRules)            { this.scaleRules = scaleRules; }
+    @Override public void setPadding(GuiPadding padding)                     { this.padding = padding; }
+    @Override public GuiPadding getPadding()                                 { return padding; }
+    @Override public void setScreen(RDGuiScreen screen)                      { this.screen = screen; }
+    @Override public RDGuiScreen getScreen()                                 { return screen; }
+    @Override public void setParent(RDGuiPanel<?> parent)                    { this.parent = parent; }
+    @Override public RDGuiPanel<?> getParent()                               { return parent; }
+    @Override public void setTextOffset(IGuiVector offset)                   { }
+    @Override public MutableGuiVector getTextOffset()                        { return new MutableGuiVector(); }
+
 
     @Override @Nullable public GuiButtonActionState getActionState()         { return actionState; }
     @Override @Nullable public GuiButtonPersistentState getPersistentState() { return persistentState; }
@@ -128,8 +158,9 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
 
     protected void onAnyEventFire(RDGuiEvent<T> event) { }
 
-    @Override protected final void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
+    @Override public final void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
         if (++partialTick >= 20) partialTick = 0;
+        if (tickDown >= 0) ++tickDown;
 
         RDGuiEventFactory.pushTickEvent(updateEvent, self(), mc, mouseX, mouseY, partialTick);
         onAnyEventFire(updateEvent);
@@ -138,14 +169,43 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
         int           diffY     = mouseY - moveEvent.getMouseY();
         MoveDirection direction = MoveDirection.getMoveDirection(diffX, diffY);
         RDGuiEventFactory.pushMouseMoveEvent(moveEvent, self(), mc, mouseX, mouseY, direction);
+        if (tickDown >= 0 && direction != null) {
+            onMouseDragged0(mc, mouseX, mouseY, direction, diffX, diffY);
+        }
     }
 
+
+    @Override
+    public boolean textboxKeyTyped(char typedChar, int keyCode) {
+        String oldText      = getText();
+        int    oldCursor    = getCursorPosition();
+        int    oldSelection = getSelectionEnd();
+
+        boolean result = super.textboxKeyTyped(typedChar, keyCode);
+
+        if (result) {
+            RDGuiEventFactory.pushTextTypedEvent(
+                    textTypedEvent, self(), Minecraft.getMinecraft(),
+                    moveEvent.getMouseX(), moveEvent.getMouseY(),
+                    getCursorPosition(), getSelectionEnd(),
+                    oldText, getText()
+            );
+            onAnyEventFire(textTypedEvent);
+            if (textTypedEvent.isCancelled()) {
+                setText(oldText);
+                setCursorPosition(oldCursor);
+                setSelectionPos(oldSelection);
+            }
+        }
+
+        return result;
+    }
 
     protected final void onKeyTyped0(char typedChar, int keyCode) {
         textboxKeyTyped(typedChar, keyCode);
     }
 
-    @Override protected final void onMouseEnter0(Minecraft mc, int mouseX, int mouseY) {
+    @Override public final void onMouseEnter0(Minecraft mc, int mouseX, int mouseY) {
         onAnyEventFire(moveEvent);
         if (!moveEvent.isCancelled()) {
             if (persistentState == null
@@ -157,7 +217,7 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
         }
     }
 
-    @Override protected final void onMouseLeave0(Minecraft mc, int mouseX, int mouseY) {
+    @Override public final void onMouseLeave0(Minecraft mc, int mouseX, int mouseY) {
         onAnyEventFire(moveEvent);
         if (!moveEvent.isCancelled()) {
             if (actionState == GuiButtonActionState.HOVER) applyActionState(null);
@@ -166,13 +226,14 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
         }
     }
 
-    @Override protected final void onMouseReleased0(Minecraft mc, int mouseX, int mouseY) {
-        if (persistentState != null) {
-            RDGuiEventFactory.pushMouseClickEvent(releaseEvent, self(), mc, mouseX, mouseY);
-            onAnyEventFire(releaseEvent);
-            if (!releaseEvent.isCancelled()) {
-                if (isMouseOver()) applyActionState(GuiButtonActionState.HOVER);
-                else applyActionState(null);
+    @Override public final void onMouseReleased0(Minecraft mc, int mouseX, int mouseY) {
+        RDGuiEventFactory.pushMouseClickEvent(releaseEvent, self(), mc, mouseX, mouseY);
+        onAnyEventFire(releaseEvent);
+        if (!releaseEvent.isCancelled()) {
+            if (isMouseOver()) applyActionState(GuiButtonActionState.HOVER);
+            else applyActionState(null);
+            tickDown = -1;
+            if (persistentState != null) {
                 onMouseReleased(releaseEvent);
                 if (isMouseOver()) {
                     RDGuiEventFactory.pushMouseClickEvent(clickEvent, self(), mc, mouseX, mouseY);
@@ -183,16 +244,24 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
         }
     }
 
-    @Override protected final void onMousePressed0(Minecraft mc, int mouseX, int mouseY) {
+    @Override public void onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY) {
+        if (tickDown >= 0) {
+            RDGuiEventFactory.pushMouseDragEvent(dragEvent, self(), mc, mouseX, mouseY, direction, diffX, diffY, tickDown);
+            onAnyEventFire(dragEvent);
+            if (!dragEvent.isCancelled()) onMouseDragged(dragEvent);
+        }
+    }
+
+    @Override public final void onMousePressed0(Minecraft mc, int mouseX, int mouseY) {
         RDGuiEventFactory.pushMouseClickEvent(pressEvent, self(), mc, mouseX, mouseY);
         onAnyEventFire(pressEvent);
         if (!pressEvent.isCancelled()) {
             if (persistentState == null
                     || persistentState == GuiButtonPersistentState.DISABLED) return;
             applyActionState(GuiButtonActionState.PRESSED);
+            tickDown = 0;
             onMousePressed(pressEvent);
             onPlaySound0(mc, mc.getSoundHandler(), soundClick, SoundSourceType.PRESS);
-            super.mouseClicked(mouseX, mouseY, 0);
         }
     }
 
@@ -217,8 +286,13 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
     }
 
     @Override
-    public final boolean mouseClicked(int mouseX, int mouseY, int mouseButton) {
-        return super.mouseClicked(mouseX, mouseY, mouseButton);
+    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) {
+        if (mouseButton == 0 && checkIsOnText(mouseX, mouseY)) {
+            int index = getCharIndexAtMouse(mouseX);
+            setCursorPosition(index);
+            return true;
+        }
+        return false;
     }
 
     public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
@@ -226,6 +300,22 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
     }
 
     protected void onClick(RDGuiMouseClickEvent<T> event) { }
+
+    @Override public final void onDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        onDrawTextBoxBackground(mc, mouseX, mouseY, partialTicks);
+    }
+
+    @Override public final void onDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        onDrawTextBoxForeground(mc, mouseX, mouseY, partialTicks);
+    }
+
+    @Override public final void onDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        onDrawTextBoxText(mc, mouseX, mouseY, partialTicks);
+    }
+
+    @Override public final void onDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        onDrawTextBoxLast(mc, mouseX, mouseY, partialTicks);
+    }
 
     public final void drawTextBox(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         onDrawTextBox(mc, mouseX, mouseY, partialTicks);
@@ -267,11 +357,58 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
         onDrawTextBoxLast(mc, mouseX, mouseY, partialTicks);
     }
 
-    protected void onUpdate(RDGuiTickEvent<T> event)              { }
-    protected void onMouseReleased(RDGuiMouseClickEvent<T> event) { }
-    protected void onMouseEnter(RDGuiMouseMoveEvent<T> event)     { }
-    protected void onMouseLeave(RDGuiMouseMoveEvent<T> event)     { }
-    protected void onMousePressed(RDGuiMouseClickEvent<T> event)  { }
+    @Override @Nullable
+    public RDGuiElement<?> findTopHovered(Minecraft mc, int mouseX, int mouseY) {
+        return mouseHover(mc, mouseX, mouseY) ? this : null;
+    }
+
+    protected void onUpdate(RDGuiTickEvent<T> event) { }
+
+    protected void onMouseDragged(RDGuiMouseDragEvent<T> event) {
+        if (isSelecting) {
+            setSelectionPos(getCharIndexAtMouse(event.getMouseX()));
+            event.setCancelled(true);
+        }
+    }
+
+    protected void onMouseReleased(RDGuiMouseClickEvent<T> event) {
+        isSelecting = false;
+    }
+
+    protected void onMouseEnter(RDGuiMouseMoveEvent<T> event) { }
+    protected void onMouseLeave(RDGuiMouseMoveEvent<T> event) { }
+
+    protected void onMousePressed(RDGuiMouseClickEvent<T> event) {
+        isSelecting = checkIsOnText(event.getMouseX(), event.getMouseY());
+        if (isSelecting) {
+            int index = getCharIndexAtMouse(event.getMouseX());
+            setCursorPosition(index);
+        }
+    }
+
+    protected boolean checkIsOnText(int mouseX, int mouseY) {
+        FontRenderer fr         = Minecraft.getMinecraft().fontRenderer;
+        float        scale      = fontSize.getScale();
+        float        centerY    = y + height / 2f;
+        float        halfHeight = (fr.FONT_HEIGHT + 2) * scale / 2f;
+
+        float textStartX = x + width / 35f;
+        float textEndX   = x + width - width / 35f;
+
+        return mouseX >= textStartX && mouseX <= textEndX &&
+                mouseY >= centerY - halfHeight && mouseY <= centerY + halfHeight;
+    }
+
+    protected int getCharIndexAtMouse(int mouseX) {
+        FontRenderer fr           = Minecraft.getMinecraft().fontRenderer;
+        float        scale        = fontSize.getScale();
+        float        inverseScale = 1.0f / scale;
+        float        textX        = x + width / 35f;
+
+        int    relX        = (int) ((mouseX - textX) * inverseScale);
+        String visibleText = fr.trimStringToWidth(getText().substring(lineScrollOffset), (int) (width * inverseScale));
+        return fr.trimStringToWidth(visibleText, relX).length() + lineScrollOffset;
+    }
 
     protected final int getHoverState(boolean mouseOver) {
         return persistentState == GuiButtonPersistentState.DISABLED ? 0 : mouseOver ? 2 : 1;
@@ -356,8 +493,8 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
         if (texture != null) {
             texture.draw(
                     event.getMc(),
-                    elementShape.getX(), elementShape.getY(),
-                    elementShape.getWidth(), elementShape.getHeight()
+                    elementShape.x(), elementShape.y(),
+                    elementShape.width(), elementShape.height()
             );
         }
     }
@@ -489,5 +626,12 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
             }
         }
         return "";
+    }
+
+    @Override
+    public void offsetCalculatedShape(float dx, float dy) {
+        calculatedElementShape.offset(dx, dy);
+        x = (int) calculatedElementShape.x();
+        y = (int) calculatedElementShape.y();
     }
 }

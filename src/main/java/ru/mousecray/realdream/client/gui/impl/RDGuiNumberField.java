@@ -9,6 +9,7 @@ import ru.mousecray.realdream.client.gui.GuiTexturePack;
 import ru.mousecray.realdream.client.gui.RDFontSize;
 import ru.mousecray.realdream.client.gui.RDGuiTextField;
 import ru.mousecray.realdream.client.gui.dim.GuiShape;
+import ru.mousecray.realdream.client.gui.dim.GuiVector;
 import ru.mousecray.realdream.client.gui.event.RDGuiEvent;
 import ru.mousecray.realdream.client.gui.event.RDGuiTextTypedEvent;
 import ru.mousecray.realdream.client.gui.state.GuiButtonActionState;
@@ -30,7 +31,7 @@ public class RDGuiNumberField extends RDGuiTextField<RDGuiNumberField> {
     ) {
         super(fontRenderer, placeholder, "", elementShape,
                 GuiTexturePack.Builder
-                        .create(texture, textureSize, textureShape.getPos(), textureShape.getSize())
+                        .create(texture, textureSize, textureShape.pos(), textureShape.size())
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
                         .addTexture(GuiButtonActionState.HOVER, 0)
                         .addTexture(GuiButtonActionState.PRESSED, 0)
@@ -44,7 +45,15 @@ public class RDGuiNumberField extends RDGuiTextField<RDGuiNumberField> {
         if (event instanceof RDGuiTextTypedEvent) {
             RDGuiTextTypedEvent<RDGuiNumberField> e       = (RDGuiTextTypedEvent<RDGuiNumberField>) event;
             String                                newText = e.getNewText();
-            if ((StringUtils.isNumeric(newText) || StringUtils.isEmpty(newText)) && newText != null && !newText.startsWith("0")) {
+
+            if (newText.isEmpty()) {
+                if (onTextTyped != null) onTextTyped.accept(e);
+                return;
+            }
+
+            if (!StringUtils.isNumeric(newText) || (newText.length() > 1 && newText.startsWith("0"))) {
+                e.setCancelled(true);
+            } else {
                 if (onTextTyped != null) onTextTyped.accept(e);
             }
         }
