@@ -45,7 +45,8 @@ public abstract class RDGuiScreen extends GuiScreen {
     protected GuiShape guiShape, guiContentShape;
     protected GuiVector guiBound;
     protected GuiVector guiDefaultSize, guiDefaultBound;
-    private RDGuiPanel<?> rootPanel;
+    private       RDGuiPanel<?>     rootPanel;
+    private final RDGuiElementCache elementCache = new RDGuiElementCache();
 
     protected RDGuiScreen(GuiVector guiDefaultSize, GuiVector guiDefaultBound) {
         this.guiDefaultSize = guiDefaultSize;
@@ -242,7 +243,9 @@ public abstract class RDGuiScreen extends GuiScreen {
         return null;
     }
 
-    public int genNextElementID() { return ++currentElementID; }
+    public int genNextElementID()              { return ++currentElementID; }
+
+    public RDGuiElementCache getElementCache() { return elementCache; }
 
     protected void resetGui() {
         currentElementID = 0;
@@ -264,6 +267,12 @@ public abstract class RDGuiScreen extends GuiScreen {
         buttonList.clear();
         labelList.clear();
         textFieldList.clear();
+    }
+
+    @Override
+    public void onGuiClosed() {
+        super.onGuiClosed();
+        elementCache.clear();
     }
 
     @Override

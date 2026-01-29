@@ -9,6 +9,7 @@ import org.lwjgl.input.Keyboard;
 import ru.mousecray.realdream.Tags;
 import ru.mousecray.realdream.client.gui.RDGuiScreen;
 import ru.mousecray.realdream.client.gui.dim.*;
+import ru.mousecray.realdream.client.gui.event.RDGuiMouseClickEvent;
 import ru.mousecray.realdream.client.gui.event.RDGuiTextTypedEvent;
 import ru.mousecray.realdream.client.gui.impl.*;
 import ru.mousecray.realdream.client.gui.impl.container.RDGuiSimplePanel;
@@ -61,50 +62,73 @@ public class GuiScreenWallet extends RDGuiScreen {
         RDFontSize fontSize = RDFontSize.NORMAL;
 
         // Close Button
-        addButton(new RDGuiCloseButton(
-                new GuiShape(0, 0, 9, 9),
-                TEXTURES, TEXTURES_SIZE, new GuiShape(95, 200, 9, 9), fontSize,
-                event -> closeGui()
-        ), null, AnchorPosition.TOP_RIGHT, GuiVector.ZERO);
+        RDGuiCloseButton closeButton = getElementCache().get("close_button", RDGuiCloseButton.class);
+        if (closeButton == null) {
+            closeButton = new RDGuiCloseButton(
+                    new GuiShape(0, 0, 9, 9),
+                    TEXTURES, TEXTURES_SIZE, new GuiShape(95, 200, 9, 9), fontSize,
+                    event -> closeGui()
+            );
+            getElementCache().put("close_button", closeButton);
+        }
+        addButton(closeButton, null, AnchorPosition.TOP_RIGHT, GuiVector.ZERO);
 
         //Заглушка, проверяем, открывать ли гуи
         if (walletPipe == null) return;
 
         // Title
-        addLabel(new RDGuiStaticLabel(RDGuiString.simple(walletStack.getDisplayName()), fontRenderer,
-                new GuiShape(0, 0, 80, 10),
-                14737632, fontSize
-        ), null, AnchorPosition.TOP_LEFT, GuiVector.ZERO);
+        RDGuiStaticLabel titleLabel = getElementCache().get("title_label", RDGuiStaticLabel.class);
+        if (titleLabel == null) {
+            titleLabel = new RDGuiStaticLabel(RDGuiString.simple(walletStack.getDisplayName()), fontRenderer,
+                    new GuiShape(0, 0, 80, 10),
+                    14737632, fontSize
+            );
+            getElementCache().put("title_label", titleLabel);
+        } else {
+            titleLabel.setGuiString(RDGuiString.simple(walletStack.getDisplayName()));
+        }
+        addLabel(titleLabel, null, AnchorPosition.TOP_LEFT, GuiVector.ZERO);
 
         float buttonTakePutYSize = 13.0f;
         float buttonTakePutXSize = 17.2f;
         float buttonTakePutGap   = 10f;
 
-        RDGuiActionButton takeAction = new RDGuiActionButton(RDGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.take"),
-                new GuiShape(0, 0, 113.8f, 12),
-                TEXTURES, TEXTURES_SIZE, new GuiShape(0, 200, 80, 10), fontSize,
-                event -> { }
-        );
+        RDGuiActionButton takeAction = getElementCache().get("take_action", RDGuiActionButton.class);
+        if (takeAction == null) {
+            takeAction = new RDGuiActionButton(RDGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.take"),
+                    new GuiShape(0, 0, 113.8f, 12),
+                    TEXTURES, TEXTURES_SIZE, new GuiShape(0, 200, 80, 10), fontSize,
+                    event -> { }
+            );
+            getElementCache().put("take_action", takeAction);
+        }
         takeAction.applyState(GuiButtonPersistentState.DISABLED);
 
-        RDGuiActionButton putAction = new RDGuiActionButton(RDGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.put"),
-                new GuiShape(0, 0, 113.8f, 12),
-                TEXTURES, TEXTURES_SIZE, new GuiShape(0, 200, 80, 10), fontSize,
-                event -> { }
-        );
+        RDGuiActionButton putAction = getElementCache().get("put_action", RDGuiActionButton.class);
+        if (putAction == null) {
+            putAction = new RDGuiActionButton(RDGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.put"),
+                    new GuiShape(0, 0, 113.8f, 12),
+                    TEXTURES, TEXTURES_SIZE, new GuiShape(0, 200, 80, 10), fontSize,
+                    event -> { }
+            );
+            getElementCache().put("put_action", putAction);
+        }
         putAction.applyState(GuiButtonPersistentState.DISABLED);
+
+        RDGuiActionButton finalTakeAction = takeAction;
+        RDGuiActionButton finalPutAction  = putAction;
 
         Consumer<RDGuiTextTypedEvent<RDGuiNumberField>> fieldEventTake = event -> {
             String newText = event.getNewText();
             if (newText == null || newText.length() > 19) {
                 event.setCancelled(true);
-                takeAction.applyState(GuiButtonPersistentState.DISABLED);
-                putAction.applyState(GuiButtonPersistentState.DISABLED);
+                finalTakeAction.applyState(GuiButtonPersistentState.DISABLED);
+                finalPutAction.applyState(GuiButtonPersistentState.DISABLED);
                 return;
             }
             if (newText.trim().isEmpty()) {
-                takeAction.applyState(GuiButtonPersistentState.DISABLED);
-                putAction.applyState(GuiButtonPersistentState.DISABLED);
+                finalTakeAction.applyState(GuiButtonPersistentState.DISABLED);
+                finalPutAction.applyState(GuiButtonPersistentState.DISABLED);
                 return;
             }
             long l;
@@ -112,60 +136,85 @@ public class GuiScreenWallet extends RDGuiScreen {
                 l = Long.parseLong(newText);
             } catch (NumberFormatException ignore) {
                 event.setCancelled(true);
-                takeAction.applyState(GuiButtonPersistentState.DISABLED);
-                putAction.applyState(GuiButtonPersistentState.DISABLED);
+                finalTakeAction.applyState(GuiButtonPersistentState.DISABLED);
+                finalPutAction.applyState(GuiButtonPersistentState.DISABLED);
                 return;
             }
             if (l <= 0) {
                 event.setCancelled(true);
-                takeAction.applyState(GuiButtonPersistentState.DISABLED);
-                putAction.applyState(GuiButtonPersistentState.DISABLED);
+                finalTakeAction.applyState(GuiButtonPersistentState.DISABLED);
+                finalPutAction.applyState(GuiButtonPersistentState.DISABLED);
                 return;
             }
 
-            takeAction.applyState(GuiButtonPersistentState.NORMAL);
-            putAction.applyState(GuiButtonPersistentState.NORMAL);
+            finalTakeAction.applyState(GuiButtonPersistentState.NORMAL);
+            finalPutAction.applyState(GuiButtonPersistentState.NORMAL);
         };
 
-        RDGuiNumberField fieldTakePut = new RDGuiNumberField(fontRenderer, RDGuiString.localized("gui." + Tags.MOD_ID + ".wallet.text_field.take_put_count"),
-                new GuiShape(0, 0, 113.5f, buttonTakePutYSize * 1.2f),
-                TEXTURES, TEXTURES_SIZE, new GuiShape(104, 200, 80, 10), fontSize, fieldEventTake
-        );
+        RDGuiNumberField fieldTakePut = getElementCache().get("field_take_put", RDGuiNumberField.class);
+        if (fieldTakePut == null) {
+            fieldTakePut = new RDGuiNumberField(fontRenderer, RDGuiString.localized("gui." + Tags.MOD_ID + ".wallet.text_field.take_put_count"),
+                    new GuiShape(0, 0, 113.5f, buttonTakePutYSize * 1.2f),
+                    TEXTURES, TEXTURES_SIZE, new GuiShape(104, 200, 80, 10), fontSize, fieldEventTake
+            );
+            getElementCache().put("field_take_put", fieldTakePut);
+        }
+        RDGuiNumberField finalFieldTakePut = fieldTakePut;
 
         // Панель управления (левая часть)
-        RDGuiSimplePanel controls = new RDGuiSimplePanel(new GuiShape(0, 0, 114, 67));
-        controls.setLayoutType(LayoutType.LINEAR_VERTICAL);
+        RDGuiSimplePanel controls = getElementCache().get("controls_panel", RDGuiSimplePanel.class);
+        if (controls == null) {
+            controls = new RDGuiSimplePanel(new GuiShape(0, 0, 114, 67));
+            controls.setLayoutType(LayoutType.LINEAR_VERTICAL);
+            getElementCache().put("controls_panel", controls);
+        }
+        controls.getChildren().clear(); // Clear old children to rebuild tree
         addPanel(controls, null, AnchorPosition.TOP_LEFT, new GuiVector(0, 133));
 
         // Ряд кнопок +1, +10, +50, -1, -10, -50
-        RDGuiSimplePanel row1 = new RDGuiSimplePanel(new GuiShape(0, 0, 114, buttonTakePutYSize));
-        row1.setLayoutType(LayoutType.LINEAR_HORIZONTAL);
+        RDGuiSimplePanel row1 = getElementCache().get("row1_panel", RDGuiSimplePanel.class);
+        if (row1 == null) {
+            row1 = new RDGuiSimplePanel(new GuiShape(0, 0, 114, buttonTakePutYSize));
+            row1.setLayoutType(LayoutType.LINEAR_HORIZONTAL);
+            getElementCache().put("row1_panel", row1);
+        }
+        row1.getChildren().clear();
         controls.addChild(row1, null, null, null);
 
-        row1.addChild(new RDGuiDefaultButton("+1", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 1, 1))), null, null, null);
-        row1.addChild(new RDGuiDefaultButton("+10", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 10, 1))), null, null, null);
-        row1.addChild(new RDGuiDefaultButton("+50", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 50, 1))), null, null, null);
+        row1.addChild(createSimpleButton("btn_+1", "+1", fontSize, event -> finalFieldTakePut.setNumberText(Math.max(finalFieldTakePut.getNumberText() + 1, 1))), null, null, null);
+        row1.addChild(createSimpleButton("btn_+10", "+10", fontSize, event -> finalFieldTakePut.setNumberText(Math.max(finalFieldTakePut.getNumberText() + 10, 1))), null, null, null);
+        row1.addChild(createSimpleButton("btn_+50", "+50", fontSize, event -> finalFieldTakePut.setNumberText(Math.max(finalFieldTakePut.getNumberText() + 50, 1))), null, null, null);
         row1.addChild(new RDGuiSimplePanel(new GuiShape(0, 0, buttonTakePutGap, 1)), null, null, null); // Spacer
-        row1.addChild(new RDGuiDefaultButton("-1", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 1, 1))), null, null, null);
-        row1.addChild(new RDGuiDefaultButton("-10", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 10, 1))), null, null, null);
-        row1.addChild(new RDGuiDefaultButton("-50", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 50, 1))), null, null, null);
+        row1.addChild(createSimpleButton("btn_-1", "-1", fontSize, event -> finalFieldTakePut.setNumberText(Math.max(finalFieldTakePut.getNumberText() - 1, 1))), null, null, null);
+        row1.addChild(createSimpleButton("btn_-10", "-10", fontSize, event -> finalFieldTakePut.setNumberText(Math.max(finalFieldTakePut.getNumberText() - 10, 1))), null, null, null);
+        row1.addChild(createSimpleButton("btn_-50", "-50", fontSize, event -> finalFieldTakePut.setNumberText(Math.max(finalFieldTakePut.getNumberText() - 50, 1))), null, null, null);
 
         // Ряд кнопок +100, +500, +1K, -100, -500, -1K
-        RDGuiSimplePanel row2 = new RDGuiSimplePanel(new GuiShape(0, 0, 114, buttonTakePutYSize));
-        row2.setLayoutType(LayoutType.LINEAR_HORIZONTAL);
+        RDGuiSimplePanel row2 = getElementCache().get("row2_panel", RDGuiSimplePanel.class);
+        if (row2 == null) {
+            row2 = new RDGuiSimplePanel(new GuiShape(0, 0, 114, buttonTakePutYSize));
+            row2.setLayoutType(LayoutType.LINEAR_HORIZONTAL);
+            getElementCache().put("row2_panel", row2);
+        }
+        row2.getChildren().clear();
         controls.addChild(row2, null, null, null);
 
-        row2.addChild(new RDGuiDefaultButton("+100", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 100, 1))), null, null, null);
-        row2.addChild(new RDGuiDefaultButton("+500", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 500, 1))), null, null, null);
-        row2.addChild(new RDGuiDefaultButton("+1K", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 1000, 1))), null, null, null);
+        row2.addChild(createSimpleButton("btn_+100", "+100", fontSize, event -> finalFieldTakePut.setNumberText(Math.max(finalFieldTakePut.getNumberText() + 100, 1))), null, null, null);
+        row2.addChild(createSimpleButton("btn_+500", "+500", fontSize, event -> finalFieldTakePut.setNumberText(Math.max(finalFieldTakePut.getNumberText() + 500, 1))), null, null, null);
+        row2.addChild(createSimpleButton("btn_+1K", "+1K", fontSize, event -> finalFieldTakePut.setNumberText(Math.max(finalFieldTakePut.getNumberText() + 1000, 1))), null, null, null);
         row2.addChild(new RDGuiSimplePanel(new GuiShape(0, 0, buttonTakePutGap, 1)), null, null, null); // Spacer
-        row2.addChild(new RDGuiDefaultButton("-100", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 100, 1))), null, null, null);
-        row2.addChild(new RDGuiDefaultButton("-500", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 500, 1))), null, null, null);
-        row2.addChild(new RDGuiDefaultButton("-1K", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 1000, 1))), null, null, null);
+        row2.addChild(createSimpleButton("btn_-100", "-100", fontSize, event -> finalFieldTakePut.setNumberText(Math.max(finalFieldTakePut.getNumberText() - 100, 1))), null, null, null);
+        row2.addChild(createSimpleButton("btn_-500", "-500", fontSize, event -> finalFieldTakePut.setNumberText(Math.max(finalFieldTakePut.getNumberText() - 500, 1))), null, null, null);
+        row2.addChild(createSimpleButton("btn_-1K", "-1K", fontSize, event -> finalFieldTakePut.setNumberText(Math.max(finalFieldTakePut.getNumberText() - 1000, 1))), null, null, null);
 
         // Поле и слайдер
-        RDGuiSimplePanel fieldSliderStack = new RDGuiSimplePanel(new GuiShape(0, 0, 114, 18));
-        fieldSliderStack.setLayoutType(LayoutType.FREE);
+        RDGuiSimplePanel fieldSliderStack = getElementCache().get("field_slider_stack", RDGuiSimplePanel.class);
+        if (fieldSliderStack == null) {
+            fieldSliderStack = new RDGuiSimplePanel(new GuiShape(0, 0, 114, 18));
+            fieldSliderStack.setLayoutType(LayoutType.FREE);
+            getElementCache().put("field_slider_stack", fieldSliderStack);
+        }
+        fieldSliderStack.getChildren().clear();
         controls.addChild(fieldSliderStack, null, null, null);
 
         fieldSliderStack.addChild(fieldTakePut, null, AnchorPosition.TOP_LEFT, null);
@@ -180,7 +229,13 @@ public class GuiScreenWallet extends RDGuiScreen {
                         false);
             }
         }
-        fieldSliderStack.addChild(new WalletSlider().onChange(value -> fieldTakePut.setNumberText(value == 0 ? 1 : (long) value * maxCoinValue / 100)),
+        WalletSlider slider = getElementCache().get("wallet_slider", WalletSlider.class);
+        if (slider == null) {
+            slider = new WalletSlider();
+            slider.onChange(value -> finalFieldTakePut.setNumberText(value == 0 ? 1 : (long) value * maxCoinValue / 100));
+            getElementCache().put("wallet_slider", slider);
+        }
+        fieldSliderStack.addChild(slider,
                 null, AnchorPosition.TOP_LEFT, new GuiVector(0, buttonTakePutYSize * 1.2f - 9));
 
         controls.addChild(takeAction, null, null, null);
@@ -235,20 +290,38 @@ public class GuiScreenWallet extends RDGuiScreen {
         if (!otherSlots.isEmpty()) activeGroups.put(3, otherSlots);
 
         // Контейнер для монет (правая часть)
-        RDGuiSimpleScrollPanel coinsContainer = new RDGuiSimpleScrollPanel(new GuiShape(0, 0, 115, 188));
-        coinsContainer.setLayoutType(LayoutType.FREE); // Используем FREE чтобы вручную расставить колонки
+        RDGuiSimpleScrollPanel coinsContainer = getElementCache().get("coins_container", RDGuiSimpleScrollPanel.class);
+        if (coinsContainer == null) {
+            coinsContainer = new RDGuiSimpleScrollPanel(new GuiShape(0, 0, 115, 188));
+            coinsContainer.setLayoutType(LayoutType.FREE);
+            getElementCache().put("coins_container", coinsContainer);
+        }
+        coinsContainer.getChildren().clear();
         addPanel(coinsContainer, null, AnchorPosition.TOP_RIGHT, new GuiVector(0, 12));
 
         if (activeGroups.isEmpty()) {
-            coinsContainer.addChild(new RDGuiStaticLabel(RDGuiString.localized("gui." + Tags.MOD_ID + ".wallet.label.empty"), fontRenderer,
-                    new GuiShape(0, 0, 80, 10), 14737632, fontSize), null, AnchorPosition.TOP_LEFT, new GuiVector(baseX, 0));
+            RDGuiStaticLabel emptyLabel = getElementCache().get("empty_label", RDGuiStaticLabel.class);
+            if (emptyLabel == null) {
+                emptyLabel = new RDGuiStaticLabel(RDGuiString.localized("gui." + Tags.MOD_ID + ".wallet.label.empty"), fontRenderer,
+                        new GuiShape(0, 0, 80, 10), 14737632, fontSize);
+                getElementCache().put("empty_label", emptyLabel);
+            }
+            coinsContainer.addChild(emptyLabel, null, AnchorPosition.TOP_LEFT, new GuiVector(baseX, 0));
         } else {
             List<Map.Entry<Integer, List<CoinValue>>> groupsList = new ArrayList<>(activeGroups.entrySet());
 
             for (int col = 0; col < 2; col++) {
+                String           colKey      = "col_panel_" + col;
                 float            colX        = col * (ROW_WIDTH + COLUMN_GAP + 5);
-                RDGuiSimplePanel columnPanel = new RDGuiSimplePanel(new GuiShape(colX, 0, ROW_WIDTH + 5, 188));
-                columnPanel.setLayoutType(LayoutType.LINEAR_VERTICAL);
+                RDGuiSimplePanel columnPanel = getElementCache().get(colKey, RDGuiSimplePanel.class);
+                if (columnPanel == null) {
+                    columnPanel = new RDGuiSimplePanel(new GuiShape(colX, 0, ROW_WIDTH + 5, 188));
+                    columnPanel.setLayoutType(LayoutType.LINEAR_VERTICAL);
+                    getElementCache().put(colKey, columnPanel);
+                } else {
+                    columnPanel.setElementShape(columnPanel.getElementShape().withX(colX));
+                }
+                columnPanel.getChildren().clear();
                 coinsContainer.addChild(columnPanel, null, null, null);
 
                 for (int i = 0; i < 2; i++) {
@@ -276,15 +349,37 @@ public class GuiScreenWallet extends RDGuiScreen {
                     int   rows   = (int) Math.ceil(groupSlots.getValue().size() / (double) slot_count_x);
                     float groupH = 12 + rows * H;
 
-                    RDGuiSimplePanel groupPanel = new RDGuiSimplePanel(new GuiShape(0, 0, ROW_WIDTH + 2, groupH));
-                    groupPanel.setLayoutType(LayoutType.FREE);
+                    String           groupPanelKey = "group_panel_" + idx;
+                    RDGuiSimplePanel groupPanel    = getElementCache().get(groupPanelKey, RDGuiSimplePanel.class);
+                    if (groupPanel == null) {
+                        groupPanel = new RDGuiSimplePanel(new GuiShape(0, 0, ROW_WIDTH + 2, groupH));
+                        groupPanel.setLayoutType(LayoutType.FREE);
+                        getElementCache().put(groupPanelKey, groupPanel);
+                    } else {
+                        groupPanel.setElementShape(groupPanel.getElementShape().withHeight(groupH));
+                    }
+                    groupPanel.getChildren().clear();
                     columnPanel.addChild(groupPanel, new GuiMargin(0, 0, 0, 10), null, null);
 
-                    groupPanel.addChild(new RDGuiStaticLabel(RDGuiString.localized(groupLabelKey), fontRenderer,
-                            new GuiShape(0, 0, ROW_WIDTH - 10, 10), 14737632, fontSize), null, AnchorPosition.TOP_LEFT, null);
+                    String           groupTitleKey = "group_title_" + idx;
+                    RDGuiStaticLabel groupTitle    = getElementCache().get(groupTitleKey, RDGuiStaticLabel.class);
+                    if (groupTitle == null) {
+                        groupTitle = new RDGuiStaticLabel(RDGuiString.localized(groupLabelKey), fontRenderer,
+                                new GuiShape(0, 0, ROW_WIDTH - 10, 10), 14737632, fontSize);
+                        getElementCache().put(groupTitleKey, groupTitle);
+                    } else {
+                        groupTitle.setGuiString(RDGuiString.localized(groupLabelKey));
+                    }
+                    groupPanel.addChild(groupTitle, null, AnchorPosition.TOP_LEFT, null);
 
-                    groupPanel.addChild(new RDGuiCheckButton(RDGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.select_all"), fontRenderer,
-                                    new GuiShape(0, 0, 8, 8), TEXTURES, TEXTURES_SIZE, new GuiShape(240, 0, 8, 8), fontSize, e -> { }),
+                    String           selectAllKey = "select_all_" + idx;
+                    RDGuiCheckButton selectAll    = getElementCache().get(selectAllKey, RDGuiCheckButton.class);
+                    if (selectAll == null) {
+                        selectAll = new RDGuiCheckButton(RDGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.select_all"), fontRenderer,
+                                new GuiShape(0, 0, 8, 8), TEXTURES, TEXTURES_SIZE, new GuiShape(240, 0, 8, 8), fontSize, e -> { });
+                        getElementCache().put(selectAllKey, selectAll);
+                    }
+                    groupPanel.addChild(selectAll,
                             null, AnchorPosition.TOP_RIGHT, null);
 
                     int slotIndex = 0;
@@ -293,7 +388,16 @@ public class GuiScreenWallet extends RDGuiScreen {
                         int row      = slotIndex / slot_count_x;
                         int colInRow = slotIndex % slot_count_x;
 
-                        groupPanel.addChild(new WalletCoinButton(new GuiShape(colInRow * W, 11 + row * H, W, H), fontSize, coinValue, e -> { }),
+                        String           coinBtnKey = "coin_btn_" + idx + "_" + slotIndex;
+                        WalletCoinButton coinBtn    = getElementCache().get(coinBtnKey, WalletCoinButton.class);
+                        if (coinBtn == null) {
+                            coinBtn = new WalletCoinButton(new GuiShape(colInRow * W, 11 + row * H, W, H), fontSize, coinValue, e -> { });
+                            getElementCache().put(coinBtnKey, coinBtn);
+                        } else {
+                            coinBtn.setElementShape(coinBtn.getElementShape().withX(colInRow * W).withY(11 + row * H));
+                            coinBtn.setCount(coinValue);
+                        }
+                        groupPanel.addChild(coinBtn,
                                 null, AnchorPosition.TOP_LEFT, null);
                         slotIndex++;
                     }
@@ -302,9 +406,21 @@ public class GuiScreenWallet extends RDGuiScreen {
         }
     }
 
+    private RDGuiDefaultButton createSimpleButton(String key, String text, RDFontSize fontSize, Consumer<RDGuiMouseClickEvent<RDGuiDefaultButton>> onClick) {
+        RDGuiDefaultButton btn = getElementCache().get(key, RDGuiDefaultButton.class);
+        if (btn == null) {
+            btn = new RDGuiDefaultButton(RDGuiString.simple(text), new GuiShape(0, 0, 17.2f, 13.0f), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, onClick);
+            getElementCache().put(key, btn);
+        }
+        return btn;
+    }
+
     private void sendWalletToServer() {
 
     }
 
-    @Override public void onGuiClosed() { Keyboard.enableRepeatEvents(false); }
+    @Override public void onGuiClosed() {
+        super.onGuiClosed();
+        Keyboard.enableRepeatEvents(false);
+    }
 }
