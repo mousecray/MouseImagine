@@ -7,11 +7,16 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
-import ru.mousecray.realdream.client.gui.*;
+import ru.mousecray.realdream.client.gui.RDGuiButton;
 import ru.mousecray.realdream.client.gui.dim.GuiShape;
 import ru.mousecray.realdream.client.gui.dim.GuiVector;
 import ru.mousecray.realdream.client.gui.event.RDGuiMouseClickEvent;
 import ru.mousecray.realdream.client.gui.event.RDGuiTickEvent;
+import ru.mousecray.realdream.client.gui.misc.GuiRenderHelper;
+import ru.mousecray.realdream.client.gui.misc.RDFontSize;
+import ru.mousecray.realdream.client.gui.misc.StateColorContainer;
+import ru.mousecray.realdream.client.gui.misc.lang.RDGuiString;
+import ru.mousecray.realdream.client.gui.misc.texture.RDGuiTexturePack;
 import ru.mousecray.realdream.client.gui.state.GuiButtonActionState;
 import ru.mousecray.realdream.client.gui.state.GuiButtonPersistentState;
 
@@ -23,6 +28,44 @@ public class RDGuiCheckButton extends RDGuiButton<RDGuiCheckButton> {
     private final Consumer<RDGuiMouseClickEvent<RDGuiCheckButton>> onClick;
 
     public RDGuiCheckButton(
+            RDGuiString text,
+            FontRenderer fontRenderer,
+            GuiShape elementShape,
+            ResourceLocation texture, GuiVector textureSize, GuiShape textureShape,
+            RDFontSize fontSize, Consumer<RDGuiMouseClickEvent<RDGuiCheckButton>> onClick) {
+        super(
+                text.get(),
+                elementShape.grow(-fontRenderer.getStringWidth(text.get()) - 1, 0, 0, 0),
+                RDGuiTexturePack.Builder
+                        .create(texture, textureSize, textureShape.pos(), textureShape.size())
+                        .addTexture(GuiButtonPersistentState.NORMAL, 0)
+                        .addTexture(GuiButtonActionState.HOVER, 1)
+                        .addTexture(GuiButtonActionState.PRESSED, 2)
+                        .addTexture(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.HOVER), 1)
+                        .addTexture(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.PRESSED), 2)
+                        .addTexture(GuiButtonPersistentState.SELECTED, 3)
+                        .addTexture(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.HOVER), 4)
+                        .addTexture(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.PRESSED), 5)
+                        .build(),
+                SoundEvents.UI_BUTTON_CLICK, fontSize
+        );
+        this.onClick = onClick;
+        setGuiString(text);
+        colorContainer = StateColorContainer.Builder
+                .create(14737632)
+                .addState(GuiButtonPersistentState.DISABLED, 10526880)
+                .addState(GuiButtonPersistentState.NORMAL, 14737632)
+                .addState(GuiButtonActionState.HOVER, 15592941)
+                .addState(GuiButtonActionState.PRESSED, 13948116)
+                .addState(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.HOVER), 15592941)
+                .addState(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.PRESSED), 13948116)
+                .addState(GuiButtonPersistentState.SELECTED, 14737632)
+                .addState(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.HOVER), 15592941)
+                .addState(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.PRESSED), 13948116)
+                .build();
+    }
+
+    public RDGuiCheckButton(
             String text,
             FontRenderer fontRenderer,
             GuiShape elementShape,
@@ -31,7 +74,7 @@ public class RDGuiCheckButton extends RDGuiButton<RDGuiCheckButton> {
         super(
                 text,
                 elementShape.grow(-fontRenderer.getStringWidth(text) - 1, 0, 0, 0),
-                GuiTexturePack.Builder
+                RDGuiTexturePack.Builder
                         .create(texture, textureSize, textureShape.pos(), textureShape.size())
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
                         .addTexture(GuiButtonActionState.HOVER, 1)
@@ -72,7 +115,7 @@ public class RDGuiCheckButton extends RDGuiButton<RDGuiCheckButton> {
     protected void drawButtonTextLayer(@Nonnull RDGuiTickEvent<RDGuiCheckButton> event) {
         if (displayString != null) {
             FontRenderer fontrenderer = event.getMc().fontRenderer;
-            int          color = colorContainer.getCalculatedColor(actionState, persistentState, packedFGColour);
+            int          color        = colorContainer.getCalculatedColor(actionState, persistentState, packedFGColour);
 
             float scale        = fontSize.getScale() * textScaleMultiplayer;
             float inverseScale = 1.0F / scale;

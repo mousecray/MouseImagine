@@ -5,13 +5,14 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.StringUtils;
-import ru.mousecray.realdream.client.gui.GuiTexturePack;
-import ru.mousecray.realdream.client.gui.RDFontSize;
 import ru.mousecray.realdream.client.gui.RDGuiTextField;
 import ru.mousecray.realdream.client.gui.dim.GuiShape;
 import ru.mousecray.realdream.client.gui.dim.GuiVector;
 import ru.mousecray.realdream.client.gui.event.RDGuiEvent;
 import ru.mousecray.realdream.client.gui.event.RDGuiTextTypedEvent;
+import ru.mousecray.realdream.client.gui.misc.RDFontSize;
+import ru.mousecray.realdream.client.gui.misc.lang.RDGuiString;
+import ru.mousecray.realdream.client.gui.misc.texture.RDGuiTexturePack;
 import ru.mousecray.realdream.client.gui.state.GuiButtonActionState;
 import ru.mousecray.realdream.client.gui.state.GuiButtonPersistentState;
 
@@ -24,13 +25,31 @@ public class RDGuiNumberField extends RDGuiTextField<RDGuiNumberField> {
     private final Consumer<RDGuiTextTypedEvent<RDGuiNumberField>> onTextTyped;
 
     public RDGuiNumberField(
+            FontRenderer fontRenderer, @Nullable RDGuiString placeholder,
+            GuiShape elementShape,
+            ResourceLocation texture, GuiVector textureSize, GuiShape textureShape,
+            RDFontSize fontSize, Consumer<RDGuiTextTypedEvent<RDGuiNumberField>> onTextTyped
+    ) {
+        super(fontRenderer, placeholder == null ? "" : placeholder.get(), "", elementShape,
+                RDGuiTexturePack.Builder
+                        .create(texture, textureSize, textureShape.pos(), textureShape.size())
+                        .addTexture(GuiButtonPersistentState.NORMAL, 0)
+                        .addTexture(GuiButtonActionState.HOVER, 0)
+                        .addTexture(GuiButtonActionState.PRESSED, 0)
+                        .build()
+                , null, fontSize);
+        this.onTextTyped = onTextTyped;
+        if (placeholder != null) setPlaceholder(placeholder);
+    }
+
+    public RDGuiNumberField(
             FontRenderer fontRenderer, @Nullable String placeholder,
             GuiShape elementShape,
             ResourceLocation texture, GuiVector textureSize, GuiShape textureShape,
             RDFontSize fontSize, Consumer<RDGuiTextTypedEvent<RDGuiNumberField>> onTextTyped
     ) {
         super(fontRenderer, placeholder, "", elementShape,
-                GuiTexturePack.Builder
+                RDGuiTexturePack.Builder
                         .create(texture, textureSize, textureShape.pos(), textureShape.size())
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
                         .addTexture(GuiButtonActionState.HOVER, 0)

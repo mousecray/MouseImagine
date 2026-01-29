@@ -4,15 +4,15 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.realdream.client.gui.GuiTexturePack;
-import ru.mousecray.realdream.client.gui.RDClickType;
-import ru.mousecray.realdream.client.gui.RDFontSize;
 import ru.mousecray.realdream.client.gui.RDGuiButton;
 import ru.mousecray.realdream.client.gui.container.RDGuiPanel;
 import ru.mousecray.realdream.client.gui.dim.*;
 import ru.mousecray.realdream.client.gui.event.RDGuiEventFactory;
 import ru.mousecray.realdream.client.gui.event.RDGuiMouseClickEvent;
 import ru.mousecray.realdream.client.gui.event.RDGuiMouseDragEvent;
+import ru.mousecray.realdream.client.gui.misc.RDClickType;
+import ru.mousecray.realdream.client.gui.misc.RDFontSize;
+import ru.mousecray.realdream.client.gui.misc.texture.RDGuiTexturePack;
 
 import javax.annotation.Nonnull;
 import java.util.function.Consumer;
@@ -36,7 +36,7 @@ public class RDGuiSlider<T extends RDGuiSlider<T>> extends RDGuiPanel<T> {
 
     private IGuiVector lastParentDefaultSize, lastParentContentSize;
 
-    public RDGuiSlider(GuiShape shape, GuiTexturePack trackTexture, GuiTexturePack knobTexture, GuiVector knobSize, int min, int max, boolean isVertical) {
+    public RDGuiSlider(GuiShape shape, RDGuiTexturePack trackTexture, RDGuiTexturePack knobTexture, GuiVector knobSize, int min, int max, boolean isVertical) {
         super(shape);
         this.isVertical = isVertical;
         this.min = min;

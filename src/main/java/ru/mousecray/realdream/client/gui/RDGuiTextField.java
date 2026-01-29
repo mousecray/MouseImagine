@@ -18,6 +18,10 @@ import org.lwjgl.opengl.GL11;
 import ru.mousecray.realdream.client.gui.container.RDGuiPanel;
 import ru.mousecray.realdream.client.gui.dim.*;
 import ru.mousecray.realdream.client.gui.event.*;
+import ru.mousecray.realdream.client.gui.misc.*;
+import ru.mousecray.realdream.client.gui.misc.lang.RDGuiString;
+import ru.mousecray.realdream.client.gui.misc.texture.RDGuiTexture;
+import ru.mousecray.realdream.client.gui.misc.texture.RDGuiTexturePack;
 import ru.mousecray.realdream.client.gui.state.GuiButtonActionState;
 import ru.mousecray.realdream.client.gui.state.GuiButtonPersistentState;
 
@@ -56,13 +60,14 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
 
     @Nullable private GuiButtonActionState     actionState     = null;
     @Nullable private GuiButtonPersistentState persistentState = GuiButtonPersistentState.NORMAL;
-    private final     GuiTexturePack           texturePack;
+    private final     RDGuiTexturePack         texturePack;
 
     private                 int           tickDown    = -1;
     private                 int           partialTick;
     private                 boolean       isSelecting = false;
     @Nullable private final SoundEvent    soundClick;
-    @Nullable private       String        placeholder;
+    private                 RDGuiString   placeholder = RDGuiString.simple("");
+    private                 RDGuiString   guiString   = RDGuiString.simple("");
     private                 boolean       hovered;
     private                 GuiScaleRules scaleRules  = new GuiScaleRules(GuiScaleType.FLOW);
     private                 RDGuiPanel<?> parent;
@@ -72,7 +77,7 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
     public RDGuiTextField(FontRenderer fontRenderer,
                           @Nullable String placeholder, @Nullable String defaultText,
                           GuiShape elementShape,
-                          @Nullable GuiTexturePack texturePack,
+                          @Nullable RDGuiTexturePack texturePack,
                           @Nullable SoundEvent soundClick, RDFontSize fontSize) {
         super(0, fontRenderer, (int) elementShape.x(), (int) elementShape.y(), (int) elementShape.width(), (int) elementShape.height());
         this.elementShape.withShape(elementShape);
@@ -81,8 +86,8 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
         setText(defaultText);
         setMaxStringLength(999);
         setEnableBackgroundDrawing(true);
-        this.placeholder = placeholder;
-        this.texturePack = texturePack == null ? GuiTexturePack.EMPTY : texturePack;
+        this.placeholder = RDGuiString.simple(placeholder);
+        this.texturePack = texturePack == null ? RDGuiTexturePack.EMPTY : texturePack;
         this.soundClick = soundClick;
     }
 
@@ -94,8 +99,9 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
     @Override public MutableGuiShape getElementShape()           { return elementShape; }
     public MutableGuiShape getCalculatedDrawShape()              { return calculatedElementShape; }
     @Override public MutableGuiShape getCalculatedElementShape() { return calculatedElementShape; }
-    @Nullable public String getPlaceholder()                     { return placeholder; }
-    public void setPlaceholder(@Nullable String placeholder)     { this.placeholder = placeholder; }
+    @Nullable public String getPlaceholder()                     { return placeholder.get(); }
+    public void setPlaceholder(@Nullable String placeholder)     { this.placeholder = RDGuiString.simple(placeholder); }
+    public void setPlaceholder(RDGuiString placeholder)          { this.placeholder = placeholder; }
 
     @Override
     public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
@@ -111,23 +117,29 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
         GuiRenderHelper.measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
     }
 
-    @Override public void setTexturePack(GuiTexturePack texturePack)         { }
-    @Override public void setElementShape(IGuiShape elementShape)            { this.elementShape.withShape(elementShape); }
-    @Override public GuiScaleRules getScaleRules()                           { return scaleRules; }
-    @Override public void setScaleRules(GuiScaleRules scaleRules)            { this.scaleRules = scaleRules; }
-    @Override public void setPadding(GuiPadding padding)                     { this.padding = padding; }
-    @Override public GuiPadding getPadding()                                 { return padding; }
-    @Override public void setScreen(RDGuiScreen screen)                      { this.screen = screen; }
-    @Override public RDGuiScreen getScreen()                                 { return screen; }
-    @Override public void setParent(RDGuiPanel<?> parent)                    { this.parent = parent; }
-    @Override public RDGuiPanel<?> getParent()                               { return parent; }
-    @Override public void setTextOffset(IGuiVector offset)                   { }
-    @Override public MutableGuiVector getTextOffset()                        { return new MutableGuiVector(); }
+    @Override public void setTexturePack(RDGuiTexturePack texturePack) { }
+    @Override public void setElementShape(IGuiShape elementShape)      { this.elementShape.withShape(elementShape); }
+    @Override public GuiScaleRules getScaleRules()                     { return scaleRules; }
+    @Override public void setScaleRules(GuiScaleRules scaleRules)      { this.scaleRules = scaleRules; }
+    @Override public void setPadding(GuiPadding padding)               { this.padding = padding; }
+    @Override public GuiPadding getPadding()                           { return padding; }
+    @Override public void setScreen(RDGuiScreen screen)                { this.screen = screen; }
+    @Override public RDGuiScreen getScreen()                           { return screen; }
+    @Override public void setParent(RDGuiPanel<?> parent)              { this.parent = parent; }
+    @Override public RDGuiPanel<?> getParent()                         { return parent; }
+    @Override public void setTextOffset(IGuiVector offset)             { }
+    @Override public MutableGuiVector getTextOffset()                  { return new MutableGuiVector(); }
+
+    @Override public void setGuiString(RDGuiString guiString) {
+        this.guiString = guiString;
+        super.setText(guiString.get());
+    }
+    @Override public RDGuiString getGuiString()                              { return guiString; }
 
 
     @Override @Nullable public GuiButtonActionState getActionState()         { return actionState; }
     @Override @Nullable public GuiButtonPersistentState getPersistentState() { return persistentState; }
-    @Override public GuiTexturePack getTexturePack()                         { return texturePack; }
+    @Override public RDGuiTexturePack getTexturePack()                       { return texturePack; }
 
     @Override
     public boolean applyState(@Nullable GuiButtonPersistentState state) {
@@ -447,9 +459,9 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
 
         GlStateManager.scale(scale, scale, 1.0F);
 
-        //noinspection ConstantValue
-        if (getText() != null && getText().isEmpty() && placeholder != null && !placeholder.isEmpty()) {
-            GuiRenderHelper.drawString(fontRenderer, placeholder, textX, textY, PLACEHOLDER_TEXT_COLOR, fontSize != RDFontSize.SMALL);
+        String text = getText();
+        if (text != null && text.isEmpty() && placeholder.get() != null && !placeholder.get().isEmpty()) {
+            GuiRenderHelper.drawString(fontRenderer, placeholder.get(), textX, textY, PLACEHOLDER_TEXT_COLOR, fontSize != RDFontSize.SMALL);
         }
 
         if (selectionEndPos > visibleText.length()) selectionEndPos = visibleText.length();
@@ -488,13 +500,13 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
     protected void drawTextBoxLastLayer(RDGuiTickEvent<T> event) { }
 
     protected void drawTextBoxBackgroundLayer(RDGuiTickEvent<T> event) {
-        GuiTexture texture = texturePack.getCalculatedTexture(actionState, persistentState);
+        RDGuiTexture texture = texturePack.getCalculatedTexture(actionState, persistentState);
 
         if (texture != null) {
             texture.draw(
                     event.getMc(),
-                    elementShape.x(), elementShape.y(),
-                    elementShape.width(), elementShape.height()
+                    calculatedElementShape.x(), calculatedElementShape.y(),
+                    calculatedElementShape.width(), calculatedElementShape.height()
             );
         }
     }
@@ -571,25 +583,36 @@ public abstract class RDGuiTextField<T extends RDGuiTextField<T>> extends GuiTex
         RDGuiEventFactory.pushTextTypedEvent(textTypedEvent, self(), Minecraft.getMinecraft(),
                 moveEvent.getMouseX(), moveEvent.getMouseY(), getCursorPosition(), getSelectionEnd(), getText(), text);
         onAnyEventFire(textTypedEvent);
-        if (!textTypedEvent.isCancelled()) super.setText(text);
+        if (!textTypedEvent.isCancelled()) {
+            guiString = RDGuiString.simple(text);
+            super.setText(text);
+        }
     }
 
     @Override
     public void writeText(String textToWrite) {
+        String newText = internalWriteText(textToWrite);
         RDGuiEventFactory.pushTextTypedEvent(textTypedEvent, self(), Minecraft.getMinecraft(),
                 moveEvent.getMouseX(), moveEvent.getMouseY(), getCursorPosition(), getSelectionEnd(),
-                getText(), internalWriteText(textToWrite));
+                getText(), newText);
         onAnyEventFire(textTypedEvent);
-        if (!textTypedEvent.isCancelled()) super.writeText(textToWrite);
+        if (!textTypedEvent.isCancelled()) {
+            guiString = RDGuiString.simple(newText);
+            super.writeText(textToWrite);
+        }
     }
 
     @Override
     public void deleteFromCursor(int num) {
+        String newText = internalDeleteFromCursor(num);
         RDGuiEventFactory.pushTextTypedEvent(textTypedEvent, self(), Minecraft.getMinecraft(),
                 moveEvent.getMouseX(), moveEvent.getMouseY(), getCursorPosition(), getSelectionEnd(),
-                getText(), internalDeleteFromCursor(num));
+                getText(), newText);
         onAnyEventFire(textTypedEvent);
-        if (!textTypedEvent.isCancelled()) super.deleteFromCursor(num);
+        if (!textTypedEvent.isCancelled()) {
+            guiString = RDGuiString.simple(newText);
+            super.deleteFromCursor(num);
+        }
     }
 
     private String internalWriteText(String textToWrite) {

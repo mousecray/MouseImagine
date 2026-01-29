@@ -1,4 +1,4 @@
-package ru.mousecray.realdream.client.gui;
+package ru.mousecray.realdream.client.gui.misc.texture;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -7,15 +7,16 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.realdream.client.gui.dim.IGuiVector;
+import ru.mousecray.realdream.client.gui.misc.GuiRenderHelper;
 
 @SideOnly(Side.CLIENT)
-public class GuiTexture {
+public class RDGuiTexture {
     private final ResourceLocation texture;
     private final IGuiVector       textureSize;
     private final IGuiVector       startPos;
     private final IGuiVector       endPos;
 
-    public GuiTexture(ResourceLocation texture, IGuiVector textureSize, IGuiVector startPos, IGuiVector elementSize) {
+    public RDGuiTexture(ResourceLocation texture, IGuiVector textureSize, IGuiVector startPos, IGuiVector elementSize) {
         this.texture = texture;
 
         this.textureSize = textureSize;

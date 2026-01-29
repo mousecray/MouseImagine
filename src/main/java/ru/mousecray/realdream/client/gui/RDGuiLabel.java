@@ -7,10 +7,15 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiLabel;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.SoundEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 import ru.mousecray.realdream.client.gui.container.RDGuiPanel;
 import ru.mousecray.realdream.client.gui.dim.*;
 import ru.mousecray.realdream.client.gui.event.*;
+import ru.mousecray.realdream.client.gui.misc.*;
+import ru.mousecray.realdream.client.gui.misc.lang.RDGuiString;
+import ru.mousecray.realdream.client.gui.misc.texture.RDGuiTexturePack;
 import ru.mousecray.realdream.client.gui.state.GuiButtonActionState;
 import ru.mousecray.realdream.client.gui.state.GuiButtonPersistentState;
 
@@ -18,6 +23,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 
+@SideOnly(Side.CLIENT)
 public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel implements RDGuiElement<T> {
     private final RDGuiTickEvent<T>
             updateEvent   = new RDGuiTickEvent<>(),
@@ -46,6 +52,8 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
 
     protected final MutableGuiShape elementShape = new MutableGuiShape(), calculatedElementShape = new MutableGuiShape();
 
+    protected RDGuiString guiString = RDGuiString.simple("");
+
     private GuiScaleRules scaleRules = new GuiScaleRules(GuiScaleType.FLOW);
 
     private RDGuiPanel<?> parent;
@@ -66,21 +74,33 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
         this.elementShape.withShape(elementShape);
         this.soundClick = soundClick;
         this.fontSize = fontSize;
+        guiString = RDGuiString.simple(text);
 
         addLine(text);
     }
 
     @Override public MutableGuiShape getElementShape()           { return elementShape; }
     @Override public MutableGuiShape getCalculatedElementShape() { return calculatedElementShape; }
-    @Override public String getText()                            { return String.join("\n", labels); }
+    @Override public String getText()                            { return guiString.get(); }
 
 
     @Override
     public void setText(String rawText) {
+        guiString = RDGuiString.simple(rawText);
         labels.clear();
         String[] split = rawText.split("\n");
         labels.addAll(Arrays.asList(split));
     }
+
+    @Override
+    public void setGuiString(RDGuiString guiString) {
+        this.guiString = guiString;
+        labels.clear();
+        String[] split = guiString.get().split("\n");
+        labels.addAll(Arrays.asList(split));
+    }
+
+    @Override public RDGuiString getGuiString()                              { return guiString; }
 
     @Override public void setId(int id)                                      { this.id = id; }
     @Override public int getId()                                             { return id; }
@@ -89,9 +109,9 @@ public abstract class RDGuiLabel<T extends RDGuiLabel<T>> extends GuiLabel imple
 
     @Override @Nullable public GuiButtonActionState getActionState()         { return actionState; }
     @Override @Nullable public GuiButtonPersistentState getPersistentState() { return persistentState; }
-    @Override public GuiTexturePack getTexturePack()                         { return GuiTexturePack.EMPTY; }
+    @Override public RDGuiTexturePack getTexturePack()                       { return RDGuiTexturePack.EMPTY; }
 
-    @Override public void setTexturePack(GuiTexturePack texturePack)         { }
+    @Override public void setTexturePack(RDGuiTexturePack texturePack)       { }
     @Override public void setElementShape(IGuiShape elementShape)            { this.elementShape.withShape(elementShape); }
     @Override public GuiScaleRules getScaleRules()                           { return scaleRules; }
     @Override public void setScaleRules(GuiScaleRules scaleRules)            { this.scaleRules = scaleRules; }

@@ -5,6 +5,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.realdream.client.gui.container.RDGuiPanel;
 import ru.mousecray.realdream.client.gui.dim.*;
+import ru.mousecray.realdream.client.gui.misc.MoveDirection;
+import ru.mousecray.realdream.client.gui.misc.lang.RDGuiString;
+import ru.mousecray.realdream.client.gui.misc.texture.RDGuiTexturePack;
 import ru.mousecray.realdream.client.gui.state.GuiButtonActionState;
 import ru.mousecray.realdream.client.gui.state.GuiButtonPersistentState;
 
@@ -21,10 +24,12 @@ public interface RDGuiElement<T extends RDGuiElement<T>> {
     int getId();
     String getText();
     void setText(String text);
+    void setGuiString(RDGuiString guiString);
+    RDGuiString getGuiString();
     boolean applyState(@Nullable GuiButtonPersistentState state);
     void setElementShape(IGuiShape elementShape);
-    GuiTexturePack getTexturePack();
-    void setTexturePack(GuiTexturePack texturePack);
+    RDGuiTexturePack getTexturePack();
+    void setTexturePack(RDGuiTexturePack texturePack);
     @Nullable GuiButtonActionState getActionState();
     @Nullable GuiButtonPersistentState getPersistentState();
     void onUpdate0(Minecraft mc, int mouseX, int mouseY);

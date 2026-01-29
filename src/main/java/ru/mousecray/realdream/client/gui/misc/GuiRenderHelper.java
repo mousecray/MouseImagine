@@ -1,4 +1,4 @@
-package ru.mousecray.realdream.client.gui;
+package ru.mousecray.realdream.client.gui.misc;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
+import ru.mousecray.realdream.client.gui.RDGuiElement;
 import ru.mousecray.realdream.client.gui.dim.*;
 
 import java.nio.FloatBuffer;
@@ -293,7 +294,7 @@ public class GuiRenderHelper {
 
         target.offset(available.x(), available.y());
     }
-    
+
     public static void calculateFlowComponentShapeWithPad(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available, MutableGuiShape calculatedElementShape, MutableGuiShape elementShape, GuiScaleRules scaleRules, GuiPadding padding) {
         calculateFlowComponentShape(
                 calculatedElementShape,

@@ -1,4 +1,4 @@
-package ru.mousecray.realdream.client.gui;
+package ru.mousecray.realdream.client.gui.misc.texture;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
@@ -13,17 +13,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SideOnly(Side.CLIENT)
-public class GuiTexturePack {
-    public static GuiTexturePack EMPTY = new GuiTexturePack(new HashMap<>());
+public class RDGuiTexturePack {
+    public static RDGuiTexturePack EMPTY = new RDGuiTexturePack(new HashMap<>());
 
-    private final Map<IGuiButtonState, GuiTexture> textures;
+    private final Map<IGuiButtonState, RDGuiTexture> textures;
 
-    private GuiTexturePack(Map<IGuiButtonState, GuiTexture> textures) { this.textures = textures; }
+    private RDGuiTexturePack(Map<IGuiButtonState, RDGuiTexture> textures) { this.textures = textures; }
 
-    public GuiTexture getTexture(IGuiButtonState state)               { return textures.get(state); }
+    public RDGuiTexture getTexture(IGuiButtonState state)                 { return textures.get(state); }
 
-    public GuiTexture getCalculatedTexture(GuiButtonActionState actionState, GuiButtonPersistentState persistentState) {
-        GuiTexture texture;
+    public RDGuiTexture getCalculatedTexture(GuiButtonActionState actionState, GuiButtonPersistentState persistentState) {
+        RDGuiTexture texture;
         if (actionState != null) {
             texture = textures.get(actionState.combine(persistentState));
             if (texture == null) {
@@ -36,11 +36,11 @@ public class GuiTexturePack {
     }
     @SideOnly(Side.CLIENT)
     public static class Builder {
-        private final Map<IGuiButtonState, GuiTexture> textures = new HashMap<>();
-        private final ResourceLocation                 baseTexture;
-        private final IGuiVector                       textureSize;
-        private final IGuiVector                       startPos;
-        private final IGuiVector                       elementSize;
+        private final Map<IGuiButtonState, RDGuiTexture> textures = new HashMap<>();
+        private final ResourceLocation                   baseTexture;
+        private final IGuiVector                         textureSize;
+        private final IGuiVector                         startPos;
+        private final IGuiVector                         elementSize;
 
         private Builder(ResourceLocation baseTexture, IGuiVector textureSize, IGuiVector startPos, IGuiVector elementSize) {
             this.baseTexture = baseTexture;
@@ -55,7 +55,7 @@ public class GuiTexturePack {
 
         public Builder addTexture(IGuiButtonState state, int index) {
             textures.put(state,
-                    new GuiTexture(
+                    new RDGuiTexture(
                             baseTexture, textureSize,
                             new GuiVector(startPos.x(), startPos.y() + elementSize.y() * index),
                             elementSize
@@ -64,6 +64,6 @@ public class GuiTexturePack {
             return this;
         }
 
-        public GuiTexturePack build() { return new GuiTexturePack(textures); }
+        public RDGuiTexturePack build() { return new RDGuiTexturePack(textures); }
     }
 }

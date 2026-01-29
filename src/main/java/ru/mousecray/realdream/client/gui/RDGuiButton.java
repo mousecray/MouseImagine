@@ -14,13 +14,17 @@ import org.lwjgl.opengl.GL11;
 import ru.mousecray.realdream.client.gui.container.RDGuiPanel;
 import ru.mousecray.realdream.client.gui.dim.*;
 import ru.mousecray.realdream.client.gui.event.*;
+import ru.mousecray.realdream.client.gui.misc.*;
+import ru.mousecray.realdream.client.gui.misc.lang.RDGuiString;
+import ru.mousecray.realdream.client.gui.misc.texture.RDGuiTexture;
+import ru.mousecray.realdream.client.gui.misc.texture.RDGuiTexturePack;
 import ru.mousecray.realdream.client.gui.state.GuiButtonActionState;
 import ru.mousecray.realdream.client.gui.state.GuiButtonPersistentState;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import static ru.mousecray.realdream.client.gui.GuiRenderHelper.*;
+import static ru.mousecray.realdream.client.gui.misc.GuiRenderHelper.*;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
@@ -44,9 +48,11 @@ public abstract class RDGuiButton<T extends RDGuiButton<T>> extends GuiButton im
     protected final MutableGuiVector calculatedTextOffsetTemp = new MutableGuiVector();
     protected final RDFontSize       fontSize;
 
+    protected RDGuiString guiString = RDGuiString.simple("");
+
     @Nullable protected GuiButtonActionState     actionState     = null;
     @Nullable protected GuiButtonPersistentState persistentState = GuiButtonPersistentState.NORMAL;
-    private             GuiTexturePack           texturePack;
+    private             RDGuiTexturePack         texturePack;
 
     private   int                 tickDown             = -1;
     private   int                 partialTick;
@@ -65,7 +71,7 @@ public abstract class RDGuiButton<T extends RDGuiButton<T>> extends GuiButton im
     public RDGuiButton(
             @Nullable String text,
             GuiShape elementShape,
-            @Nullable GuiTexturePack texturePack,
+            @Nullable RDGuiTexturePack texturePack,
             @Nullable SoundEvent soundClick,
             RDFontSize fontSize) {
 
@@ -76,23 +82,32 @@ public abstract class RDGuiButton<T extends RDGuiButton<T>> extends GuiButton im
 
         this.elementShape = elementShape.toMutable();
         this.fontSize = fontSize;
-        this.texturePack = texturePack == null ? GuiTexturePack.EMPTY : texturePack;
+        this.texturePack = texturePack == null ? RDGuiTexturePack.EMPTY : texturePack;
         this.soundClick = soundClick;
+        guiString = RDGuiString.simple(text);
     }
 
-    @Override public void setId(int id)                                      { this.id = id; }
+    @Override public void setId(int id)                           { this.id = id; }
 
-    @SuppressWarnings("unchecked") @Override public T self()                 { return (T) this; }
+    @SuppressWarnings("unchecked") @Override public T self()      { return (T) this; }
 
-    @Override public void setTextOffset(IGuiVector offset)                   { textOffset.withVector(offset); }
-    @Override public MutableGuiVector getTextOffset()                        { return textOffset; }
-    protected void setTextScaleMultiplayer(float multiplayer)                { textScaleMultiplayer = multiplayer; }
-    @Override public void setElementShape(IGuiShape elementShape)            { this.elementShape.withShape(elementShape); }
-    @Override public MutableGuiShape getElementShape()                       { return elementShape; }
-    @Override public MutableGuiShape getCalculatedElementShape()             { return calculatedElementShape; }
-    @Override public int getId()                                             { return id; }
-    @Override public String getText()                                        { return displayString; }
-    @Override public void setText(String text)                               { displayString = text; }
+    @Override public void setTextOffset(IGuiVector offset)        { textOffset.withVector(offset); }
+    @Override public MutableGuiVector getTextOffset()             { return textOffset; }
+    protected void setTextScaleMultiplayer(float multiplayer)     { textScaleMultiplayer = multiplayer; }
+    @Override public void setElementShape(IGuiShape elementShape) { this.elementShape.withShape(elementShape); }
+    @Override public MutableGuiShape getElementShape()            { return elementShape; }
+    @Override public MutableGuiShape getCalculatedElementShape()  { return calculatedElementShape; }
+    @Override public int getId()                                  { return id; }
+    @Override public String getText()                             { return guiString.get(); }
+    @Override public void setText(String text) {
+        guiString = RDGuiString.simple(text);
+        displayString = text;
+    }
+    @Override public void setGuiString(RDGuiString guiString) {
+        this.guiString = guiString;
+        displayString = guiString.get();
+    }
+    @Override public RDGuiString getGuiString()                              { return guiString; }
     @Override public GuiScaleRules getScaleRules()                           { return scaleRules; }
     @Override public void setScaleRules(GuiScaleRules scaleRules)            { this.scaleRules = scaleRules; }
     @Override public void setPadding(GuiPadding padding)                     { this.padding = padding; }
@@ -100,8 +115,8 @@ public abstract class RDGuiButton<T extends RDGuiButton<T>> extends GuiButton im
 
     @Override @Nullable public GuiButtonActionState getActionState()         { return actionState; }
     @Override @Nullable public GuiButtonPersistentState getPersistentState() { return persistentState; }
-    @Override public GuiTexturePack getTexturePack()                         { return texturePack; }
-    @Override public void setTexturePack(GuiTexturePack texturePack)         { this.texturePack = texturePack; }
+    @Override public RDGuiTexturePack getTexturePack()                       { return texturePack; }
+    @Override public void setTexturePack(RDGuiTexturePack texturePack)       { this.texturePack = texturePack; }
 
 
     @Override
@@ -292,7 +307,8 @@ public abstract class RDGuiButton<T extends RDGuiButton<T>> extends GuiButton im
     protected void onMousePressed(RDGuiMouseClickEvent<T> event)  { }
 
     protected void drawButtonTextLayer(RDGuiTickEvent<T> event) {
-        if (displayString != null && !displayString.isEmpty()) {
+        String text = guiString.get();
+        if (text != null && !text.isEmpty()) {
             FontRenderer fr    = event.getMc().fontRenderer;
             int          color = colorContainer.getCalculatedColor(actionState, persistentState, packedFGColour);
 
@@ -306,7 +322,7 @@ public abstract class RDGuiButton<T extends RDGuiButton<T>> extends GuiButton im
             GlStateManager.scale(scale, scale, 1.0F);
 
             GuiRenderHelper.drawCenteredString(
-                    fr, displayString,
+                    fr, text,
                     (calculatedElementShape.x() + calculatedElementShape.width() / 2f) * invScale + calculatedTextOffsetTemp.x() * invScale,
                     (calculatedElementShape.y() + calculatedElementShape.height() / 2f) * invScale - (fr.FONT_HEIGHT / 2f) + calculatedTextOffsetTemp.y() * invScale,
                     color,
@@ -340,7 +356,7 @@ public abstract class RDGuiButton<T extends RDGuiButton<T>> extends GuiButton im
     protected void drawButtonForegroundLayer(RDGuiTickEvent<T> event) { }
 
     protected void drawButtonBackgroundLayer(RDGuiTickEvent<T> event) {
-        GuiTexture texture = texturePack.getCalculatedTexture(actionState, persistentState);
+        RDGuiTexture texture = texturePack.getCalculatedTexture(actionState, persistentState);
         if (texture != null) {
             texture.draw(
                     event.getMc(),

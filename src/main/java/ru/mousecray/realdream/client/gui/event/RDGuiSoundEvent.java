@@ -5,7 +5,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.realdream.client.gui.RDGuiElement;
-import ru.mousecray.realdream.client.gui.SoundSourceType;
+import ru.mousecray.realdream.client.gui.misc.SoundSourceType;
 
 @SideOnly(Side.CLIENT)
 public class RDGuiSoundEvent<T extends RDGuiElement<T>> extends RDGuiEvent<T> {

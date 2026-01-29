@@ -4,14 +4,14 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.realdream.client.gui.GuiTexturePack;
-import ru.mousecray.realdream.client.gui.RDFontSize;
 import ru.mousecray.realdream.client.gui.RDGuiButton;
 import ru.mousecray.realdream.client.gui.dim.GuiScaleRules;
 import ru.mousecray.realdream.client.gui.dim.GuiScaleType;
 import ru.mousecray.realdream.client.gui.dim.GuiShape;
 import ru.mousecray.realdream.client.gui.dim.GuiVector;
 import ru.mousecray.realdream.client.gui.event.RDGuiMouseClickEvent;
+import ru.mousecray.realdream.client.gui.misc.RDFontSize;
+import ru.mousecray.realdream.client.gui.misc.texture.RDGuiTexturePack;
 import ru.mousecray.realdream.client.gui.state.GuiButtonActionState;
 import ru.mousecray.realdream.client.gui.state.GuiButtonPersistentState;
 
@@ -28,7 +28,7 @@ public class RDGuiCloseButton extends RDGuiButton<RDGuiCloseButton> {
             RDFontSize fontSize, Consumer<RDGuiMouseClickEvent<RDGuiCloseButton>> onClick) {
         super(
                 null, elementShape,
-                GuiTexturePack.Builder
+                RDGuiTexturePack.Builder
                         .create(texture, textureSize, textureShape.pos(), textureShape.size())
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
                         .addTexture(GuiButtonActionState.HOVER, 1)

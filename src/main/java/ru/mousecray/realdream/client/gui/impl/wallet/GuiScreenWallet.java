@@ -1,6 +1,5 @@
 package ru.mousecray.realdream.client.gui.impl.wallet;
 
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -8,14 +7,15 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
 import ru.mousecray.realdream.Tags;
-import ru.mousecray.realdream.client.gui.GuiTexturePack;
-import ru.mousecray.realdream.client.gui.RDFontSize;
 import ru.mousecray.realdream.client.gui.RDGuiScreen;
-import ru.mousecray.realdream.client.gui.container.RDGuiBasicPanel;
-import ru.mousecray.realdream.client.gui.container.RDGuiBasicScrollPanel;
 import ru.mousecray.realdream.client.gui.dim.*;
 import ru.mousecray.realdream.client.gui.event.RDGuiTextTypedEvent;
 import ru.mousecray.realdream.client.gui.impl.*;
+import ru.mousecray.realdream.client.gui.impl.container.RDGuiSimplePanel;
+import ru.mousecray.realdream.client.gui.impl.container.RDGuiSimpleScrollPanel;
+import ru.mousecray.realdream.client.gui.misc.RDFontSize;
+import ru.mousecray.realdream.client.gui.misc.lang.RDGuiString;
+import ru.mousecray.realdream.client.gui.misc.texture.RDGuiTexturePack;
 import ru.mousecray.realdream.client.gui.state.GuiButtonPersistentState;
 import ru.mousecray.realdream.common.economy.CoinHelper;
 import ru.mousecray.realdream.common.economy.CoinValue;
@@ -65,29 +65,29 @@ public class GuiScreenWallet extends RDGuiScreen {
                 new GuiShape(0, 0, 9, 9),
                 TEXTURES, TEXTURES_SIZE, new GuiShape(95, 200, 9, 9), fontSize,
                 event -> closeGui()
-        ), null, AnchorPosition.TOP_RIGHT, new GuiVector(0, 0));
+        ), null, AnchorPosition.TOP_RIGHT, GuiVector.ZERO);
 
         //Заглушка, проверяем, открывать ли гуи
         if (walletPipe == null) return;
 
         // Title
-        addLabel(new RDGuiStaticLabel(walletStack.getDisplayName(), fontRenderer,
+        addLabel(new RDGuiStaticLabel(RDGuiString.simple(walletStack.getDisplayName()), fontRenderer,
                 new GuiShape(0, 0, 80, 10),
                 14737632, fontSize
-        ), null, AnchorPosition.TOP_LEFT, new GuiVector(0, 0));
+        ), null, AnchorPosition.TOP_LEFT, GuiVector.ZERO);
 
         float buttonTakePutYSize = 13.0f;
         float buttonTakePutXSize = 17.2f;
         float buttonTakePutGap   = 10f;
 
-        RDGuiActionButton takeAction = new RDGuiActionButton(I18n.format("gui." + Tags.MOD_ID + ".wallet.button.take"),
+        RDGuiActionButton takeAction = new RDGuiActionButton(RDGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.take"),
                 new GuiShape(0, 0, 113.8f, 12),
                 TEXTURES, TEXTURES_SIZE, new GuiShape(0, 200, 80, 10), fontSize,
                 event -> { }
         );
         takeAction.applyState(GuiButtonPersistentState.DISABLED);
 
-        RDGuiActionButton putAction = new RDGuiActionButton(I18n.format("gui." + Tags.MOD_ID + ".wallet.button.put"),
+        RDGuiActionButton putAction = new RDGuiActionButton(RDGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.put"),
                 new GuiShape(0, 0, 113.8f, 12),
                 TEXTURES, TEXTURES_SIZE, new GuiShape(0, 200, 80, 10), fontSize,
                 event -> { }
@@ -127,44 +127,44 @@ public class GuiScreenWallet extends RDGuiScreen {
             putAction.applyState(GuiButtonPersistentState.NORMAL);
         };
 
-        RDGuiNumberField fieldTakePut = new RDGuiNumberField(fontRenderer, I18n.format("gui." + Tags.MOD_ID + ".wallet.text_field.take_put_count"),
+        RDGuiNumberField fieldTakePut = new RDGuiNumberField(fontRenderer, RDGuiString.localized("gui." + Tags.MOD_ID + ".wallet.text_field.take_put_count"),
                 new GuiShape(0, 0, 113.5f, buttonTakePutYSize * 1.2f),
                 TEXTURES, TEXTURES_SIZE, new GuiShape(104, 200, 80, 10), fontSize, fieldEventTake
         );
 
         // Панель управления (левая часть)
-        RDGuiBasicPanel controls = new RDGuiBasicPanel(new GuiShape(0, 0, 114, 67));
+        RDGuiSimplePanel controls = new RDGuiSimplePanel(new GuiShape(0, 0, 114, 67));
         controls.setLayoutType(LayoutType.LINEAR_VERTICAL);
         addPanel(controls, null, AnchorPosition.TOP_LEFT, new GuiVector(0, 133));
 
         // Ряд кнопок +1, +10, +50, -1, -10, -50
-        RDGuiBasicPanel row1 = new RDGuiBasicPanel(new GuiShape(0, 0, 114, buttonTakePutYSize));
+        RDGuiSimplePanel row1 = new RDGuiSimplePanel(new GuiShape(0, 0, 114, buttonTakePutYSize));
         row1.setLayoutType(LayoutType.LINEAR_HORIZONTAL);
         controls.addChild(row1, null, null, null);
 
         row1.addChild(new RDGuiDefaultButton("+1", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 1, 1))), null, null, null);
         row1.addChild(new RDGuiDefaultButton("+10", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 10, 1))), null, null, null);
         row1.addChild(new RDGuiDefaultButton("+50", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 50, 1))), null, null, null);
-        row1.addChild(new RDGuiBasicPanel(new GuiShape(0, 0, buttonTakePutGap, 1)), null, null, null); // Spacer
+        row1.addChild(new RDGuiSimplePanel(new GuiShape(0, 0, buttonTakePutGap, 1)), null, null, null); // Spacer
         row1.addChild(new RDGuiDefaultButton("-1", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 1, 1))), null, null, null);
         row1.addChild(new RDGuiDefaultButton("-10", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 10, 1))), null, null, null);
         row1.addChild(new RDGuiDefaultButton("-50", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 50, 1))), null, null, null);
 
         // Ряд кнопок +100, +500, +1K, -100, -500, -1K
-        RDGuiBasicPanel row2 = new RDGuiBasicPanel(new GuiShape(0, 0, 114, buttonTakePutYSize));
+        RDGuiSimplePanel row2 = new RDGuiSimplePanel(new GuiShape(0, 0, 114, buttonTakePutYSize));
         row2.setLayoutType(LayoutType.LINEAR_HORIZONTAL);
         controls.addChild(row2, null, null, null);
 
         row2.addChild(new RDGuiDefaultButton("+100", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 100, 1))), null, null, null);
         row2.addChild(new RDGuiDefaultButton("+500", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 500, 1))), null, null, null);
         row2.addChild(new RDGuiDefaultButton("+1K", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 1000, 1))), null, null, null);
-        row2.addChild(new RDGuiBasicPanel(new GuiShape(0, 0, buttonTakePutGap, 1)), null, null, null); // Spacer
+        row2.addChild(new RDGuiSimplePanel(new GuiShape(0, 0, buttonTakePutGap, 1)), null, null, null); // Spacer
         row2.addChild(new RDGuiDefaultButton("-100", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 100, 1))), null, null, null);
         row2.addChild(new RDGuiDefaultButton("-500", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 500, 1))), null, null, null);
         row2.addChild(new RDGuiDefaultButton("-1K", new GuiShape(0, 0, buttonTakePutXSize, buttonTakePutYSize), TEXTURES, TEXTURES_SIZE, new GuiShape(80, 200, 10, 10), fontSize, event -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 1000, 1))), null, null, null);
 
         // Поле и слайдер
-        RDGuiBasicPanel fieldSliderStack = new RDGuiBasicPanel(new GuiShape(0, 0, 114, 18));
+        RDGuiSimplePanel fieldSliderStack = new RDGuiSimplePanel(new GuiShape(0, 0, 114, 18));
         fieldSliderStack.setLayoutType(LayoutType.FREE);
         controls.addChild(fieldSliderStack, null, null, null);
 
@@ -173,8 +173,8 @@ public class GuiScreenWallet extends RDGuiScreen {
         class WalletSlider extends RDGuiSlider<WalletSlider> {
             public WalletSlider() {
                 super(new GuiShape(0, 0, 113.8f, 11),
-                        GuiTexturePack.Builder.create(TEXTURES, TEXTURES_SIZE, new GuiVector(0, 200), new GuiVector(80, 10)).build(),
-                        GuiTexturePack.Builder.create(TEXTURES, TEXTURES_SIZE, new GuiVector(90, 200), new GuiVector(5, 7)).build(),
+                        RDGuiTexturePack.Builder.create(TEXTURES, TEXTURES_SIZE, new GuiVector(0, 200), new GuiVector(80, 10)).build(),
+                        RDGuiTexturePack.Builder.create(TEXTURES, TEXTURES_SIZE, new GuiVector(90, 200), new GuiVector(5, 7)).build(),
                         new GuiVector(6.68f, 11),
                         0, 100,
                         false);
@@ -235,19 +235,19 @@ public class GuiScreenWallet extends RDGuiScreen {
         if (!otherSlots.isEmpty()) activeGroups.put(3, otherSlots);
 
         // Контейнер для монет (правая часть)
-        RDGuiBasicScrollPanel coinsContainer = new RDGuiBasicScrollPanel(new GuiShape(0, 0, 115, 188));
+        RDGuiSimpleScrollPanel coinsContainer = new RDGuiSimpleScrollPanel(new GuiShape(0, 0, 115, 188));
         coinsContainer.setLayoutType(LayoutType.FREE); // Используем FREE чтобы вручную расставить колонки
         addPanel(coinsContainer, null, AnchorPosition.TOP_RIGHT, new GuiVector(0, 12));
 
         if (activeGroups.isEmpty()) {
-            coinsContainer.addChild(new RDGuiStaticLabel(I18n.format("gui." + Tags.MOD_ID + ".wallet.label.empty"), fontRenderer,
+            coinsContainer.addChild(new RDGuiStaticLabel(RDGuiString.localized("gui." + Tags.MOD_ID + ".wallet.label.empty"), fontRenderer,
                     new GuiShape(0, 0, 80, 10), 14737632, fontSize), null, AnchorPosition.TOP_LEFT, new GuiVector(baseX, 0));
         } else {
             List<Map.Entry<Integer, List<CoinValue>>> groupsList = new ArrayList<>(activeGroups.entrySet());
 
             for (int col = 0; col < 2; col++) {
-                float           colX        = col * (ROW_WIDTH + COLUMN_GAP + 5);
-                RDGuiBasicPanel columnPanel = new RDGuiBasicPanel(new GuiShape(colX, 0, ROW_WIDTH + 5, 188));
+                float            colX        = col * (ROW_WIDTH + COLUMN_GAP + 5);
+                RDGuiSimplePanel columnPanel = new RDGuiSimplePanel(new GuiShape(colX, 0, ROW_WIDTH + 5, 188));
                 columnPanel.setLayoutType(LayoutType.LINEAR_VERTICAL);
                 coinsContainer.addChild(columnPanel, null, null, null);
 
@@ -276,14 +276,14 @@ public class GuiScreenWallet extends RDGuiScreen {
                     int   rows   = (int) Math.ceil(groupSlots.getValue().size() / (double) slot_count_x);
                     float groupH = 12 + rows * H;
 
-                    RDGuiBasicPanel groupPanel = new RDGuiBasicPanel(new GuiShape(0, 0, ROW_WIDTH + 2, groupH));
+                    RDGuiSimplePanel groupPanel = new RDGuiSimplePanel(new GuiShape(0, 0, ROW_WIDTH + 2, groupH));
                     groupPanel.setLayoutType(LayoutType.FREE);
                     columnPanel.addChild(groupPanel, new GuiMargin(0, 0, 0, 10), null, null);
 
-                    groupPanel.addChild(new RDGuiStaticLabel(I18n.format(groupLabelKey), fontRenderer,
+                    groupPanel.addChild(new RDGuiStaticLabel(RDGuiString.localized(groupLabelKey), fontRenderer,
                             new GuiShape(0, 0, ROW_WIDTH - 10, 10), 14737632, fontSize), null, AnchorPosition.TOP_LEFT, null);
 
-                    groupPanel.addChild(new RDGuiCheckButton(I18n.format("gui." + Tags.MOD_ID + ".wallet.button.select_all"), fontRenderer,
+                    groupPanel.addChild(new RDGuiCheckButton(RDGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.select_all"), fontRenderer,
                                     new GuiShape(0, 0, 8, 8), TEXTURES, TEXTURES_SIZE, new GuiShape(240, 0, 8, 8), fontSize, e -> { }),
                             null, AnchorPosition.TOP_RIGHT, null);
 

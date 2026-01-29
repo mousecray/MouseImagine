@@ -6,8 +6,14 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiLabel;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.realdream.client.gui.*;
+import ru.mousecray.realdream.client.gui.RDGuiElement;
+import ru.mousecray.realdream.client.gui.RDGuiScreen;
+import ru.mousecray.realdream.client.gui.RDGuiTextField;
 import ru.mousecray.realdream.client.gui.dim.*;
+import ru.mousecray.realdream.client.gui.misc.MoveDirection;
+import ru.mousecray.realdream.client.gui.misc.lang.RDGuiString;
+import ru.mousecray.realdream.client.gui.misc.texture.RDGuiTexture;
+import ru.mousecray.realdream.client.gui.misc.texture.RDGuiTexturePack;
 import ru.mousecray.realdream.client.gui.state.GuiButtonActionState;
 import ru.mousecray.realdream.client.gui.state.GuiButtonPersistentState;
 
@@ -18,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ru.mousecray.realdream.client.gui.GuiRenderHelper.*;
+import static ru.mousecray.realdream.client.gui.misc.GuiRenderHelper.*;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
@@ -44,8 +50,8 @@ public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElemen
     private RDGuiScreen   screen;
     private RDGuiPanel<?> parent;
 
-    private GuiTexturePack texturePack = GuiTexturePack.EMPTY;
-    private int            id;
+    private RDGuiTexturePack texturePack = RDGuiTexturePack.EMPTY;
+    private int              id;
 
     public RDGuiPanel(GuiShape elementShape) {
         this.elementShape = elementShape.toMutable();
@@ -89,13 +95,15 @@ public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElemen
     @Override public void setParent(RDGuiPanel<?> parent)                         { this.parent = parent; }
     @Override public GuiScaleRules getScaleRules()                                { return scaleRules; }
     @Override public void setScaleRules(GuiScaleRules scaleRules)                 { this.scaleRules = scaleRules; }
-    @Override public GuiTexturePack getTexturePack()                              { return texturePack; }
-    @Override public void setTexturePack(GuiTexturePack texturePack)              { this.texturePack = texturePack; }
+    @Override public RDGuiTexturePack getTexturePack()                            { return texturePack; }
+    @Override public void setTexturePack(RDGuiTexturePack texturePack)            { this.texturePack = texturePack; }
     @Override public MutableGuiShape getElementShape()                            { return elementShape; }
     @Override public MutableGuiShape getCalculatedElementShape()                  { return calculatedElementShape; }
     @Override public int getId()                                                  { return id; }
     @Override public String getText()                                             { return ""; }
     @Override public void setText(String text)                                    { }
+    @Override public void setGuiString(RDGuiString guiString)                     { }
+    @Override public RDGuiString getGuiString()                                   { return RDGuiString.simple(""); }
     @Override public void setTextOffset(IGuiVector offset)                        { }
     @Override public MutableGuiVector getTextOffset()                             { return new MutableGuiVector(); }
 
@@ -364,7 +372,7 @@ public abstract class RDGuiPanel<T extends RDGuiPanel<T>> implements RDGuiElemen
     }
 
     protected void drawPanelBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        GuiTexture texture = texturePack.getCalculatedTexture(getActionState(), getPersistentState());
+        RDGuiTexture texture = texturePack.getCalculatedTexture(getActionState(), getPersistentState());
         if (texture != null) {
             texture.draw(
                     mc,

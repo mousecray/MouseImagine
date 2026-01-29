@@ -4,8 +4,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
-import ru.mousecray.realdream.client.gui.GuiRenderHelper;
-import ru.mousecray.realdream.client.gui.RDFontSize;
 import ru.mousecray.realdream.client.gui.dim.GuiScaleRules;
 import ru.mousecray.realdream.client.gui.dim.GuiScaleType;
 import ru.mousecray.realdream.client.gui.dim.GuiShape;
@@ -13,6 +11,8 @@ import ru.mousecray.realdream.client.gui.dim.GuiVector;
 import ru.mousecray.realdream.client.gui.event.RDGuiMouseClickEvent;
 import ru.mousecray.realdream.client.gui.event.RDGuiTickEvent;
 import ru.mousecray.realdream.client.gui.impl.RDGuiSelectedButton;
+import ru.mousecray.realdream.client.gui.misc.GuiRenderHelper;
+import ru.mousecray.realdream.client.gui.misc.RDFontSize;
 import ru.mousecray.realdream.client.gui.state.GuiButtonActionState;
 import ru.mousecray.realdream.common.economy.CoinValue;
 

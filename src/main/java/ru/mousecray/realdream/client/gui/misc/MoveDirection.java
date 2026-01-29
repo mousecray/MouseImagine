@@ -1,4 +1,4 @@
-package ru.mousecray.realdream.client.gui;
+package ru.mousecray.realdream.client.gui.misc;
 
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;

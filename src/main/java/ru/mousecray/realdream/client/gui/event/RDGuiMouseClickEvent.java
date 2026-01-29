@@ -2,8 +2,8 @@ package ru.mousecray.realdream.client.gui.event;
 
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.realdream.client.gui.RDClickType;
 import ru.mousecray.realdream.client.gui.RDGuiElement;
+import ru.mousecray.realdream.client.gui.misc.RDClickType;
 
 @SideOnly(Side.CLIENT)
 public class RDGuiMouseClickEvent<T extends RDGuiElement<T>> extends RDGuiMouseEvent<T> {

@@ -18,6 +18,8 @@ import org.lwjgl.input.Mouse;
 import ru.mousecray.realdream.client.gui.container.RDGuiPanel;
 import ru.mousecray.realdream.client.gui.dim.*;
 import ru.mousecray.realdream.client.gui.impl.RDGuiSlider;
+import ru.mousecray.realdream.client.gui.misc.GuiRenderHelper;
+import ru.mousecray.realdream.client.gui.misc.lang.RDGuiString;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -249,6 +251,12 @@ public abstract class RDGuiScreen extends GuiScreen {
             public RDGuiPanel self() {
                 return this;
             }
+
+            @Override
+            public void setGuiString(RDGuiString guiString) { }
+
+            @Override
+            public RDGuiString getGuiString() { return RDGuiString.simple(""); }
         };
         rootPanel.setLayoutType(LayoutType.ANCHOR);
         rootPanel.setScreen(this);
