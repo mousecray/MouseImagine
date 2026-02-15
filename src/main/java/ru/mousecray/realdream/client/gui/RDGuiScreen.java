@@ -97,57 +97,62 @@ public abstract class RDGuiScreen extends GuiScreen {
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
 
-        ObjectArrayList<GuiButton>    guiButtons = new ObjectArrayList<>(buttonList);
-        ObjectArrayList<GuiTextField> guiFields  = new ObjectArrayList<>(textFieldList);
-        ObjectArrayList<GuiLabel>     guiLabels  = new ObjectArrayList<>(labelList);
-        for (GuiButton guiButton : guiButtons) {
-            RDGuiButton<?> gb = (RDGuiButton<?>) guiButton;
-            gb.onDrawBackground(mc, mouseX, mouseY, partialTicks);
-        }
-        for (GuiTextField guiTextField : guiFields) {
-            RDGuiTextField<?> gf = (RDGuiTextField<?>) guiTextField;
-            gf.onDrawBackground(mc, mouseX, mouseY, partialTicks);
-        }
-        for (GuiLabel guiLabel : guiLabels) {
-            RDGuiLabel<?> gl = (RDGuiLabel<?>) guiLabel;
-            gl.onDrawBackground(mc, mouseX, mouseY, partialTicks);
-        }
-        for (GuiButton guiButton : guiButtons) {
-            RDGuiButton<?> gb = (RDGuiButton<?>) guiButton;
-            gb.onDrawForeground(mc, mouseX, mouseY, partialTicks);
-        }
-        for (GuiTextField guiTextField : guiFields) {
-            RDGuiTextField<?> gf = (RDGuiTextField<?>) guiTextField;
-            gf.onDrawForeground(mc, mouseX, mouseY, partialTicks);
-        }
-        for (GuiLabel guiLabel : guiLabels) {
-            RDGuiLabel<?> gl = (RDGuiLabel<?>) guiLabel;
-            gl.onDrawForeground(mc, mouseX, mouseY, partialTicks);
-        }
-        for (GuiButton guiButton : guiButtons) {
-            RDGuiButton<?> gb = (RDGuiButton<?>) guiButton;
-            gb.onDrawText(mc, mouseX, mouseY, partialTicks);
-        }
-        for (GuiTextField guiTextField : guiFields) {
-            RDGuiTextField<?> gf = (RDGuiTextField<?>) guiTextField;
-            gf.onDrawText(mc, mouseX, mouseY, partialTicks);
-        }
-        for (GuiLabel guiLabel : guiLabels) {
-            RDGuiLabel<?> gl = (RDGuiLabel<?>) guiLabel;
-            gl.onDrawText(mc, mouseX, mouseY, partialTicks);
-        }
-        for (GuiButton guiButton : guiButtons) {
-            RDGuiButton<?> gb = (RDGuiButton<?>) guiButton;
-            gb.onDrawLast(mc, mouseX, mouseY, partialTicks);
-        }
-        for (GuiTextField guiTextField : guiFields) {
-            RDGuiTextField<?> gf = (RDGuiTextField<?>) guiTextField;
-            gf.onDrawLast(mc, mouseX, mouseY, partialTicks);
-        }
-        for (GuiLabel guiLabel : guiLabels) {
-            RDGuiLabel<?> gl = (RDGuiLabel<?>) guiLabel;
-            gl.onDrawLast(mc, mouseX, mouseY, partialTicks);
-        }
+        rootPanel.onDrawBackground(mc, mouseX, mouseY, partialTicks);
+        rootPanel.onDrawForeground(mc, mouseX, mouseY, partialTicks);
+        rootPanel.onDrawText(mc, mouseX, mouseY, partialTicks);
+        rootPanel.onDrawLast(mc, mouseX, mouseY, partialTicks);
+
+//        ObjectArrayList<GuiButton>    guiButtons = new ObjectArrayList<>(buttonList);
+//        ObjectArrayList<GuiTextField> guiFields  = new ObjectArrayList<>(textFieldList);
+//        ObjectArrayList<GuiLabel>     guiLabels  = new ObjectArrayList<>(labelList);
+//        for (GuiButton guiButton : guiButtons) {
+//            RDGuiButton<?> gb = (RDGuiButton<?>) guiButton;
+//            gb.onDrawBackground(mc, mouseX, mouseY, partialTicks);
+//        }
+//        for (GuiTextField guiTextField : guiFields) {
+//            RDGuiTextField<?> gf = (RDGuiTextField<?>) guiTextField;
+//            gf.onDrawBackground(mc, mouseX, mouseY, partialTicks);
+//        }
+//        for (GuiLabel guiLabel : guiLabels) {
+//            RDGuiLabel<?> gl = (RDGuiLabel<?>) guiLabel;
+//            gl.onDrawBackground(mc, mouseX, mouseY, partialTicks);
+//        }
+//        for (GuiButton guiButton : guiButtons) {
+//            RDGuiButton<?> gb = (RDGuiButton<?>) guiButton;
+//            gb.onDrawForeground(mc, mouseX, mouseY, partialTicks);
+//        }
+//        for (GuiTextField guiTextField : guiFields) {
+//            RDGuiTextField<?> gf = (RDGuiTextField<?>) guiTextField;
+//            gf.onDrawForeground(mc, mouseX, mouseY, partialTicks);
+//        }
+//        for (GuiLabel guiLabel : guiLabels) {
+//            RDGuiLabel<?> gl = (RDGuiLabel<?>) guiLabel;
+//            gl.onDrawForeground(mc, mouseX, mouseY, partialTicks);
+//        }
+//        for (GuiButton guiButton : guiButtons) {
+//            RDGuiButton<?> gb = (RDGuiButton<?>) guiButton;
+//            gb.onDrawText(mc, mouseX, mouseY, partialTicks);
+//        }
+//        for (GuiTextField guiTextField : guiFields) {
+//            RDGuiTextField<?> gf = (RDGuiTextField<?>) guiTextField;
+//            gf.onDrawText(mc, mouseX, mouseY, partialTicks);
+//        }
+//        for (GuiLabel guiLabel : guiLabels) {
+//            RDGuiLabel<?> gl = (RDGuiLabel<?>) guiLabel;
+//            gl.onDrawText(mc, mouseX, mouseY, partialTicks);
+//        }
+//        for (GuiButton guiButton : guiButtons) {
+//            RDGuiButton<?> gb = (RDGuiButton<?>) guiButton;
+//            gb.onDrawLast(mc, mouseX, mouseY, partialTicks);
+//        }
+//        for (GuiTextField guiTextField : guiFields) {
+//            RDGuiTextField<?> gf = (RDGuiTextField<?>) guiTextField;
+//            gf.onDrawLast(mc, mouseX, mouseY, partialTicks);
+//        }
+//        for (GuiLabel guiLabel : guiLabels) {
+//            RDGuiLabel<?> gl = (RDGuiLabel<?>) guiLabel;
+//            gl.onDrawLast(mc, mouseX, mouseY, partialTicks);
+//        }
 
         RenderHelper.enableGUIStandardItemLighting();
         GlStateManager.pushMatrix();
