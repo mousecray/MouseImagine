@@ -11,11 +11,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiPanel;
 import ru.mousecray.mouseproject.client.gui.core.dim.*;
+import ru.mousecray.mouseproject.client.gui.core.dim.layout.GridLayoutParams;
+import ru.mousecray.mouseproject.client.gui.core.dim.layout.MPGridPos;
+import ru.mousecray.mouseproject.client.gui.core.dim.layout.MPGuiLayoutParams;
+import ru.mousecray.mouseproject.client.gui.core.dim.layout.MPGuiMargin;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.HashMap;
-import java.util.Map;
 
 import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper.*;
 
@@ -24,9 +26,6 @@ import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHel
 @MethodsReturnNonnullByDefault
 public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
     private static final MPGridPos GRID_POS_ZERO = new MPGridPos(0, 0);
-
-    private final Map<MPGuiElement<?>, MPAnchorPos> childAnchors = new HashMap<>();
-    private final Map<MPGuiElement<?>, MPGridPos>   childGridPos = new HashMap<>();
 
     private int   gridRows;
     private int   gridCols;
@@ -52,9 +51,9 @@ public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
     }
 
     public void addChild(MPGuiElement<?> child, @Nullable MPGuiMargin margin, @Nullable MPAnchorPos anchor, @Nullable MPGuiVector offset, @Nullable MPGridPos gridPos) {
-        super.addChild(child, margin, offset);
-        childAnchors.put(child, anchor != null ? anchor : MPAnchorPos.TOP_LEFT);
-        childGridPos.put(child, gridPos != null ? gridPos : GRID_POS_ZERO);
+        super.addChild(child, margin, anchor, offset);
+
+        child.getCore().setLayoutParams(new GridLayoutParams(margin, anchor, offset, gridPos));
     }
 
     @Override
@@ -71,8 +70,11 @@ public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
         float cellH = Math.max(0, availH / gridRows);
 
         for (MPGuiElement<?> child : children) {
-            MPAnchorPos anchor = childAnchors.getOrDefault(child, MPAnchorPos.TOP_LEFT);
-            MPGridPos   pos    = childGridPos.getOrDefault(child, GRID_POS_ZERO);
+            MPGuiLayoutParams params = child.getCore().getLayoutParams();
+
+            MPAnchorPos anchor = params.anchor;
+
+            MPGridPos pos = params instanceof GridLayoutParams ? ((GridLayoutParams) params).gridPos : MPGridPos.DEFAULT();
 
             float cellAreaX = inner.x() + pos.col * (cellW + scaledGapX);
             float cellAreaY = inner.y() + pos.row * (cellH + scaledGapY);
@@ -138,11 +140,5 @@ public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
             childAvailableTemp.withX(childX).withY(childY).withWidth(childW).withHeight(childH);
             child.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
         }
-    }
-
-    @Override
-    protected void onChildrenCleared() {
-        childAnchors.clear();
-        childGridPos.clear();
     }
 }

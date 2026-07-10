@@ -14,6 +14,8 @@ import ru.mousecray.mouseproject.client.gui.core.component.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.core.component.texture.MPGuiTexture;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiScaleRules;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
+import ru.mousecray.mouseproject.client.gui.core.dim.MPMutableGuiShape;
+import ru.mousecray.mouseproject.client.gui.core.dim.MPMutableGuiVector;
 import ru.mousecray.mouseproject.client.gui.core.event.MPGuiTickEvent;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPFontSize;
 
@@ -43,30 +45,27 @@ public abstract class MPGuiBaseCheckbox<T extends MPGuiBaseCheckbox<T>> extends 
     }
 
     @Override
-    protected void onDrawBackground(MPGuiTickEvent<T> event) {
-        List<MPGuiTexture> textures = getTexturePack().getCalculatedTextures(stateManager);
+    public void onDrawBackground(MPGuiTickEvent<T> event) {
+        List<MPGuiTexture> textures        = getTexturePack().getCalculatedTextures(getStateManager());
+        MPMutableGuiShape  calculatedShape = getCalculatedShape();
         for (MPGuiTexture texture : textures) {
-            float scaleY  = calculatedShape.height() / Math.max(1f, shape.height());
+            float scaleY  = calculatedShape.height() / Math.max(1f, getShape().height());
             float curBoxW = boxOriginalWidth * scaleY;
 
             float boxX = calculatedShape.x() + calculatedShape.width() - curBoxW;
             float boxY = calculatedShape.y();
 
-            texture.draw(
-                    event.getMc(),
-                    boxX, boxY,
-                    curBoxW, calculatedShape.height()
-            );
+            texture.draw(event.getMc(), boxX, boxY, curBoxW, calculatedShape.height());
         }
     }
 
     @Override
-    protected void onDrawText(MPGuiTickEvent<T> event) {
+    public void onDrawText(MPGuiTickEvent<T> event) {
         if (displayString != null) {
             FontRenderer fontrenderer = event.getMc().fontRenderer;
-            int          color        = colorPack.getCalculatedColor(stateManager, packedFGColour);
+            int          color        = getColorPack().getCalculatedColor(getStateManager(), getPackedFGColour());
 
-            float scale        = getFontSize().getScale() * textScaleMultiplayer;
+            float scale        = getFontSize().getScale() * getTextScaleMultiplayer();
             float inverseScale = 1.0F / scale;
 
             GlStateManager.pushMatrix();
@@ -74,6 +73,8 @@ public abstract class MPGuiBaseCheckbox<T extends MPGuiBaseCheckbox<T>> extends 
             GlStateManager.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
             GlStateManager.scale(scale, scale, 1.0F);
+            MPMutableGuiShape  calculatedInnerShape     = getCalculatedInnerShape();
+            MPMutableGuiVector calculatedTextOffsetTemp = getCore().getCalculatedTextOffsetTemp();
             MPGuiRenderHelper.drawString(
                     fontrenderer, displayString,
                     (calculatedInnerShape.x()) * inverseScale + calculatedTextOffsetTemp.x() * inverseScale,
@@ -83,5 +84,11 @@ public abstract class MPGuiBaseCheckbox<T extends MPGuiBaseCheckbox<T>> extends 
             );
             GlStateManager.popMatrix();
         }
+    }
+
+    @Override
+    public void setGuiString(MPGuiString guiString) {
+        super.setGuiString(guiString);
+        getShape().withWidth((float) getFontRenderer().getStringWidth(guiString.get()) + 2f + boxOriginalWidth);
     }
 }

@@ -46,7 +46,7 @@ public class WalletCoinButton extends MPGuiSelectableButton<WalletCoinButton> {
         );
         this.coinValue = coinValue;
         cachedName = new ItemStack(coinValue.getType().getItem(), 1).getDisplayName();
-        setTextOffset(MPGuiVector.of(0, getShape().height() / 2.3f));
+        setTextOffset(MPGuiVector.of(0, getShape().height() / 3f));
         int length = coinValue.getFormattedValue(CoinValue.FormatType.SHORT).length();
         if (length > 4) setTextScaleMultiplayer((float) Math.max(0.5, 4d / length));
         setScaleRules(new MPGuiScaleRules(MPGuiScaleType.ORIGIN_VERTICAL));
@@ -63,7 +63,7 @@ public class WalletCoinButton extends MPGuiSelectableButton<WalletCoinButton> {
     public CoinValue getCount() { return coinValue; }
 
     @Override
-    protected void onDrawForeground(@Nonnull MPGuiTickEvent<WalletCoinButton> event) {
+    public void onDrawForeground(@Nonnull MPGuiTickEvent<WalletCoinButton> event) {
         super.onDrawForeground(event);
         float width           = getCalculatedShape().width();
         float height          = getCalculatedShape().height();
@@ -77,24 +77,26 @@ public class WalletCoinButton extends MPGuiSelectableButton<WalletCoinButton> {
         float sizeY = y + (height - itemDefaultSize * scale) / 4f;
 
         GlStateManager.pushMatrix();
-        GlStateManager.translate(sizeX + scale * 13f / 1.6f, sizeY + scale * 14f / 1.7f, 0);
-        GlStateManager.scale(scale * 13f, scale * 14f, 1.0f);
+        GlStateManager.translate(sizeX + scale * 13f / 1.6f, sizeY + scale * 14f / 1.7f, 150.0F);
+        GlStateManager.scale(scale * 13f, scale * 14f, scale * 13f);
 
         MPGuiRenderHelper.enableBrightItemLighting();
         GlStateManager.enableRescaleNormal();
 
         if (coinValue != null) {
-            if (stateManager.has(MPGuiElementState.HOVERED)) {
+            if (getStateManager().has(MPGuiElementState.HOVERED)) {
                 GlStateManager.translate(0, 0, 0);
-                GlStateManager.scale(1.2f, 1.2f, 1.0f);
+                GlStateManager.scale(1.2f, 1.2f, 1.2f);
                 float rotationAngle = ((System.currentTimeMillis() % 2000) / 2000.0f) * 360.0f;
                 rotationAngle += partialTicks * 9.0f;
                 GlStateManager.rotate(rotationAngle, 0.0f, 1.0f, 0.0f);
             }
+            GlStateManager.enableDepth();
             event.getMc().getRenderItem().renderItem(
                     new ItemStack(coinValue.getType().getItem()),
                     ItemCameraTransforms.TransformType.FIXED
             );
+            GlStateManager.disableDepth();
         }
 
         MPGuiRenderHelper.disableBrightItemLighting();
@@ -103,7 +105,7 @@ public class WalletCoinButton extends MPGuiSelectableButton<WalletCoinButton> {
     }
 
     @Override
-    protected void onDrawLast(@Nonnull MPGuiTickEvent<WalletCoinButton> event) {
+    public void onDrawLast(@Nonnull MPGuiTickEvent<WalletCoinButton> event) {
         super.onDrawLast(event);
         drawButtonTooltip(event);
     }

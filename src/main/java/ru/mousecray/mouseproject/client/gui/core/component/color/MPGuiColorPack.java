@@ -42,15 +42,19 @@ public class MPGuiColorPack {
         return Builder.create(1275068671).addColor(1280337116, MPGuiElementState.DISABLED).build();
     }
 
-    private final Int2IntMap colors;
-    private final int        defaultColor;
+    private final MPColorBuffer buffer;
+    private final Int2IntMap    colors;
+    private final int           defaultColor;
 
     private MPGuiColorPack(int defaultColor, Int2IntMap colors) {
         this.defaultColor = defaultColor;
         this.colors = colors;
+        buffer = new MPColorBuffer();
     }
 
-    public int getDefaultColor() { return defaultColor; }
+    public MPColorBuffer getColorBuffer() { return buffer; }
+
+    public int getDefaultColor()          { return defaultColor; }
 
     public int getColor(MPGuiElementState... states) {
         for (Int2IntMap.Entry e : colors.int2IntEntrySet()) {
@@ -108,7 +112,7 @@ public class MPGuiColorPack {
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
-    public static float[] intToColor(int color) {
+    public static void intToColor(MPColorBuffer buffer, int color) {
         if ((color & 0xFF000000) == 0) color |= 0xFF000000;
 
         float r = (color >> 16 & 0xFF) / 255.0F;
@@ -116,6 +120,10 @@ public class MPGuiColorPack {
         float b = (color & 0xFF) / 255.0F;
         float a = (color >> 24 & 0xFF) / 255.0F;
 
-        return new float[]{ r, g, b, a };
+        buffer.allocate(r, g, b, a);
+    }
+
+    public void intToColor(MPGuiElementStateManager stateManager) {
+        intToColor(buffer, getCalculatedColor(stateManager));
     }
 }

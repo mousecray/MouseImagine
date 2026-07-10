@@ -90,7 +90,7 @@ public class MPGuiBaseSlider<T extends MPGuiBaseSlider<T>> extends MPGuiPanel<T>
             }
 
             @Override
-            protected void onMouseDragged(MPGuiMouseDragEvent<KnobButton> e) {
+            public void onMouseDragged(MPGuiMouseDragEvent<KnobButton> e) {
                 if (e.isCancelled()) return;
                 updateFromMouse(e.getMouseX(), e.getMouseY());
             }

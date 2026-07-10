@@ -38,7 +38,7 @@ public class MPGuiSimpleCheckbox extends MPGuiBaseCheckbox<MPGuiSimpleCheckbox> 
                 .addTexture(4, SELECTED, HOVERED)
                 .addTexture(5, SELECTED, PRESSED)
                 .build());
-        colorPack = MPGuiColorPack.Builder
+        setColorPack(MPGuiColorPack.Builder
                 .create(14737632)
                 .addColor(10526880, DISABLED)
                 .addColor(14737632)
@@ -47,6 +47,6 @@ public class MPGuiSimpleCheckbox extends MPGuiBaseCheckbox<MPGuiSimpleCheckbox> 
                 .addColor(14737632, SELECTED)
                 .addColor(15592941, SELECTED, HOVERED)
                 .addColor(13948116, SELECTED, PRESSED)
-                .build();
+                .build());
     }
 }

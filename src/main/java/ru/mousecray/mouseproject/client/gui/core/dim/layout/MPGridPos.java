@@ -3,13 +3,15 @@
  * Licensed under the GNU Lesser General Public License, Version 3.0
  ******************************************************************************/
 
-package ru.mousecray.mouseproject.client.gui.core.dim;
+package ru.mousecray.mouseproject.client.gui.core.dim.layout;
 
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class MPGridPos {
+    public static MPGridPos DEFAULT() { return new MPGridPos(0, 0); }
+
     public final int row;
     public final int col;
     public final int rowSpan;

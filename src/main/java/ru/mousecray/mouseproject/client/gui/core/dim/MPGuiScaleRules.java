@@ -5,17 +5,17 @@
 
 package ru.mousecray.mouseproject.client.gui.core.dim;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
 
 public class MPGuiScaleRules {
-    private final Set<MPGuiScaleType> scaleTypes = new HashSet<>();
+    private final EnumSet<MPGuiScaleType> scaleTypes = EnumSet.noneOf(MPGuiScaleType.class);
 
     public MPGuiScaleRules(MPGuiScaleType... types) { for (MPGuiScaleType type : types) addType(type); }
 
     private void addType(MPGuiScaleType newType) {
-        List<MPGuiScaleType> toRemove = new ArrayList<>();
-        for (MPGuiScaleType existing : scaleTypes) if (isIncompatible(existing, newType)) toRemove.add(existing);
-        toRemove.forEach(scaleTypes::remove);
+        scaleTypes.removeIf(existing -> isIncompatible(existing, newType));
 
         scaleTypes.add(newType);
 
@@ -63,10 +63,8 @@ public class MPGuiScaleRules {
     }
 
     private boolean axesOverlap(MPGuiScaleType a, MPGuiScaleType b) {
-        Set<MPGuiScaleType.Axes> axesA = a.getAxes();
-        Set<MPGuiScaleType.Axes> axesB = b.getAxes();
-        axesA.retainAll(axesB);
-        return !axesA.isEmpty();
+        for (MPGuiScaleType.Axes axis : a.getAxes()) if (b.getAxes().contains(axis)) return true;
+        return false;
     }
 
     public boolean isSizeable()                { return isSizeableHorizontal() || isSizeableVertical(); }

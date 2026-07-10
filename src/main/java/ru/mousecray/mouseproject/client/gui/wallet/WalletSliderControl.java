@@ -1,6 +1,5 @@
 package ru.mousecray.mouseproject.client.gui.wallet;
 
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.core.component.lang.MPGuiString;
@@ -8,8 +7,8 @@ import ru.mousecray.mouseproject.client.gui.core.container.MPGuiFreePanel;
 import ru.mousecray.mouseproject.client.gui.core.control.MPGuiNumberField;
 import ru.mousecray.mouseproject.client.gui.core.control.MPGuiSimpleSlider;
 import ru.mousecray.mouseproject.client.gui.core.dim.*;
+import ru.mousecray.mouseproject.client.gui.core.dim.layout.MPGuiPadding;
 import ru.mousecray.mouseproject.client.gui.core.event.MPGuiTextTypedEvent;
-import ru.mousecray.mouseproject.client.gui.core.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPNumberMode;
 
 import java.util.function.Consumer;
@@ -24,8 +23,6 @@ public class WalletSliderControl extends MPGuiFreePanel {
     private Consumer<Boolean> validityListener;
 
     public WalletSliderControl(
-            FontRenderer fontRenderer,
-            MPFontSize fontSize,
             float width,
             float height,
             long maxCoinValue
@@ -38,8 +35,6 @@ public class WalletSliderControl extends MPGuiFreePanel {
                 MPGuiString.localizedGuiTag("wallet.text_field.take_put_count"),
                 MPNumberMode.POSITIVE
         );
-        field.setFontRenderer(fontRenderer);
-        field.setFontSize(fontSize);
         field.setOnTextTypedListener(this::onInternalTextTyped);
 
         field.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT_HORIZONTAL));
@@ -56,8 +51,8 @@ public class WalletSliderControl extends MPGuiFreePanel {
             field.setNumberText(newValue);
         });
 
-        addChild(field, null, null);
-        addChild(slider, null, MPGuiVector.of(0, height / 1.8f));
+        addChild(field, null, null, null);
+        addChild(slider, null, null, MPGuiVector.of(0, height / 1.8f));
     }
 
     private void onInternalTextTyped(MPGuiTextTypedEvent<MPGuiNumberField> event) {
@@ -89,7 +84,7 @@ public class WalletSliderControl extends MPGuiFreePanel {
         }
     }
 
-    public WalletSliderControl onValidityChanged(Consumer<Boolean> listener) {
+    public WalletSliderControl setOnValidityChanged(Consumer<Boolean> listener) {
         validityListener = listener;
         return this;
     }

@@ -25,7 +25,10 @@ import ru.mousecray.mouseproject.client.gui.core.component.state.MPGuiElementSta
 import ru.mousecray.mouseproject.client.gui.core.container.MPGuiAnchorPanel;
 import ru.mousecray.mouseproject.client.gui.core.control.base.MPGuiBaseSlider;
 import ru.mousecray.mouseproject.client.gui.core.dim.*;
+import ru.mousecray.mouseproject.client.gui.core.dim.layout.MPGuiMargin;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPFontSize;
+import ru.mousecray.mouseproject.client.gui.core.misc.cache.MPGuiCacheBuilder;
+import ru.mousecray.mouseproject.client.gui.core.misc.cache.MPGuiCacheInitiator;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -84,6 +87,8 @@ public abstract class MPGuiScreen extends GuiScreen {
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        MPGuiRenderHelper.beginFrame();
+
         int i = guiLeft;
         int j = guiTop;
         drawDefaultBackground();
@@ -178,6 +183,11 @@ public abstract class MPGuiScreen extends GuiScreen {
         return panel;
     }
 
+    public <T extends MPGuiElement<?>> T addChild(T element, @Nullable MPGuiMargin margin, @Nullable MPAnchorPos anchor, @Nullable MPGuiVector offset) {
+        rootPanel.addChild(element, margin, anchor, offset);
+        return element;
+    }
+
     @SuppressWarnings({ "NullableProblems", "unchecked", "rawtypes" }) @Override @Nullable
     protected <T extends GuiButton> T addButton(T button) {
         if (button instanceof MPGuiButton) return (T) addButton(((MPGuiButton) button), null, null, null);
@@ -268,8 +278,10 @@ public abstract class MPGuiScreen extends GuiScreen {
 
             if (handled) {
                 MPGuiElement<?> clicked = rootPanel.getLastSelectedElementRecursively();
-                if (clicked != null) setFocusTo(clicked);
-            }
+                if (clicked != null && !clicked.getStateManager().isForbidden(MPGuiElementState.FOCUSED)) {
+                    setFocusTo(clicked);
+                } else clearFocus();
+            } else clearFocus();
         }
 
         if (!handled) super.mouseClicked(mouseX, mouseY, mouseButton);
@@ -334,6 +346,13 @@ public abstract class MPGuiScreen extends GuiScreen {
         } else super.actionPerformed(button);
     }
 
+    public void clearFocus() {
+        if (currentFocusIndex >= 0 && currentFocusIndex < focusOrderList.size()) {
+            focusOrderList.get(currentFocusIndex).getStateManager().remove(MPGuiElementState.FOCUSED);
+        }
+        currentFocusIndex = -1;
+    }
+
     public void rebuildFocusList() {
         focusOrderList.clear();
         currentFocusIndex = -1;
@@ -359,4 +378,13 @@ public abstract class MPGuiScreen extends GuiScreen {
     protected void onClickButton(MPGuiButton<?> button)      { }
     protected void onClickTextField(MPGuiTextField<?> field) { }
     protected void onClickLabel(MPGuiLabel<?> label)         { }
+
+    @SuppressWarnings("unchecked")
+    protected <D extends MPGuiPanel<?>> MPGuiCacheInitiator<D> createCachedElement(String key) {
+        return (MPGuiCacheInitiator<D>) MPGuiCacheBuilder.create(key).setScreen(this);
+    }
+
+    protected <D extends MPGuiPanel<?>> MPGuiCacheInitiator<D> createCachedElement(String key, D parent) {
+        return MPGuiCacheBuilder.<D>create(key).setScreen(this).setParent(parent);
+    }
 }

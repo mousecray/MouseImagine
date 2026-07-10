@@ -38,6 +38,8 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
 
     private MPGuiTexturePack thumbForegroundTexturePack = MPGuiTexturePack.EMPTY();
 
+    private IGuiVector lastParentDefaultSize, lastParentContentSize;
+
     private float contentSize  = 1f;
     private float viewportSize = 1f;
     private float scrollValue  = 0f;
@@ -77,10 +79,9 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
     private void updateOrientationState() {
         boolean isVert = orientation == MPOrientation.VERTICAL;
 
-        MPGuiScaleType scaleType = isVert ? MPGuiScaleType.PARENT_HORIZONTAL : MPGuiScaleType.PARENT_VERTICAL;
-        minusButton.setScaleRules(new MPGuiScaleRules(scaleType));
-        plusButton.setScaleRules(new MPGuiScaleRules(scaleType));
-        thumb.setScaleRules(new MPGuiScaleRules(scaleType));
+        minusButton.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT));
+        plusButton.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT));
+        thumb.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT));
 
         IGuiVector minusPos  = isVert ? MPGuiVector.of(203, 0) : MPGuiVector.of(203, 22);
         IGuiVector minusSize = isVert ? MPGuiVector.of(11, 7) : MPGuiVector.of(7, 11);
@@ -213,9 +214,21 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
             float scrollRatio = scrollValue / maxScroll;
             float thumbOffset = thickness + (scrollRatio * (trackSize - thumbLength));
 
-            if (isVert) thumb.getShape().withWidth(thickness).withHeight(thumbLength).withX(0).withY(thumbOffset);
-            else thumb.getShape().withWidth(thumbLength).withHeight(thickness).withX(thumbOffset).withY(0);
+            if (lastParentDefaultSize != null && lastParentContentSize != null) {
+                if (isVert) childAvailableTemp.withX(inner.x()).withY(inner.y() + thumbOffset)
+                        .withWidth(thickness).withHeight(thumbLength);
+                else childAvailableTemp.withX(inner.x() + thumbOffset).withY(inner.y())
+                        .withWidth(thumbLength).withHeight(thickness);
+                thumb.calculate(lastParentDefaultSize, lastParentContentSize, childAvailableTemp);
+            }
         }
+    }
+
+    @Override
+    public void calculate(IGuiVector pDefSize, IGuiVector pContentSize, IGuiShape available) {
+        lastParentDefaultSize = pDefSize;
+        lastParentContentSize = pContentSize;
+        super.calculate(pDefSize, pContentSize, available);
     }
 
     @Override
@@ -225,21 +238,13 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
         float   totalLength = isVert ? inner.height() : inner.width();
 
         childAvailableTemp.withX(inner.x()).withY(inner.y()).withWidth(thickness).withHeight(thickness);
-        minusButton.getShape().withWidth(thickness).withHeight(thickness);
         minusButton.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
 
         if (isVert) childAvailableTemp.withX(inner.x()).withY(inner.y() + totalLength - thickness);
         else childAvailableTemp.withX(inner.x() + totalLength - thickness).withY(inner.y());
-
-        plusButton.getShape().withWidth(thickness).withHeight(thickness);
         plusButton.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
 
         recalculateThumb();
-        childAvailableTemp.withX(inner.x() + thumb.getShape().x())
-                .withY(inner.y() + thumb.getShape().y())
-                .withWidth(thumb.getShape().width())
-                .withHeight(thumb.getShape().height());
-        thumb.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
     }
 
     private class ScrollbarArrow extends MPGuiButton<ScrollbarArrow> {
@@ -263,7 +268,7 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
         }
 
         @Override
-        protected void onMouseDragged(MPGuiMouseDragEvent<ScrollbarThumb> e) {
+        public void onMouseDragged(MPGuiMouseDragEvent<ScrollbarThumb> e) {
             if (e.isCancelled()) return;
 
             float maxScroll = Math.max(0, contentSize - viewportSize);
@@ -272,7 +277,7 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
             boolean isVert          = orientation == MPOrientation.VERTICAL;
             float   scrollableTrack = getScrollableTrack(isVert);
 
-            if (scrollableTrack <= 0) return;
+            if (scrollableTrack <= 0.001f) return;
 
             float diff        = isVert ? e.getDiffY() : e.getDiffX();
             float moveRatio   = diff / scrollableTrack;
@@ -297,7 +302,7 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
         public void onClick(MPGuiMouseClickEvent<ScrollbarThumb> event) { }
 
         @Override
-        protected void onDrawForeground(MPGuiTickEvent<ScrollbarThumb> event) {
+        public void onDrawForeground(MPGuiTickEvent<ScrollbarThumb> event) {
             super.onDrawForeground(event);
 
             MPGuiTexture fgTex = thumbForegroundTexturePack.getCalculatedTexture(getStateManager());

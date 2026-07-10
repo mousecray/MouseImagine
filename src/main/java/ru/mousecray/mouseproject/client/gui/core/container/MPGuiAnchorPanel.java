@@ -10,60 +10,44 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiPanel;
-import ru.mousecray.mouseproject.client.gui.core.dim.*;
+import ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper;
+import ru.mousecray.mouseproject.client.gui.core.dim.IGuiVector;
+import ru.mousecray.mouseproject.client.gui.core.dim.MPAnchorPos;
+import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
+import ru.mousecray.mouseproject.client.gui.core.dim.MPMutableGuiShape;
+import ru.mousecray.mouseproject.client.gui.core.dim.layout.MPGuiLayoutParams;
 
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.HashMap;
-import java.util.Map;
-
-import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper.calculateFlowComponentX;
-import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper.calculateFlowComponentY;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class MPGuiAnchorPanel extends MPGuiPanel<MPGuiAnchorPanel> {
-    private final Map<MPGuiElement<?>, MPAnchorPos> childAnchors = new HashMap<>();
 
     public MPGuiAnchorPanel(MPGuiShape elementShape) { super(elementShape); }
 
-    public void addChild(MPGuiElement<?> child, @Nullable MPGuiMargin margin, @Nullable MPAnchorPos anchor, @Nullable MPGuiVector offset) {
-        super.addChild(child, margin, offset);
-        childAnchors.put(child, anchor != null ? anchor : MPAnchorPos.TOP_LEFT);
-    }
-
     @Override
-    protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MPMutableGuiShape inner) {
+    protected void layoutChildren(IGuiVector pDefSize, IGuiVector pContentSize, MPMutableGuiShape inner) {
         for (MPGuiElement<?> child : children) {
-            //1. Вручную считаем отступы, масштабируя их от экрана
-            MPGuiMargin margin = getChildMargin(child);
-            marginTemp[0] = calculateFlowComponentX(parentDefaultSize, parentContentSize, margin.getLeft());
-            marginTemp[1] = calculateFlowComponentY(parentDefaultSize, parentContentSize, margin.getTop());
-            marginTemp[2] = calculateFlowComponentX(parentDefaultSize, parentContentSize, margin.getRight());
-            marginTemp[3] = calculateFlowComponentY(parentDefaultSize, parentContentSize, margin.getBottom());
-            float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
-
-            //2. Доступное пространство - это размер ПАНЕЛИ (inner)
-            float childAvailW = Math.max(0, inner.width() - ml - mr);
-            float childAvailH = Math.max(0, inner.height() - mt - mb);
-
-            //3. Вычисляем предпочтительный размер элемента (учитывает FLOW, PARENT, ORIGIN, FIXED)
-            child.measurePreferred(parentDefaultSize, parentContentSize, childAvailW, childAvailH, measureTemp);
+            MPGuiRenderHelper.measureChildWithMargin(pDefSize, pContentSize, child,
+                    getChildMargin(child), marginTemp, measureTemp
+            );
+            float ml     = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
             float childW = measureTemp.x();
             float childH = measureTemp.y();
+
+            float childAvailW = Math.max(0, inner.width() - ml - mr);
+            float childAvailH = Math.max(0, inner.height() - mt - mb);
 
             float childX = inner.x() + ml;
             float childY = inner.y() + mt;
 
-            MPAnchorPos anchor = childAnchors.getOrDefault(child, MPAnchorPos.TOP_LEFT);
-            MPGuiVector offset = getChildOffset(child);
+            MPGuiLayoutParams params = child.getCore().getLayoutParams();
 
-            //4. Смещения (offset) масштабируются ВСЕГДА
-            float offsetX = calculateFlowComponentX(parentDefaultSize, parentContentSize, offset.x());
-            float offsetY = calculateFlowComponentY(parentDefaultSize, parentContentSize, offset.y());
+            MPAnchorPos anchor       = params.anchor;
+            float[]     scaledOffset = calculateScaledOffset(child, pDefSize, pContentSize);
+            float       offsetX      = scaledOffset[0], offsetY = scaledOffset[1];
 
-            //5. Позиционирование по якорю
             switch (anchor) {
                 case TOP_LEFT:
                     childX += offsetX;
@@ -104,8 +88,7 @@ public class MPGuiAnchorPanel extends MPGuiPanel<MPGuiAnchorPanel> {
             }
 
             childAvailableTemp.withX(childX).withY(childY).withWidth(childW).withHeight(childH);
-            child.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
+            child.calculate(pDefSize, pContentSize, childAvailableTemp);
         }
     }
-    @Override protected void onChildrenCleared() { childAnchors.clear(); }
 }

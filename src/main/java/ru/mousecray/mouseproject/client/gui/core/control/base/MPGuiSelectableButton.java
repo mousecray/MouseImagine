@@ -24,8 +24,8 @@ public abstract class MPGuiSelectableButton<T extends MPGuiSelectableButton<T>> 
 
     @Override
     public void onClick(MPGuiMouseClickEvent<T> event) {
-        if (stateManager.has(SELECTED)) stateManager.remove(SELECTED);
-        else stateManager.add(SELECTED);
+        if (getStateManager().has(SELECTED)) getStateManager().remove(SELECTED);
+        else getStateManager().add(SELECTED);
         super.onClick(event);
     }
 }

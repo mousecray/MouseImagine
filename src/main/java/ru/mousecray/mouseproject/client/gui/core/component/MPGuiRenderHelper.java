@@ -14,12 +14,16 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.Vec3d;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.core.dim.*;
+import ru.mousecray.mouseproject.client.gui.core.dim.layout.MPGuiMargin;
+import ru.mousecray.mouseproject.client.gui.core.dim.layout.MPGuiPadding;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPFontSize;
 
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 public class MPGuiRenderHelper {
     private static final Vec3d LIGHT0_POS = (new Vec3d(0.20000000298023224D, 1.0D, -0.699999988079071D)).normalize();
@@ -380,5 +384,94 @@ public class MPGuiRenderHelper {
                 result.withY(result.y() + padT + padB);
             }
         }
+    }
+
+    public static class ScissorState {
+        public boolean enabled;
+        public int     x, y, width, height;
+    }
+
+    private static final int       MAX_SCISSOR_DEPTH = 32;
+    private static final int[]     scissorStackX     = new int[MAX_SCISSOR_DEPTH];
+    private static final int[]     scissorStackY     = new int[MAX_SCISSOR_DEPTH];
+    private static final int[]     scissorStackW     = new int[MAX_SCISSOR_DEPTH];
+    private static final int[]     scissorStackH     = new int[MAX_SCISSOR_DEPTH];
+    private static       int       scissorDepth      = 0;
+    private static final IntBuffer SCISSOR_BUFFER    = BufferUtils.createIntBuffer(16);
+
+    private static boolean frameScissorCached = false;
+    private static int     cachedBaseX, cachedBaseY, cachedBaseW, cachedBaseH;
+
+    public static void beginFrame() {
+        scissorDepth = 0;
+        frameScissorCached = GL11.glIsEnabled(GL11.GL_SCISSOR_TEST);
+        if (frameScissorCached) {
+            SCISSOR_BUFFER.clear();
+            GL11.glGetInteger(GL11.GL_SCISSOR_BOX, SCISSOR_BUFFER);
+            cachedBaseX = SCISSOR_BUFFER.get(0);
+            cachedBaseY = SCISSOR_BUFFER.get(1);
+            cachedBaseW = SCISSOR_BUFFER.get(2);
+            cachedBaseH = SCISSOR_BUFFER.get(3);
+        }
+    }
+
+    public static void pushScissor(int x, int y, int width, int height, ScissorState state) {
+        state.enabled = GL11.glIsEnabled(GL11.GL_SCISSOR_TEST);
+
+        if (state.enabled && scissorDepth == 0) {
+            if (frameScissorCached) {
+                scissorStackX[0] = cachedBaseX;
+                scissorStackY[0] = cachedBaseY;
+                scissorStackW[0] = cachedBaseW;
+                scissorStackH[0] = cachedBaseH;
+            } else {
+                Minecraft mc = Minecraft.getMinecraft();
+                scissorStackX[0] = 0;
+                scissorStackY[0] = 0;
+                scissorStackW[0] = mc.displayWidth;
+                scissorStackH[0] = mc.displayHeight;
+            }
+            scissorDepth = 1;
+        }
+
+        int targetX = x, targetY = y, targetW = width, targetH = height;
+
+        if (scissorDepth > 0) {
+            int pX = scissorStackX[scissorDepth - 1];
+            int pY = scissorStackY[scissorDepth - 1];
+            int pW = scissorStackW[scissorDepth - 1];
+            int pH = scissorStackH[scissorDepth - 1];
+
+            int right = Math.min(x + width, pX + pW);
+            int top   = Math.min(y + height, pY + pH);
+            targetX = Math.max(x, pX);
+            targetY = Math.max(y, pY);
+            targetW = Math.max(0, right - targetX);
+            targetH = Math.max(0, top - targetY);
+        }
+
+        if (scissorDepth < MAX_SCISSOR_DEPTH) {
+            scissorStackX[scissorDepth] = targetX;
+            scissorStackY[scissorDepth] = targetY;
+            scissorStackW[scissorDepth] = targetW;
+            scissorStackH[scissorDepth] = targetH;
+            scissorDepth++;
+        }
+
+        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+        GL11.glScissor(targetX, targetY, targetW, targetH);
+    }
+
+    public static void popScissor(ScissorState state) {
+        if (scissorDepth > 0) scissorDepth--;
+
+        if (scissorDepth > 0) {
+            GL11.glScissor(
+                    scissorStackX[scissorDepth - 1],
+                    scissorStackY[scissorDepth - 1],
+                    scissorStackW[scissorDepth - 1],
+                    scissorStackH[scissorDepth - 1]
+            );
+        } else if (!state.enabled) GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
 }

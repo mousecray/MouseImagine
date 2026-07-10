@@ -7,36 +7,26 @@ package ru.mousecray.mouseproject.client.gui.core;
 
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.opengl.GL11;
 import ru.mousecray.mouseproject.MouseProject;
 import ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper;
-import ru.mousecray.mouseproject.client.gui.core.component.color.MPGuiColorPack;
 import ru.mousecray.mouseproject.client.gui.core.component.lang.MPGuiString;
-import ru.mousecray.mouseproject.client.gui.core.component.sound.MPGuiSoundPack;
 import ru.mousecray.mouseproject.client.gui.core.component.sound.MPSoundSourceType;
 import ru.mousecray.mouseproject.client.gui.core.component.state.MPGuiElementState;
-import ru.mousecray.mouseproject.client.gui.core.component.state.MPGuiElementStateManager;
-import ru.mousecray.mouseproject.client.gui.core.component.texture.MPGuiTexture;
-import ru.mousecray.mouseproject.client.gui.core.component.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.core.control.MPGuiScrollbar;
 import ru.mousecray.mouseproject.client.gui.core.dim.*;
+import ru.mousecray.mouseproject.client.gui.core.dim.layout.MPGuiPadding;
 import ru.mousecray.mouseproject.client.gui.core.event.*;
-import ru.mousecray.mouseproject.client.gui.core.misc.MPClickType;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPMoveDirection;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPScrollDirection;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.List;
-import java.util.Objects;
 
 import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper.calculateFlowComponentX;
 import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper.calculateFlowComponentY;
@@ -45,64 +35,24 @@ import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHel
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements MPGuiElement<T> {
-    private final MPGuiTickEvent<T>
-            updateEvent   = new MPGuiTickEvent<>(),
-            drawBGEvent   = new MPGuiTickEvent<>(),
-            drawFGEvent   = new MPGuiTickEvent<>(),
-            drawLastEvent = new MPGuiTickEvent<>(),
-            drawTextEvent = new MPGuiTickEvent<>();
-    private final MPGuiMouseClickEvent<T>
-            pressEvent   = new MPGuiMouseClickEvent<>(MPClickType.PRESS),
-            releaseEvent = new MPGuiMouseClickEvent<>(MPClickType.RELEASE),
-            clickEvent   = new MPGuiMouseClickEvent<>(MPClickType.CLICK);
-    private final MPGuiMouseMoveEvent<T>   moveEvent   = new MPGuiMouseMoveEvent<>();
-    private final MPGuiMouseDragEvent<T>   dragEvent   = new MPGuiMouseDragEvent<>();
-    private final MPGuiMouseScrollEvent<T> scrollEvent = new MPGuiMouseScrollEvent<>();
-    private final MPGuiKeyEvent<T>         keyEvent    = new MPGuiKeyEvent<>();
-    private final MPGuiSoundEvent<T>       soundEvent  = new MPGuiSoundEvent<>();
-
-    private final MPMutableGuiShape shape;
-    private final MPMutableGuiShape calculatedShape = new MPMutableGuiShape();
-    private       MPGuiScaleRules   scaleRules      = new MPGuiScaleRules(MPGuiScaleType.FLOW);
+    protected final MPGuiElementCore<T> core;
 
     @Nullable private MPGuiPanel<?>  content;
     private           MPGuiScrollbar scrollbar;
     private           MPOrientation  orientation = MPOrientation.VERTICAL;
+
+    private final MPGuiRenderHelper.ScissorState scissorState = new MPGuiRenderHelper.ScissorState();
 
     private float   scrollValue        = 0;
     private float   contentSize        = 0;
     private boolean scrollEnabled      = true;
     private float   scrollbarThickness = 8f;
 
-    private MPGuiScreen   screen;
-    private MPGuiPanel<?> parent;
-    private int           id;
-    private int           tickDown = -1;
-
-    private final MPGuiElementStateManager stateManager = new MPGuiElementStateManager();
-    protected     MPGuiTexturePack         texturePack  = MPGuiTexturePack.EMPTY();
-    protected     MPGuiColorPack           colorPack    = MPGuiColorPack.EMPTY();
-    protected     MPGuiSoundPack           soundPack    = MPGuiSoundPack.EMPTY();
+    private int id;
 
     public MPGuiScrollPanel(MPGuiShape shape) {
-        this.shape = shape.toMutable();
-        stateManager.setForbidden(MPGuiElementState.FOCUSED, true);
-
-        Minecraft mc = Minecraft.getMinecraft();
-        T         th = self();
-        updateEvent.bind(mc, th);
-        drawBGEvent.bind(mc, th);
-        drawFGEvent.bind(mc, th);
-        drawLastEvent.bind(mc, th);
-        drawTextEvent.bind(mc, th);
-        pressEvent.bind(mc, th);
-        releaseEvent.bind(mc, th);
-        clickEvent.bind(mc, th);
-        moveEvent.bind(mc, th);
-        dragEvent.bind(mc, th);
-        scrollEvent.bind(mc, th);
-        keyEvent.bind(mc, th);
-        soundEvent.bind(mc, th);
+        core = new MPGuiElementCore<>(shape);
+        core.bindEvents(Minecraft.getMinecraft(), self());
 
         MPGuiShape sbShape = new MPGuiShape(0, 0, scrollbarThickness, 100);
         scrollbar = new MPGuiScrollbar(sbShape);
@@ -142,6 +92,8 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
     public void setContent(@Nullable MPGuiPanel<?> content) {
         this.content = content;
         if (content != null) {
+            MPGuiPanel<?> parent = getParent();
+            MPGuiScreen   screen = getScreen();
             if (parent != null) content.setParent(parent);
             if (screen != null) {
                 content.setScreen(screen);
@@ -153,59 +105,25 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
     @Nullable public MPGuiPanel<?> getContent()              { return content; }
 
     @SuppressWarnings("unchecked") @Override public T self() { return (T) this; }
-
-    //Идентификация и иерархия
-    @Override public void setId(int id) { this.id = id; }
-    @Override public int getId()                       { return id; }
-
-    @Override @Nullable public MPGuiScreen getScreen() { return screen; }
+    @Override public MPGuiElementCore<T> getCore()           { return core; }
+    @Override public void setId(int id)                      { this.id = id; }
+    @Override public int getId()                             { return id; }
 
     @Override
     public void setScreen(@Nullable MPGuiScreen screen) {
-        this.screen = screen;
-        stateManager.lockForbidden(screen != null || getParent() != null);
+        MPGuiElement.super.setScreen(screen);
         if (content != null) content.setScreen(screen);
         if (scrollbar != null) scrollbar.setScreen(screen);
     }
 
-    @Override @Nullable public MPGuiPanel<?> getParent() { return parent; }
-
     @Override
     public void setParent(@Nullable MPGuiPanel<?> parent) {
-        this.parent = parent;
-        stateManager.lockForbidden(parent != null || getScreen() != null);
+        MPGuiElement.super.setParent(parent);
         if (parent != null && content != null) content.setParent(parent);
     }
 
-    //Данные и состояние
-    @Override public MPGuiString getGuiString() { return MPGuiString.EMPTY(); }
-    @Override public void setGuiString(MPGuiString guiString)   { }
-
-    @Override public MPGuiElementStateManager getStateManager() { return stateManager; }
-
-    @Override public MPGuiTexturePack getTexturePack()          { return texturePack; }
-
-    @Override
-    public void setTexturePack(MPGuiTexturePack texturePack) {
-        Objects.requireNonNull(texturePack, "texturePack cannot be null. Use MPGuiTexturePack.EMPTY() instead.");
-        this.texturePack = texturePack;
-    }
-
-    @Override public MPGuiSoundPack getSoundPack() { return soundPack; }
-
-    @Override
-    public void setSoundPack(MPGuiSoundPack soundPack) {
-        Objects.requireNonNull(soundPack, "soundPack cannot be null. Use MPGuiSoundPack.EMPTY() instead.");
-        this.soundPack = soundPack;
-    }
-
-    @Override public MPGuiColorPack getColorPack() { return colorPack; }
-
-    @Override
-    public void setColorPack(MPGuiColorPack colorPack) {
-        Objects.requireNonNull(colorPack, "colorPack cannot be null. Use MPGuiColorPack.EMPTY() instead.");
-        this.colorPack = colorPack;
-    }
+    @Override public MPGuiString getGuiString()               { return MPGuiString.EMPTY(); }
+    @Override public void setGuiString(MPGuiString guiString) { }
 
     @Override
     public FontRenderer getFontRenderer() {
@@ -232,13 +150,8 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
         MouseProject.LOGGER.warn("MPGuiScrollPanel cannot support custom TextScaleMultiplayer");
     }
 
-    //Геометрия
-    @Override public MPMutableGuiShape getShape() { return shape; }
-    @Override public MPMutableGuiShape getCalculatedShape()         { return calculatedShape; }
-    @Override public MPMutableGuiShape getCalculatedInnerShape()    { return calculatedShape; }
-    @Override public MPGuiScaleRules getScaleRules()                { return scaleRules; }
-    @Override public void setScaleRules(MPGuiScaleRules scaleRules) { this.scaleRules = scaleRules; }
-    @Override public MPGuiPadding getPadding()                      { return MPGuiPadding.ZERO(); }
+    @Override public MPMutableGuiShape getCalculatedInnerShape() { return getCalculatedShape(); }
+    @Override public MPGuiPadding getPadding()                   { return MPGuiPadding.ZERO(); }
 
     @Override
     public void setPadding(MPGuiPadding padding) {
@@ -249,9 +162,11 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
 
     @Override
     public void calculate(IGuiVector pDefSize, IGuiVector pContentSize, IGuiShape available) {
+        MPMutableGuiShape calculatedShape = getCalculatedShape();
+        MPMutableGuiShape shape           = getShape();
         MPGuiRenderHelper.calculateFlowComponentShape(
                 calculatedShape, pDefSize, pContentSize,
-                shape, scaleRules, available
+                shape, getScaleRules(), available
         );
 
         if (content != null) {
@@ -307,7 +222,7 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
 
     @Override
     public void offsetCalculatedShape(float dx, float dy) {
-        calculatedShape.offset(dx, dy);
+        MPGuiElement.super.offsetCalculatedShape(dx, dy);
         if (content != null) content.offsetCalculatedShape(dx, dy);
         if (scrollbar != null) scrollbar.offsetCalculatedShape(dx, dy);
     }
@@ -318,9 +233,10 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
         float oldScroll = scrollValue;
         scrollValue += amount;
 
-        boolean isVert       = orientation == MPOrientation.VERTICAL;
-        float   viewportSize = isVert ? calculatedShape.height() : calculatedShape.width();
-        float   maxScroll    = Math.max(0, contentSize - viewportSize);
+        MPMutableGuiShape calculatedShape = getCalculatedShape();
+        boolean           isVert          = orientation == MPOrientation.VERTICAL;
+        float             viewportSize    = isVert ? calculatedShape.height() : calculatedShape.width();
+        float             maxScroll       = Math.max(0, contentSize - viewportSize);
 
         if (scrollValue < 0) scrollValue = 0;
         if (scrollValue > maxScroll) scrollValue = maxScroll;
@@ -336,15 +252,17 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
 
     private float calculateTrueContentHeight() {
         if (content == null) return 0;
-        return Math.max(0, findMaxBottom(content) - calculatedShape.y());
+        return Math.max(0, findMaxBottom(content) - content.getCalculatedShape().y());
     }
 
     private float calculateTrueContentWidth() {
         if (content == null) return 0;
-        return Math.max(0, findMaxRight(content) - calculatedShape.x());
+        return Math.max(0, findMaxRight(content) - content.getCalculatedShape().x());
     }
 
     private float findMaxBottom(MPGuiElement<?> element) {
+        if (!element.isVisible()) return element.getCalculatedShape().y();
+
         float max = element.getCalculatedShape().y() + element.getCalculatedShape().height();
         if (element instanceof MPGuiPanel) {
             for (MPGuiElement<?> child : ((MPGuiPanel<?>) element).getChildren()) {
@@ -355,6 +273,8 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
     }
 
     private float findMaxRight(MPGuiElement<?> element) {
+        if (!element.isVisible()) return element.getCalculatedShape().x();
+
         float max = element.getCalculatedShape().x() + element.getCalculatedShape().width();
         if (element instanceof MPGuiPanel) {
             for (MPGuiElement<?> child : ((MPGuiPanel<?>) element).getChildren()) {
@@ -367,18 +287,9 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
     //Диспетчеризация событий
     @Override
     public final void dispatchUpdate(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        if (tickDown >= 0) ++tickDown;
+        MPGuiElement.super.dispatchUpdate(mc, mouseX, mouseY, partialTicks);
 
-        MPGuiEventFactory.pushTickEvent(updateEvent, mouseX, mouseY, partialTicks);
-        onAnyEventFire(updateEvent);
-        if (!updateEvent.isCancelled()) onUpdate(updateEvent);
-
-        int             diffX     = mouseX - moveEvent.getMouseX();
-        int             diffY     = mouseY - moveEvent.getMouseY();
-        MPMoveDirection direction = MPMoveDirection.getMoveDirection(diffX, diffY);
-        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, mouseX, mouseY, direction);
-
-        if (tickDown >= 0 && direction != null) dispatchMouseDragged(mc, mouseX, mouseY, direction, diffX, diffY);
+        MPMutableGuiShape calculatedShape = getCalculatedShape();
 
         boolean isVert       = orientation == MPOrientation.VERTICAL;
         float   viewportSize = isVert ? calculatedShape.height() : calculatedShape.width();
@@ -391,45 +302,24 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
 
     @Override
     public final void dispatchProcessHover(Minecraft mc, int mouseX, int mouseY) {
+        MPGuiElement.super.dispatchProcessHover(mc, mouseX, mouseY);
         if (!isVisible()) return;
 
-        boolean isVert       = orientation == MPOrientation.VERTICAL;
-        float   viewportSize = isVert ? calculatedShape.height() : calculatedShape.width();
+        MPMutableGuiShape calculatedShape = getCalculatedShape();
+        boolean           isVert          = orientation == MPOrientation.VERTICAL;
+        float             viewportSize    = isVert ? calculatedShape.height() : calculatedShape.width();
 
         if (scrollEnabled && scrollbar != null && contentSize > viewportSize) scrollbar.dispatchProcessHover(mc, mouseX, mouseY);
         if (content != null) content.dispatchProcessHover(mc, mouseX, mouseY);
 
         boolean isHovered = calculatedShape.contains(mouseX, mouseY);
-        if (isHovered && !stateManager.has(MPGuiElementState.HOVERED)) dispatchMouseEnter(mc, mouseX, mouseY);
-        else if (!isHovered && stateManager.has(MPGuiElementState.HOVERED)) dispatchMouseLeave(mc, mouseX, mouseY);
-    }
-
-    @Override
-    public void dispatchMouseEnter(Minecraft mc, int mouseX, int mouseY) {
-        stateManager.add(MPGuiElementState.HOVERED);
-        MPGuiEventFactory.pushMouseMoveEvent(
-                moveEvent, mouseX, mouseY, MPMoveDirection.calculateMoveDirection(mouseX, mouseY, moveEvent)
-        );
-        onAnyEventFire(moveEvent);
-        if (!moveEvent.isCancelled()) {
-            dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.ENTER);
-            onMouseEnter(moveEvent);
-        }
-    }
-
-    @Override
-    public final void dispatchMouseLeave(Minecraft mc, int mouseX, int mouseY) {
-        stateManager.remove(MPGuiElementState.HOVERED);
-        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, mouseX, mouseY, null);
-        onAnyEventFire(moveEvent);
-        if (!moveEvent.isCancelled()) {
-            dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.LEAVE);
-            onMouseLeave(moveEvent);
-        }
+        if (isHovered && !getStateManager().has(MPGuiElementState.HOVERED)) dispatchMouseEnter(mc, mouseX, mouseY);
+        else if (!isHovered && getStateManager().has(MPGuiElementState.HOVERED)) dispatchMouseLeave(mc, mouseX, mouseY);
     }
 
     @Override
     public final boolean dispatchMousePressed(Minecraft mc, int mouseX, int mouseY, int mouseButton) {
+        MPMutableGuiShape calculatedShape = getCalculatedShape();
         if (!calculatedShape.contains(mouseX, mouseY)) return false;
 
         boolean isVert       = orientation == MPOrientation.VERTICAL;
@@ -448,10 +338,11 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
             return false;
         }
 
-        if (stateManager.has(MPGuiElementState.FAIL)) dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.FAIL);
+        if (getStateManager().has(MPGuiElementState.FAIL)) dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.FAIL);
 
-        tickDown = 0;
-        stateManager.add(MPGuiElementState.PRESSED);
+        getCore().setTickDown(0);
+        getStateManager().add(MPGuiElementState.PRESSED);
+        MPGuiMouseClickEvent<T> pressEvent = getCore().getPressEvent();
         MPGuiEventFactory.pushMouseClickEvent(pressEvent, mouseX, mouseY);
         onAnyEventFire(pressEvent);
         if (!pressEvent.isCancelled()) {
@@ -463,18 +354,20 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
 
     @Override
     public final void dispatchMouseReleased(Minecraft mc, int mouseX, int mouseY, int state) {
-        tickDown = -1;
-        stateManager.remove(MPGuiElementState.PRESSED);
+        getCore().setTickDown(-1);
+        getStateManager().remove(MPGuiElementState.PRESSED);
 
         if (scrollEnabled && scrollbar != null) scrollbar.dispatchMouseReleased(mc, mouseX, mouseY, state);
         if (content != null) content.dispatchMouseReleased(mc, mouseX, mouseY, state);
 
+        MPGuiMouseClickEvent<T> releaseEvent = getCore().getReleaseEvent();
         MPGuiEventFactory.pushMouseClickEvent(releaseEvent, mouseX, mouseY);
         onAnyEventFire(releaseEvent);
         if (!releaseEvent.isCancelled()) {
             dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.RELEASE);
             onMouseReleased(releaseEvent);
-            if (calculatedShape.contains(mouseX, mouseY)) {
+            if (getCalculatedShape().contains(mouseX, mouseY)) {
+                MPGuiMouseClickEvent<T> clickEvent = getCore().getClickEvent();
                 MPGuiEventFactory.pushMouseClickEvent(clickEvent, mouseX, mouseY);
                 onAnyEventFire(clickEvent);
                 if (!clickEvent.isCancelled()) {
@@ -487,9 +380,11 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
 
     @Override
     public final boolean dispatchMouseDragged(Minecraft mc, int mouseX, int mouseY, MPMoveDirection direction, int diffX, int diffY) {
-        boolean handled      = false;
-        boolean isVert       = orientation == MPOrientation.VERTICAL;
-        float   viewportSize = isVert ? calculatedShape.height() : calculatedShape.width();
+        MPGuiElementCore<T> core            = getCore();
+        boolean             handled         = false;
+        boolean             isVert          = orientation == MPOrientation.VERTICAL;
+        MPMutableGuiShape   calculatedShape = core.getCalculatedShape();
+        float               viewportSize    = isVert ? calculatedShape.height() : calculatedShape.width();
 
         if (scrollEnabled && scrollbar != null && contentSize > viewportSize) {
             if (scrollbar.dispatchMouseDragged(mc, mouseX, mouseY, direction, diffX, diffY)) handled = true;
@@ -498,6 +393,8 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
             handled = content.dispatchMouseDragged(mc, mouseX, mouseY, direction, diffX, diffY);
         }
 
+        int                    tickDown  = core.getTickDown();
+        MPGuiMouseDragEvent<T> dragEvent = core.getDragEvent();
         if (!handled && tickDown >= 0) {
             MPGuiEventFactory.pushMouseDragEvent(dragEvent, mouseX, mouseY, direction, diffX, diffY, tickDown);
             onAnyEventFire(dragEvent);
@@ -512,16 +409,15 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
 
     @Override
     public final boolean dispatchMouseScrolled(Minecraft mc, int mouseX, int mouseY, int scroll) {
-        if (!calculatedShape.contains(mouseX, mouseY)) return false;
+        MPGuiElementCore<T> core = getCore();
+        if (!core.getCalculatedShape().contains(mouseX, mouseY)) return false;
 
-        if (content != null) {
-            if (content.dispatchMouseScrolled(mc, mouseX, mouseY, scroll)) return true;
-        }
+        if (content != null && content.dispatchMouseScrolled(mc, mouseX, mouseY, scroll)) return true;
 
         if (scrollEnabled) {
             float oldScroll = scrollValue;
             applyScroll(-scroll / 10f);
-
+            MPGuiMouseScrollEvent<T> scrollEvent = core.getScrollEvent();
             MPGuiEventFactory.pushMouseScrollEvent(scrollEvent, mouseX, mouseY, MPScrollDirection.getScrollDirection(scroll), scroll);
             onAnyEventFire(scrollEvent);
             if (!scrollEvent.isCancelled()) {
@@ -539,7 +435,10 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
 
         if (content != null && content.dispatchKeyTyped(mc, mouseX, mouseY, typedChar, keyCode)) return true;
 
-        if (stateManager.has(MPGuiElementState.FOCUSED)) {
+        MPGuiElementCore<T> core = getCore();
+
+        if (core.getStateManager().has(MPGuiElementState.FOCUSED)) {
+            MPGuiKeyEvent<T> keyEvent = core.getKeyEvent();
             MPGuiEventFactory.pushKeyEvent(keyEvent, mouseX, mouseY, typedChar, keyCode);
             onAnyEventFire(keyEvent);
 
@@ -552,19 +451,11 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
         return false;
     }
 
-    @Override
-    public final void dispatchPlaySound(Minecraft mc, SoundHandler soundHandler, MPSoundSourceType source) {
-        SoundEvent sound = soundPack.getSound(source);
-        if (sound != null) {
-            MPGuiEventFactory.pushSoundEvent(soundEvent, moveEvent.getMouseX(), moveEvent.getMouseY(), soundHandler, sound, source);
-            onAnyEventFire(soundEvent);
-            if (!soundEvent.isCancelled()) onPlaySound(soundEvent);
-        }
-    }
-
     //Рендеринг
     @Override
     public final void dispatchDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        MPGuiElementCore<T> core        = getCore();
+        MPGuiTickEvent<T>   drawBGEvent = core.getDrawBGEvent();
         MPGuiEventFactory.pushTickEvent(drawBGEvent, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawBGEvent);
         if (!drawBGEvent.isCancelled()) {
@@ -573,11 +464,12 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
             if (content != null) {
                 setupScissor(mc);
                 content.dispatchDrawBackground(mc, mouseX, mouseY, partialTicks);
-                GL11.glDisable(GL11.GL_SCISSOR_TEST);
+                restoreScissor();
             }
 
-            boolean isVert       = orientation == MPOrientation.VERTICAL;
-            float   viewportSize = isVert ? calculatedShape.height() : calculatedShape.width();
+            boolean           isVert          = orientation == MPOrientation.VERTICAL;
+            MPMutableGuiShape calculatedShape = core.getCalculatedShape();
+            float             viewportSize    = isVert ? calculatedShape.height() : calculatedShape.width();
 
             if (scrollEnabled && scrollbar != null && contentSize > viewportSize) {
                 scrollbar.dispatchDrawBackground(mc, mouseX, mouseY, partialTicks);
@@ -587,6 +479,8 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
 
     @Override
     public final void dispatchDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        MPGuiElementCore<T> core        = getCore();
+        MPGuiTickEvent<T>   drawFGEvent = core.getDrawFGEvent();
         MPGuiEventFactory.pushTickEvent(drawFGEvent, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawFGEvent);
         if (!drawFGEvent.isCancelled()) {
@@ -595,11 +489,12 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
             if (content != null) {
                 setupScissor(mc);
                 content.dispatchDrawForeground(mc, mouseX, mouseY, partialTicks);
-                GL11.glDisable(GL11.GL_SCISSOR_TEST);
+                restoreScissor();
             }
 
-            boolean isVert       = orientation == MPOrientation.VERTICAL;
-            float   viewportSize = isVert ? calculatedShape.height() : calculatedShape.width();
+            boolean           isVert          = orientation == MPOrientation.VERTICAL;
+            MPMutableGuiShape calculatedShape = core.getCalculatedShape();
+            float             viewportSize    = isVert ? calculatedShape.height() : calculatedShape.width();
 
             if (scrollEnabled && scrollbar != null && contentSize > viewportSize) {
                 scrollbar.dispatchDrawForeground(mc, mouseX, mouseY, partialTicks);
@@ -609,6 +504,8 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
 
     @Override
     public final void dispatchDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        MPGuiElementCore<T> core          = getCore();
+        MPGuiTickEvent<T>   drawTextEvent = core.getDrawTextEvent();
         MPGuiEventFactory.pushTickEvent(drawTextEvent, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawTextEvent);
         if (!drawTextEvent.isCancelled()) {
@@ -617,11 +514,12 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
             if (content != null) {
                 setupScissor(mc);
                 content.dispatchDrawText(mc, mouseX, mouseY, partialTicks);
-                GL11.glDisable(GL11.GL_SCISSOR_TEST);
+                restoreScissor();
             }
 
-            boolean isVert       = orientation == MPOrientation.VERTICAL;
-            float   viewportSize = isVert ? calculatedShape.height() : calculatedShape.width();
+            boolean           isVert          = orientation == MPOrientation.VERTICAL;
+            MPMutableGuiShape calculatedShape = core.getCalculatedShape();
+            float             viewportSize    = isVert ? calculatedShape.height() : calculatedShape.width();
 
             if (scrollEnabled && scrollbar != null && contentSize > viewportSize) {
                 scrollbar.dispatchDrawText(mc, mouseX, mouseY, partialTicks);
@@ -631,6 +529,8 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
 
     @Override
     public final void dispatchDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        MPGuiElementCore<T> core          = getCore();
+        MPGuiTickEvent<T>   drawLastEvent = core.getDrawLastEvent();
         MPGuiEventFactory.pushTickEvent(drawLastEvent, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawLastEvent);
         if (!drawLastEvent.isCancelled()) {
@@ -639,11 +539,12 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
             if (content != null) {
                 setupScissor(mc);
                 content.dispatchDrawLast(mc, mouseX, mouseY, partialTicks);
-                GL11.glDisable(GL11.GL_SCISSOR_TEST);
+                restoreScissor();
             }
 
-            boolean isVert       = orientation == MPOrientation.VERTICAL;
-            float   viewportSize = isVert ? calculatedShape.height() : calculatedShape.width();
+            boolean           isVert          = orientation == MPOrientation.VERTICAL;
+            MPMutableGuiShape calculatedShape = core.getCalculatedShape();
+            float             viewportSize    = isVert ? calculatedShape.height() : calculatedShape.width();
 
             if (scrollEnabled && scrollbar != null && contentSize > viewportSize) {
                 scrollbar.dispatchDrawLast(mc, mouseX, mouseY, partialTicks);
@@ -652,51 +553,32 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
     }
 
     private void setupScissor(Minecraft mc) {
-        int scale = new ScaledResolution(mc).getScaleFactor();
-        GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GL11.glScissor(
-                (int) (calculatedShape.x() * scale),
-                (int) (mc.displayHeight - (calculatedShape.y() + calculatedShape.height()) * scale),
-                (int) (calculatedShape.width() * scale),
-                (int) (calculatedShape.height() * scale)
-        );
+        int scale    = new ScaledResolution(mc).getScaleFactor();
+        int scissorX = (int) (getCalculatedShape().x() * scale);
+        int scissorY = (int) (mc.displayHeight - (getCalculatedShape().y() + getCalculatedShape().height()) * scale);
+        int scissorW = (int) (getCalculatedShape().width() * scale);
+        int scissorH = (int) (getCalculatedShape().height() * scale);
+
+        MPGuiRenderHelper.pushScissor(scissorX, scissorY, scissorW, scissorH, scissorState);
     }
 
-    //Обработчики событий
-    protected void onDrawBackground(MPGuiTickEvent<T> event) {
-        List<MPGuiTexture> textures = texturePack.getCalculatedTextures(stateManager);
-        for (MPGuiTexture texture : textures) {
-            texture.draw(
-                    event.getMc(),
-                    calculatedShape.x(), calculatedShape.y(),
-                    calculatedShape.width(), calculatedShape.height()
-            );
-        }
-    }
-
-    protected void onDrawForeground(MPGuiTickEvent<T> event)       { }
-    protected void onDrawText(MPGuiTickEvent<T> event)             { }
-    protected void onDrawLast(MPGuiTickEvent<T> event)             { }
-
-    protected void onUpdate(MPGuiTickEvent<T> event)               { }
-    protected void onMouseEnter(MPGuiMouseMoveEvent<T> event)      { }
-    protected void onMouseLeave(MPGuiMouseMoveEvent<T> event)      { }
-    protected void onMousePressed(MPGuiMouseClickEvent<T> event)   { }
-    protected void onMouseReleased(MPGuiMouseClickEvent<T> event)  { }
-    protected void onMouseDragged(MPGuiMouseDragEvent<T> event)    { }
-    protected void onMouseScrolled(MPGuiMouseScrollEvent<T> event) { }
-    protected void onKeyTyped(MPGuiKeyEvent<T> event)              { }
-
-    protected void onPlaySound(MPGuiSoundEvent<T> event) {
-        event.getHandler().playSound(PositionedSoundRecord.getMasterRecord(event.getSound(), 1.0F));
-    }
-
-    protected void onAnyEventFire(MPGuiEvent<T> event) { }
-    public void onClick(MPGuiMouseClickEvent<T> event) { }
+    private void restoreScissor() { MPGuiRenderHelper.popScissor(scissorState); }
 
     //Интеграция с vanilla
     @Override
     public boolean mouseHover(Minecraft mc, int mouseX, int mouseY) {
-        return calculatedShape.contains(mouseX, mouseY);
+        return MPGuiElement.super.mouseHover(mc, mouseX, mouseY);
     }
+
+    @Override
+    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
+        return MPGuiElement.super.mousePressed(mc, mouseX, mouseY);
+    }
+
+    @Override public final int getHoverState(boolean mouseOver)           { return MPGuiElement.super.getHoverState(mouseOver); }
+    @Override public void mouseReleased(int mouseX, int mouseY)           { MPGuiElement.super.mouseReleased(mouseX, mouseY); }
+    @Override public final void playPressSound(SoundHandler soundHandler) { MPGuiElement.super.playPressSound(soundHandler); }
+    @Override public boolean isMouseOver()                                { return MPGuiElement.super.isMouseOver(); }
+
+
 }

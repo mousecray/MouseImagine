@@ -57,7 +57,9 @@ public class MPGuiTexture {
     public void draw(Minecraft mc, float x, float y, float width, float height) {
         if (width <= 0 || height <= 0 || opacity <= 0.001f) return;
 
-        if (width != lastWidth || height != lastHeight) bake(width, height);
+        if (Math.abs(width - lastWidth) > 0.001f || Math.abs(height - lastHeight) > 0.001f) {
+            bake(width, height);
+        }
 
         if (quadCount == 0) return;
 
@@ -116,7 +118,9 @@ public class MPGuiTexture {
         int stepsY            = (modeY == MPGuiTextureScaleRules.ScaleMode.FILL && scaledTexH > 0) ? (int) Math.ceil(height / (scaledTexH + scaleRules.getGapY())) : 1;
         int requiredArraySize = stepsX * stepsY * 8;
 
-        if (bakedQuads.length < requiredArraySize) bakedQuads = new float[requiredArraySize];
+        if (bakedQuads.length < requiredArraySize) {
+            bakedQuads = new float[Math.max(requiredArraySize, bakedQuads.length * 2)];
+        }
 
         float xCursor = 0;
         while (xCursor < width) {

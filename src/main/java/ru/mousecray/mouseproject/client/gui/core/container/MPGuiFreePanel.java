@@ -10,12 +10,13 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiPanel;
-import ru.mousecray.mouseproject.client.gui.core.dim.*;
+import ru.mousecray.mouseproject.client.gui.core.dim.IGuiVector;
+import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
+import ru.mousecray.mouseproject.client.gui.core.dim.MPMutableGuiShape;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper.calculateFlowComponentX;
-import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper.calculateFlowComponentY;
+import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper.*;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
@@ -26,30 +27,22 @@ public class MPGuiFreePanel extends MPGuiPanel<MPGuiFreePanel> {
     @Override
     protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MPMutableGuiShape inner) {
         for (MPGuiElement<?> child : children) {
-            //1. Отступы
-            MPGuiMargin margin = getChildMargin(child);
-            marginTemp[0] = calculateFlowComponentX(parentDefaultSize, parentContentSize, margin.getLeft());
-            marginTemp[1] = calculateFlowComponentY(parentDefaultSize, parentContentSize, margin.getTop());
-            marginTemp[2] = calculateFlowComponentX(parentDefaultSize, parentContentSize, margin.getRight());
-            marginTemp[3] = calculateFlowComponentY(parentDefaultSize, parentContentSize, margin.getBottom());
-            float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
+            if (!child.isVisible()) continue;
 
-            //2. PARENT заполняет панель
-            float childAvailW = Math.max(0, inner.width() - ml - mr);
-            float childAvailH = Math.max(0, inner.height() - mt - mb);
-
-            child.measurePreferred(parentDefaultSize, parentContentSize, childAvailW, childAvailH, measureTemp);
+            measureChildWithMargin(parentDefaultSize, parentContentSize, child,
+                    getChildMargin(child), marginTemp, measureTemp
+            );
+            float ml     = marginTemp[0], mt = marginTemp[1];
             float childW = measureTemp.x();
             float childH = measureTemp.y();
 
-            //3. Координаты X/Y подчиняются scaleRules (isFixed)
-            float posX = child.getScaleRules().isFixedHorizontal() ? child.getShape().x() : calculateFlowComponentX(parentDefaultSize, parentContentSize, child.getShape().x());
-            float posY = child.getScaleRules().isFixedVertical() ? child.getShape().y() : calculateFlowComponentY(parentDefaultSize, parentContentSize, child.getShape().y());
+            float posX = child.getScaleRules().isFixedHorizontal() ? child.getShape().x()
+                    : calculateFlowComponentX(parentDefaultSize, parentContentSize, child.getShape().x());
+            float posY = child.getScaleRules().isFixedVertical() ? child.getShape().y()
+                    : calculateFlowComponentY(parentDefaultSize, parentContentSize, child.getShape().y());
 
-            //4. Оффсеты масштабируются
-            MPGuiVector offset  = getChildOffset(child);
-            float       offsetX = calculateFlowComponentX(parentDefaultSize, parentContentSize, offset.x());
-            float       offsetY = calculateFlowComponentY(parentDefaultSize, parentContentSize, offset.y());
+            float[] scaledOffset = calculateScaledOffset(child, parentDefaultSize, parentContentSize);
+            float   offsetX      = scaledOffset[0], offsetY = scaledOffset[1];
 
             childAvailableTemp.withX(inner.x() + ml + posX + offsetX);
             childAvailableTemp.withY(inner.y() + mt + posY + offsetY);

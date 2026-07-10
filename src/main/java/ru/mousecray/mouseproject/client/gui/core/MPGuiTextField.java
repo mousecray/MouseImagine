@@ -7,7 +7,6 @@ package ru.mousecray.mouseproject.client.gui.core;
 
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiTextField;
@@ -16,136 +15,66 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ChatAllowedCharacters;
-import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import ru.mousecray.mouseproject.MouseProject;
 import ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper;
+import ru.mousecray.mouseproject.client.gui.core.component.color.MPColorBuffer;
 import ru.mousecray.mouseproject.client.gui.core.component.color.MPGuiColorPack;
 import ru.mousecray.mouseproject.client.gui.core.component.lang.MPGuiString;
-import ru.mousecray.mouseproject.client.gui.core.component.sound.MPGuiSoundPack;
 import ru.mousecray.mouseproject.client.gui.core.component.sound.MPSoundSourceType;
 import ru.mousecray.mouseproject.client.gui.core.component.state.MPGuiElementState;
-import ru.mousecray.mouseproject.client.gui.core.component.state.MPGuiElementStateManager;
-import ru.mousecray.mouseproject.client.gui.core.component.texture.MPGuiTexture;
-import ru.mousecray.mouseproject.client.gui.core.component.texture.MPGuiTexturePack;
-import ru.mousecray.mouseproject.client.gui.core.dim.*;
+import ru.mousecray.mouseproject.client.gui.core.dim.IGuiShape;
+import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
+import ru.mousecray.mouseproject.client.gui.core.dim.MPMutableGuiShape;
 import ru.mousecray.mouseproject.client.gui.core.event.*;
-import ru.mousecray.mouseproject.client.gui.core.misc.MPClickType;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPMoveDirection;
-import ru.mousecray.mouseproject.client.gui.core.misc.MPScrollDirection;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.List;
 import java.util.Objects;
+
+import static ru.mousecray.mouseproject.client.gui.core.event.MPGuiEventFactory.pushMouseClickEvent;
+import static ru.mousecray.mouseproject.client.gui.core.event.MPGuiEventFactory.pushTextTypedEvent;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTextField implements MPGuiElement<T> {
-    private final MPGuiTickEvent<T>
-            updateEvent   = new MPGuiTickEvent<>(),
-            drawBGEvent   = new MPGuiTickEvent<>(),
-            drawFGEvent   = new MPGuiTickEvent<>(),
-            drawLastEvent = new MPGuiTickEvent<>(),
-            drawTextEvent = new MPGuiTickEvent<>();
-    private final MPGuiMouseClickEvent<T>
-            pressEvent   = new MPGuiMouseClickEvent<>(MPClickType.PRESS),
-            releaseEvent = new MPGuiMouseClickEvent<>(MPClickType.RELEASE),
-            clickEvent   = new MPGuiMouseClickEvent<>(MPClickType.CLICK);
-    private final MPGuiMouseMoveEvent<T>   moveEvent      = new MPGuiMouseMoveEvent<>();
-    private final MPGuiMouseDragEvent<T>   dragEvent      = new MPGuiMouseDragEvent<>();
-    private final MPGuiMouseScrollEvent<T> scrollEvent    = new MPGuiMouseScrollEvent<>();
-    private final MPGuiKeyEvent<T>         keyEvent       = new MPGuiKeyEvent<>();
-    private final MPGuiSoundEvent<T>       soundEvent     = new MPGuiSoundEvent<>();
-    private final MPGuiTextTypedEvent<T>   textTypedEvent = new MPGuiTextTypedEvent<>();
+    protected final MPGuiElementCore<T>    core;
+    private final   MPGuiTextTypedEvent<T> textTypedEvent = new MPGuiTextTypedEvent<>();
 
-    protected final MPGuiElementStateManager stateManager = new MPGuiElementStateManager();
+    protected MPGuiString placeholder = MPGuiString.EMPTY();
 
-    protected final MPMutableGuiShape
-            shape,
-            calculatedShape      = new MPMutableGuiShape(),
-            calculatedInnerShape = new MPMutableGuiShape();
-    protected final MPMutableGuiVector calculatedTextOffsetTemp = new MPMutableGuiVector();
-
-    @Nullable protected FontRenderer fontRenderer;
-    @Nullable protected MPFontSize   fontSize;
-    protected           MPGuiString  guiString   = MPGuiString.EMPTY();
-    protected           MPGuiString  placeholder = MPGuiString.EMPTY();
-
-    private   MPGuiTexturePack texturePack          = MPGuiTexturePack.EMPTY();
-    protected MPGuiColorPack   colorPack            = MPGuiColorPack.TEXT_FIELD_SIMPLE();
-    protected MPGuiColorPack   placeholderColorPack = MPGuiColorPack.TEXT_FIELD_PLACEHOLDER();
-    protected MPGuiColorPack   cursorColorPack      = MPGuiColorPack.TEXT_FIELD_CURSOR();
-    protected MPGuiColorPack   selectionColorPack   = MPGuiColorPack.TEXT_FIELD_SELECTION();
-    private   MPGuiSoundPack   soundPack            = MPGuiSoundPack.EMPTY();
-
-    protected int                tickDown             = -1;
-    protected MPMutableGuiVector textOffset           = new MPMutableGuiVector();
-    protected float              textScaleMultiplayer = 1.0F;
-    private   MPGuiScaleRules    scaleRules           = new MPGuiScaleRules(MPGuiScaleType.FLOW);
+    protected MPGuiColorPack placeholderColorPack = MPGuiColorPack.TEXT_FIELD_PLACEHOLDER();
+    protected MPGuiColorPack cursorColorPack      = MPGuiColorPack.TEXT_FIELD_CURSOR();
+    protected MPGuiColorPack selectionColorPack   = MPGuiColorPack.TEXT_FIELD_SELECTION();
 
     private boolean hasSelection = false;
-
-    private MPGuiPanel<?> parent;
-    private MPGuiPadding  padding = new MPGuiPadding(0);
-    private MPGuiScreen   screen;
 
     public MPGuiTextField(MPGuiShape shape) {
         super(
                 0, Minecraft.getMinecraft().fontRenderer, (int) shape.x(), (int) shape.y(),
                 (int) shape.width(), (int) shape.height()
         );
-        this.shape = shape.toMutable();
+        core = new MPGuiElementCore<>(shape);
+        core.bindEvents(Minecraft.getMinecraft(), self());
+        textTypedEvent.bind(Minecraft.getMinecraft(), self());
 
-        Minecraft mc = Minecraft.getMinecraft();
-        T         th = self();
-        updateEvent.bind(mc, th);
-        drawBGEvent.bind(mc, th);
-        drawFGEvent.bind(mc, th);
-        drawLastEvent.bind(mc, th);
-        drawTextEvent.bind(mc, th);
-        pressEvent.bind(mc, th);
-        releaseEvent.bind(mc, th);
-        clickEvent.bind(mc, th);
-        moveEvent.bind(mc, th);
-        dragEvent.bind(mc, th);
-        scrollEvent.bind(mc, th);
-        keyEvent.bind(mc, th);
-        soundEvent.bind(mc, th);
+        setColorPack(MPGuiColorPack.TEXT_FIELD_SIMPLE());
 
-        stateManager.setChangeListener(() -> super.setFocused(stateManager.has(MPGuiElementState.FOCUSED)));
+        getStateManager().setChangeListener(() -> super.setFocused(getStateManager().has(MPGuiElementState.FOCUSED)));
 
         super.setEnableBackgroundDrawing(true);
     }
 
     @SuppressWarnings("unchecked") @Override public T self() { return (T) this; }
-
-    //Идентификация и иерархия
-    @Override public void setId(int id) { this.id = id; }
-    @Override public int getId()                       { return id; }
-    @Override @Nullable public MPGuiScreen getScreen() { return screen; }
-
-    @Override
-    public void setScreen(@Nullable MPGuiScreen screen) {
-        this.screen = screen;
-        stateManager.lockForbidden(screen != null || getParent() != null);
-    }
-
-    @Override @Nullable public MPGuiPanel<?> getParent() { return parent; }
-
-    @Override
-    public void setParent(@Nullable MPGuiPanel<?> parent) {
-        this.parent = parent;
-        stateManager.lockForbidden(parent != null || getScreen() != null);
-    }
-
-    //Данные и состояние
-    @Override public MPGuiString getGuiString() { return guiString; }
+    @Override public MPGuiElementCore<T> getCore()           { return core; }
+    @Override public void setId(int id)                      { this.id = id; }
+    @Override public int getId()                             { return id; }
 
     @Override
     public void setGuiString(MPGuiString guiString) {
@@ -154,14 +83,15 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         int    oldCursor    = getCursorPosition();
         int    oldSelection = getSelectionEnd();
 
-        MPGuiEventFactory.pushTextTypedEvent(
+        MPGuiMouseMoveEvent<T> moveEvent = getCore().getMoveEvent();
+        pushTextTypedEvent(
                 textTypedEvent, moveEvent.getMouseX(), moveEvent.getMouseY(),
                 getCursorPosition(), getSelectionEnd(), oldText, guiString.get()
         );
         onAnyEventFire(textTypedEvent);
 
         if (!textTypedEvent.isCancelled()) {
-            this.guiString = guiString;
+            getCore().setGuiString(guiString);
             super.setText(guiString.get());
         } else {
             super.setText(oldText);
@@ -178,33 +108,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         this.placeholder = placeholder;
     }
 
-    public boolean isHasSelection()                             { return hasSelection; }
-
-    @Override public MPGuiElementStateManager getStateManager() { return stateManager; }
-
-    @Override public MPGuiTexturePack getTexturePack()          { return texturePack; }
-
-    @Override
-    public void setTexturePack(MPGuiTexturePack texturePack) {
-        Objects.requireNonNull(texturePack, "texturePack cannot be null. Use MPGuiTexturePack.EMPTY() instead.");
-        this.texturePack = texturePack;
-    }
-
-    @Override public MPGuiSoundPack getSoundPack() { return soundPack; }
-
-    @Override
-    public void setSoundPack(MPGuiSoundPack soundPack) {
-        Objects.requireNonNull(soundPack, "soundPack cannot be null. Use MPGuiSoundPack.EMPTY() instead.");
-        this.soundPack = soundPack;
-    }
-
-    @Override public MPGuiColorPack getColorPack() { return colorPack; }
-
-    @Override
-    public void setColorPack(MPGuiColorPack colorPack) {
-        Objects.requireNonNull(colorPack, "colorPack cannot be null. Use MPGuiColorPack.EMPTY() instead.");
-        this.colorPack = colorPack;
-    }
+    public boolean isHasSelection()                 { return hasSelection; }
 
     public MPGuiColorPack getPlaceholderColorPack() { return placeholderColorPack; }
 
@@ -228,63 +132,6 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     }
 
     @Override
-    public FontRenderer getFontRenderer() {
-        if (fontRenderer != null) return fontRenderer;
-        if (getScreen() != null) return getScreen().getFontRenderer();
-        return Minecraft.getMinecraft().fontRenderer;
-    }
-
-    @Override
-    public void setFontRenderer(@Nullable FontRenderer fr) {
-        if (getScreen() != null) {
-            MouseProject.LOGGER.warn(
-                    "FontRenderer cannot be setup immediately to MPGuiElement that added to container." +
-                            " It set now, but actual element size will be updated on the next gui size calculation."
-            );
-        }
-        fontRenderer = fr;
-    }
-
-    @Override
-    public MPFontSize getFontSize() {
-        if (fontSize != null) return fontSize;
-        if (getScreen() != null) return getScreen().getFontSize();
-        return MPFontSize.NORMAL;
-    }
-
-    @Override
-    public void setFontSize(@Nullable MPFontSize size) {
-        if (getScreen() != null) {
-            MouseProject.LOGGER.warn(
-                    "FontSize cannot be setup immediately to MPGuiElement that added to container." +
-                            " It set now, but actual element size will be updated on the next gui size calculation."
-            );
-        }
-        fontSize = size;
-    }
-
-    @Override public float getTextScaleMultiplayer()                 { return textScaleMultiplayer; }
-    @Override public void setTextScaleMultiplayer(float multiplayer) { textScaleMultiplayer = multiplayer; }
-
-    //Геометрия
-    @Override public MPMutableGuiShape getShape() { return shape; }
-    @Override public MPMutableGuiShape getCalculatedShape()         { return calculatedShape; }
-    @Override public MPMutableGuiShape getCalculatedInnerShape()    { return calculatedInnerShape; }
-
-    @Override public MPGuiScaleRules getScaleRules()                { return scaleRules; }
-    @Override public void setScaleRules(MPGuiScaleRules scaleRules) { this.scaleRules = Objects.requireNonNull(scaleRules); }
-    @Override public MPGuiPadding getPadding()                      { return padding; }
-    @Override public void setPadding(MPGuiPadding padding)          { this.padding = Objects.requireNonNull(padding); }
-    @Override public MPMutableGuiVector getTextOffset()             { return textOffset; }
-
-    @Override
-    public void calculateTextOffset(IGuiVector pDefSize, IGuiVector pContentSize) {
-        MPGuiRenderHelper.calculateFlowComponentVector(
-                calculatedTextOffsetTemp, pDefSize, pContentSize, getTextOffset()
-        );
-    }
-
-    @Override
     public void setupShapeToVanilla(IGuiShape result) {
         x = (int) result.x();
         y = (int) result.y();
@@ -292,75 +139,15 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         height = (int) result.height();
     }
 
-    @Override
-    public void offsetCalculatedShape(float dx, float dy) {
-        calculatedShape.offset(dx, dy);
-        calculatedInnerShape.offset(dx, dy);
-        x = (int) calculatedShape.x();
-        y = (int) calculatedShape.y();
-    }
-
-    @Override
-    public final void setEnableBackgroundDrawing(boolean enableBackgroundDrawing) {
-        MouseProject.LOGGER.warn("backgroundDrawing is permanently enabled for MPGuiTextField. " +
-                "If you are attempting to set it manually, please keep in mind that doing so will have no effect.");
-    }
-
     //Диспетчеризация событий
-    @Override
-    public final void dispatchUpdate(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        if (tickDown >= 0) ++tickDown;
-        super.updateCursorCounter();
-
-        MPGuiEventFactory.pushTickEvent(updateEvent, mouseX, mouseY, partialTicks);
-        onAnyEventFire(updateEvent);
-        if (!updateEvent.isCancelled()) onUpdate(updateEvent);
-
-        int             diffX     = mouseX - moveEvent.getMouseX();
-        int             diffY     = mouseY - moveEvent.getMouseY();
-        MPMoveDirection direction = MPMoveDirection.getMoveDirection(diffX, diffY);
-        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, mouseX, mouseY, direction);
-
-        if (tickDown >= 0 && direction != null) dispatchMouseDragged(mc, mouseX, mouseY, direction, diffX, diffY);
-    }
-
-    @Override public final void dispatchProcessHover(Minecraft mc, int mouseX, int mouseY) { }
-
-    @Override
-    public final void dispatchMouseEnter(Minecraft mc, int mouseX, int mouseY) {
-        stateManager.add(MPGuiElementState.HOVERED);
-        MPGuiEventFactory.pushMouseMoveEvent(
-                moveEvent, mouseX, mouseY, MPMoveDirection.calculateMoveDirection(mouseX, mouseY, moveEvent)
-        );
-        onAnyEventFire(moveEvent);
-        if (!moveEvent.isCancelled()) {
-            dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.ENTER);
-            onMouseEnter(moveEvent);
-        }
-    }
-
-    @Override
-    public final void dispatchMouseLeave(Minecraft mc, int mouseX, int mouseY) {
-        stateManager.remove(MPGuiElementState.HOVERED);
-        MPGuiEventFactory.pushMouseMoveEvent(
-                moveEvent, mouseX, mouseY, MPMoveDirection.calculateMoveDirection(mouseX, mouseY, moveEvent)
-        );
-        onAnyEventFire(moveEvent);
-        if (!moveEvent.isCancelled()) {
-            dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.LEAVE);
-            onMouseLeave(moveEvent);
-        }
-    }
-
-    @Override
-    public final boolean dispatchMousePressed(Minecraft mc, int mouseX, int mouseY, int mouseButton) {
-        if (!calculatedShape.contains(mouseX, mouseY)) return false;
+    @Override public final boolean dispatchMousePressed(Minecraft mc, int mouseX, int mouseY, int mouseButton) {
+        if (!getCalculatedShape().contains(mouseX, mouseY)) return false;
         if (!isEnabled() || !isVisible()) {
             dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.DISABLED);
             return false;
         }
 
-        if (stateManager.has(MPGuiElementState.FAIL)) {
+        if (getStateManager().has(MPGuiElementState.FAIL)) {
             dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.FAIL);
             return false;
         }
@@ -368,10 +155,11 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         hasSelection = checkIsOnText(mouseX, mouseY);
         if (hasSelection && mouseButton == 0) setCursorPosition(getCharIndexAtMouse(mouseX));
 
-        tickDown = 0;
-        stateManager.add(MPGuiElementState.PRESSED);
+        getCore().setTickDown(0);
+        getStateManager().add(MPGuiElementState.PRESSED);
 
-        MPGuiEventFactory.pushMouseClickEvent(pressEvent, mouseX, mouseY);
+        MPGuiMouseClickEvent<T> pressEvent = getCore().getPressEvent();
+        pushMouseClickEvent(pressEvent, mouseX, mouseY);
         onAnyEventFire(pressEvent);
         if (!pressEvent.isCancelled()) {
             dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.PRESS);
@@ -382,18 +170,20 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
     @Override
     public final void dispatchMouseReleased(Minecraft mc, int mouseX, int mouseY, int state) {
-        tickDown = -1;
+        getCore().setTickDown(-1);
         hasSelection = false;
-        stateManager.remove(MPGuiElementState.PRESSED);
+        getStateManager().remove(MPGuiElementState.PRESSED);
 
-        MPGuiEventFactory.pushMouseClickEvent(releaseEvent, mouseX, mouseY);
+        MPGuiMouseClickEvent<T> releaseEvent = getCore().getReleaseEvent();
+        pushMouseClickEvent(releaseEvent, mouseX, mouseY);
         onAnyEventFire(releaseEvent);
 
         if (!releaseEvent.isCancelled()) {
             dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.RELEASE);
             onMouseReleased(releaseEvent);
-            if (calculatedShape.contains(mouseX, mouseY)) {
-                MPGuiEventFactory.pushMouseClickEvent(clickEvent, mouseX, mouseY);
+            if (getCalculatedShape().contains(mouseX, mouseY)) {
+                MPGuiMouseClickEvent<T> clickEvent = getCore().getClickEvent();
+                pushMouseClickEvent(clickEvent, mouseX, mouseY);
                 onAnyEventFire(clickEvent);
                 if (!clickEvent.isCancelled()) {
                     dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.CLICK);
@@ -405,6 +195,8 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
     @Override
     public final boolean dispatchMouseDragged(Minecraft mc, int mouseX, int mouseY, MPMoveDirection dir, int diffX, int diffY) {
+        MPGuiMouseDragEvent<T> dragEvent = getCore().getDragEvent();
+        int                    tickDown  = getCore().getTickDown();
         if (tickDown >= 0) {
             MPGuiEventFactory.pushMouseDragEvent(dragEvent, mouseX, mouseY, dir, diffX, diffY, tickDown);
             onAnyEventFire(dragEvent);
@@ -424,17 +216,6 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     }
 
     @Override
-    public final boolean dispatchMouseScrolled(Minecraft mc, int mouseX, int mouseY, int scroll) {
-        MPGuiEventFactory.pushMouseScrollEvent(scrollEvent, mouseX, mouseY, MPScrollDirection.getScrollDirection(scroll), scroll);
-        onAnyEventFire(scrollEvent);
-        if (!scrollEvent.isCancelled()) {
-            dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.SCROLL);
-            onMouseScrolled(scrollEvent);
-        }
-        return scrollEvent.isConsumed();
-    }
-
-    @Override
     public final boolean dispatchKeyTyped(Minecraft mc, int mouseX, int mouseY, char typedChar, int keyCode) {
         if (!isFocused() || !isVisible()) return false;
 
@@ -442,11 +223,17 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         int    oldCursor    = getCursorPosition();
         int    oldSelection = getSelectionEnd();
 
+        int   oldW  = width;
+        float scale = getFontSize().getScale() * getTextScaleMultiplayer();
+        width = (int) (getCalculatedInnerShape().width() / scale);
+
         boolean handled = super.textboxKeyTyped(typedChar, keyCode);
+
+        width = oldW;
 
         if (handled) {
             if (!oldText.equals(getText())) {
-                MPGuiEventFactory.pushTextTypedEvent(
+                pushTextTypedEvent(
                         textTypedEvent, mouseX, mouseY, getCursorPosition(), getSelectionEnd(), oldText, getText()
                 );
                 onAnyEventFire(textTypedEvent);
@@ -457,10 +244,11 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
                     setCursorPosition(oldCursor);
                     setSelectionPos(oldSelection);
                 } else {
-                    if (!textTypedEvent.isConsumed()) guiString = MPGuiString.simple(getText());
+                    if (!textTypedEvent.isConsumed()) getCore().setGuiString(MPGuiString.simple(getText()));
                 }
             }
 
+            MPGuiKeyEvent<T> keyEvent = getCore().getKeyEvent();
             MPGuiEventFactory.pushKeyEvent(keyEvent, mouseX, mouseY, typedChar, keyCode);
             onAnyEventFire(keyEvent);
             if (!keyEvent.isCancelled()) {
@@ -473,71 +261,21 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         return false;
     }
 
-    @Override
-    public final void dispatchPlaySound(Minecraft mc, SoundHandler soundHandler, MPSoundSourceType source) {
-        SoundEvent sound = soundPack.getSound(source);
-        if (sound != null) {
-            MPGuiEventFactory.pushSoundEvent(soundEvent, moveEvent.getMouseX(), moveEvent.getMouseY(), soundHandler, sound, source);
-            onAnyEventFire(soundEvent);
-            if (!soundEvent.isCancelled()) onPlaySound(soundEvent);
-        }
-    }
-
-    //Рендеринг
-    @Override
-    public final void dispatchDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        MPGuiEventFactory.pushTickEvent(drawBGEvent, mouseX, mouseY, partialTicks);
-        onAnyEventFire(drawBGEvent);
-        if (!drawBGEvent.isCancelled()) onDrawBackground(drawBGEvent);
-    }
 
     @Override
-    public final void dispatchDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        MPGuiEventFactory.pushTickEvent(drawFGEvent, mouseX, mouseY, partialTicks);
-        onAnyEventFire(drawFGEvent);
-        if (!drawFGEvent.isCancelled()) onDrawForeground(drawFGEvent);
-    }
-
-    @Override
-    public final void dispatchDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        MPGuiEventFactory.pushTickEvent(drawTextEvent, mouseX, mouseY, partialTicks);
-        onAnyEventFire(drawTextEvent);
-        if (!drawTextEvent.isCancelled()) onDrawText(drawTextEvent);
-    }
-
-    @Override
-    public final void dispatchDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        MPGuiEventFactory.pushTickEvent(drawLastEvent, mouseX, mouseY, partialTicks);
-        onAnyEventFire(drawLastEvent);
-        if (!drawLastEvent.isCancelled()) onDrawLast(drawLastEvent);
-    }
-
-    //Обработчики событий
-    protected void onDrawBackground(MPGuiTickEvent<T> event) {
-        List<MPGuiTexture> textures = texturePack.getCalculatedTextures(stateManager);
-        for (MPGuiTexture texture : textures) {
-            texture.draw(
-                    event.getMc(),
-                    calculatedShape.x(), calculatedShape.y(),
-                    calculatedShape.width(), calculatedShape.height()
-            );
-        }
-    }
-
-    protected void onDrawForeground(MPGuiTickEvent<T> event) { }
-
-    protected void onDrawText(MPGuiTickEvent<T> event) {
+    public void onDrawText(MPGuiTickEvent<T> event) {
         if (getText().isEmpty() && !isFocused() && placeholder.get() != null && !placeholder.get().isEmpty()) {
             FontRenderer fr     = getFontRenderer();
-            int          pColor = placeholderColorPack.getCalculatedColor(stateManager);
+            int          pColor = placeholderColorPack.getCalculatedColor(getStateManager());
 
             MPFontSize fs           = getFontSize();
-            float      scale        = fs.getScale() * textScaleMultiplayer;
+            float      scale        = fs.getScale() * getTextScaleMultiplayer();
             float      inverseScale = 1.0F / scale;
 
-            float innerX = calculatedInnerShape.x();
-            float innerY = calculatedInnerShape.y();
-            float innerH = calculatedInnerShape.height();
+            MPMutableGuiShape calculatedInnerShape = getCalculatedInnerShape();
+            float             innerX               = calculatedInnerShape.x();
+            float             innerY               = calculatedInnerShape.y();
+            float             innerH               = calculatedInnerShape.height();
 
             float logicalX = innerX * inverseScale;
             float logicalY = (innerY + innerH / 2f) * inverseScale - (fr.FONT_HEIGHT / 1.4f) * inverseScale;
@@ -553,9 +291,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
             MPGuiRenderHelper.drawString(fr, placeholder.get(), textX, textY, pColor, fs != MPFontSize.SMALL);
 
             GlStateManager.popMatrix();
-        } else {
-            drawCustomTextLayer(event);
-        }
+        } else drawCustomTextLayer(event);
     }
 
     private void drawCustomTextLayer(MPGuiTickEvent<T> event) {
@@ -563,15 +299,16 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         float inverseScale = 1.0F / scale;
 
         FontRenderer fontRenderer = getFontRenderer();
-        int          textColor    = colorPack.getCalculatedColor(stateManager);
+        int          textColor    = getColorPack().getCalculatedColor(getStateManager());
         String       fullText     = getText();
 
         int cursorPos       = getCursorPosition() - lineScrollOffset;
         int selectionEndPos = getSelectionEnd() - lineScrollOffset;
 
-        float innerX = calculatedInnerShape.x();
-        float innerY = calculatedInnerShape.y();
-        float innerH = calculatedInnerShape.height();
+        MPMutableGuiShape calculatedInnerShape = getCalculatedInnerShape();
+        float             innerX               = calculatedInnerShape.x();
+        float             innerY               = calculatedInnerShape.y();
+        float             innerH               = calculatedInnerShape.height();
 
         int scaledAvailableWidth = (int) (calculatedInnerShape.width() * inverseScale);
 
@@ -605,6 +342,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         else if (cursorPos > visibleText.length()) cursorX = textX + (float) scaledAvailableWidth;
         else if (isCursorAtEnd) cursorX--;
 
+        MPFontSize fontSize = getFontSize();
         if (!visibleText.isEmpty()) {
             float currentX = MPGuiRenderHelper.drawString(
                     fontRenderer, textBeforeCursor, textX, textY, textColor, fontSize != MPFontSize.SMALL
@@ -617,7 +355,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         }
 
         if (showCursor) {
-            int cursorColor = cursorColorPack.getCalculatedColor(stateManager);
+            int cursorColor = cursorColorPack.getCalculatedColor(getStateManager());
             if (isCursorAtEnd) MPGuiRenderHelper.drawRect(
                     cursorX, textY - 1, cursorX + 1, textY + 1 + fontRenderer.FONT_HEIGHT, cursorColor
             );
@@ -627,20 +365,18 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         }
 
         if (selectionEndPos != cursorPos) {
-            float selectionEndX  = textX + fontRenderer.getStringWidth(visibleText.substring(0, selectionEndPos));
-            float maxX           = textX + (float) scaledAvailableWidth;
-            int   selectionColor = selectionColorPack.getCalculatedColor(stateManager);
+            float selectionEndX = textX + fontRenderer.getStringWidth(visibleText.substring(0, selectionEndPos));
+            float maxX          = textX + (float) scaledAvailableWidth;
             drawSelectionBox(
                     cursorX, textY - 1, selectionEndX - 1,
-                    textY + 1 + fontRenderer.FONT_HEIGHT, textX, maxX,
-                    selectionColor
+                    textY + 1 + fontRenderer.FONT_HEIGHT, textX, maxX
             );
         }
 
         GlStateManager.popMatrix();
     }
 
-    private void drawSelectionBox(float startX, float startY, float endX, float endY, float minX, float maxX, int color) {
+    private void drawSelectionBox(float startX, float startY, float endX, float endY, float minX, float maxX) {
         if (startX < endX) {
             float i = startX;
             startX = endX;
@@ -659,8 +395,9 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
         Tessellator   tessellator   = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
-        float[]       glColors      = MPGuiColorPack.intToColor(color);
-        GlStateManager.color(glColors[0], glColors[1], glColors[2], glColors[3]);
+        selectionColorPack.intToColor(getStateManager());
+        MPColorBuffer buf = selectionColorPack.getColorBuffer();
+        GlStateManager.color(buf.getRed(), buf.getGreen(), buf.getBlue(), buf.getAlpha());
         GlStateManager.disableTexture2D();
         GlStateManager.enableColorLogic();
         GlStateManager.colorLogicOp(GlStateManager.LogicOp.OR_REVERSE);
@@ -675,17 +412,14 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    protected void onDrawLast(MPGuiTickEvent<T> event)             { }
+    @Override
+    public void onUpdate(MPGuiTickEvent<T> event) {
+        MPGuiElement.super.onUpdate(event);
+        updateCursorCounter();
+    }
 
-    protected void onUpdate(MPGuiTickEvent<T> event)               { }
-    protected void onMouseEnter(MPGuiMouseMoveEvent<T> event)      { }
-    protected void onMouseLeave(MPGuiMouseMoveEvent<T> event)      { }
-    protected void onMousePressed(MPGuiMouseClickEvent<T> event)   { }
-    protected void onMouseReleased(MPGuiMouseClickEvent<T> event)  { }
-    protected void onMouseDragged(MPGuiMouseDragEvent<T> event)    { }
-    protected void onMouseScrolled(MPGuiMouseScrollEvent<T> event) { }
-
-    protected void onKeyTyped(MPGuiKeyEvent<T> event) {
+    @Override
+    public void onKeyTyped(MPGuiKeyEvent<T> event) {
         if (!event.isCancelled() && (event.getKeyCode() == Keyboard.KEY_RETURN || event.getKeyCode() == Keyboard.KEY_NUMPADENTER)) {
             dispatchMousePressed(event.getMc(), x + width / 2, y + height / 2, 0);
             dispatchMouseReleased(event.getMc(), x + width / 2, y + height / 2, 0);
@@ -695,17 +429,10 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
     protected void onTextTyped(MPGuiTextTypedEvent<T> event) { }
 
-    protected void onPlaySound(MPGuiSoundEvent<T> event) {
-        event.getHandler().playSound(PositionedSoundRecord.getMasterRecord(event.getSound(), 1.0F));
-    }
-
-    protected void onAnyEventFire(MPGuiEvent<T> event) { }
-
-    public void onClick(MPGuiMouseClickEvent<T> event) { }
-
     protected boolean checkIsOnText(int mouseX, int mouseY) {
-        FontRenderer fr    = getFontRenderer();
-        float        scale = getFontSize().getScale();
+        MPMutableGuiShape calculatedInnerShape = getCalculatedInnerShape();
+        FontRenderer      fr                   = getFontRenderer();
+        float             scale                = getFontSize().getScale();
 
         float centerY    = calculatedInnerShape.y() + calculatedInnerShape.height() / 2f;
         float halfHeight = (fr.FONT_HEIGHT + 2) * scale / 2f;
@@ -721,8 +448,9 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         float        scale        = getFontSize().getScale();
         float        inverseScale = 1.0f / scale;
 
-        float textX = calculatedInnerShape.x();
-        int   relX  = (int) ((mouseX - textX) * inverseScale);
+        MPMutableGuiShape calculatedInnerShape = getCalculatedInnerShape();
+        float             textX                = calculatedInnerShape.x();
+        int               relX                 = (int) ((mouseX - textX) * inverseScale);
 
         String visibleText = fr.trimStringToWidth(
                 getText().substring(lineScrollOffset),
@@ -738,10 +466,12 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     }
     @Override
     public boolean textboxKeyTyped(char typedChar, int keyCode) {
+        MPGuiMouseMoveEvent<T> moveEvent = getCore().getMoveEvent();
         return dispatchKeyTyped(Minecraft.getMinecraft(), moveEvent.getMouseX(), moveEvent.getMouseY(), typedChar, keyCode);
     }
     @Override
     public final void drawTextBox() {
+        MPGuiMouseMoveEvent<T> moveEvent = getCore().getMoveEvent();
         dispatchDraw(
                 Minecraft.getMinecraft(), moveEvent.getMouseX(), moveEvent.getMouseY(),
                 Minecraft.getMinecraft().getRenderPartialTicks()
@@ -763,29 +493,37 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     @Override public boolean isMouseOver()                                { return MPGuiElement.super.isMouseOver(); }
 
     @Override
+    public final void setEnableBackgroundDrawing(boolean enableBackgroundDrawing) {
+        MouseProject.LOGGER.warn("backgroundDrawing is permanently enabled for MPGuiTextField. " +
+                "If you are attempting to set it manually, please keep in mind that doing so will have no effect.");
+    }
+
+    @Override
     public void writeText(String textToWrite) {
-        String newText = internalWriteText(textToWrite);
-        MPGuiEventFactory.pushTextTypedEvent(
+        MPGuiMouseMoveEvent<T> moveEvent = getCore().getMoveEvent();
+        String                 newText   = internalWriteText(textToWrite);
+        pushTextTypedEvent(
                 textTypedEvent, moveEvent.getMouseX(), moveEvent.getMouseY(),
                 getCursorPosition(), getSelectionEnd(), getText(), newText
         );
         onAnyEventFire(textTypedEvent);
         if (!textTypedEvent.isCancelled()) {
-            guiString = MPGuiString.simple(newText);
+            getCore().setGuiString(MPGuiString.simple(newText));
             super.writeText(textToWrite);
         }
     }
 
     @Override
     public void deleteFromCursor(int num) {
-        String newText = internalDeleteFromCursor(num);
-        MPGuiEventFactory.pushTextTypedEvent(
+        MPGuiMouseMoveEvent<T> moveEvent = getCore().getMoveEvent();
+        String                 newText   = internalDeleteFromCursor(num);
+        pushTextTypedEvent(
                 textTypedEvent, moveEvent.getMouseX(), moveEvent.getMouseY(), getCursorPosition(), getSelectionEnd(),
                 getText(), newText
         );
         onAnyEventFire(textTypedEvent);
         if (!textTypedEvent.isCancelled()) {
-            guiString = MPGuiString.simple(newText);
+            getCore().setGuiString(MPGuiString.simple(newText));
             super.deleteFromCursor(num);
         }
     }
@@ -837,7 +575,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         }
 
         float scale                = getFontSize().getScale() * getTextScaleMultiplayer();
-        int   scaledAvailableWidth = (int) (calculatedInnerShape.width() / scale);
+        int   scaledAvailableWidth = (int) (getCalculatedInnerShape().width() / scale);
 
         String s = fr.trimStringToWidth(getText().substring(lineScrollOffset), scaledAvailableWidth);
         int    k = s.length() + lineScrollOffset;
@@ -856,7 +594,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
     @Override
     public void setVisible(boolean isVisible) {
-        if (isVisible) stateManager.remove(MPGuiElementState.HIDDEN);
-        else stateManager.add(MPGuiElementState.HIDDEN);
+        if (isVisible) getStateManager().remove(MPGuiElementState.HIDDEN);
+        else getStateManager().add(MPGuiElementState.HIDDEN);
     }
 }

@@ -1,5 +1,5 @@
 /**
- * It is advised that you do not edit anything in the build.gradle; unless you are sure of what you are doing
+ * It is advised that you do not edit anything in the cache.gradle; unless you are sure of what you are doing
  */
 
 import com.gtnewhorizons.retrofuturagradle.mcp.InjectTagsTask
