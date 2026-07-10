@@ -11,10 +11,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiPanel;
 import ru.mousecray.mouseproject.client.gui.core.dim.*;
-import ru.mousecray.mouseproject.client.gui.core.dim.layout.GridLayoutParams;
-import ru.mousecray.mouseproject.client.gui.core.dim.layout.MPGridPos;
-import ru.mousecray.mouseproject.client.gui.core.dim.layout.MPGuiLayoutParams;
-import ru.mousecray.mouseproject.client.gui.core.dim.layout.MPGuiMargin;
+import ru.mousecray.mouseproject.client.gui.core.dim.layout.*;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -48,6 +45,49 @@ public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
         gridGapX = gapX;
         gridGapY = gapY;
         return this;
+    }
+
+    @Override
+    public void measurePreferred(IGuiVector pDefSize, IGuiVector pContentSize, float sugX, float sugY, MPMutableGuiVector result) {
+        super.measurePreferred(pDefSize, pContentSize, sugX, sugY, result);
+        MPGuiScaleRules rules = getScaleRules();
+        if (!rules.isWrapHorizontal() && !rules.isWrapVertical()) return;
+
+        float scaledGapX = calculateFlowComponentX(pDefSize, pContentSize, gridGapX);
+        float scaledGapY = calculateFlowComponentY(pDefSize, pContentSize, gridGapY);
+
+        float maxCellW = 0;
+        float maxCellH = 0;
+
+        for (MPGuiElement<?> child : children) {
+            measureChildWithMargin(pDefSize, pContentSize, child, getChildMargin(child), marginTemp, measureTemp);
+            float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
+
+            MPGuiLayoutParams params = child.getCore().getLayoutParams();
+            MPGridPos         pos    = params instanceof GridLayoutParams ? ((GridLayoutParams) params).gridPos : MPGridPos.DEFAULT();
+
+            float childReqW = measureTemp.x() + ml + mr;
+            float childReqH = measureTemp.y() + mt + mb;
+
+            float cellW = (childReqW - scaledGapX * (pos.colSpan - 1)) / pos.colSpan;
+            float cellH = (childReqH - scaledGapY * (pos.rowSpan - 1)) / pos.rowSpan;
+
+            if (cellW > maxCellW) maxCellW = cellW;
+            if (cellH > maxCellH) maxCellH = cellH;
+        }
+
+        if (rules.isWrapHorizontal()) {
+            float        totalW = maxCellW * gridCols + scaledGapX * Math.max(0, gridCols - 1);
+            MPGuiPadding pad    = getPadding();
+            totalW += calculateFlowComponentX(pDefSize, pContentSize, pad.getLeft() + pad.getRight());
+            result.withX(totalW);
+        }
+        if (rules.isWrapVertical()) {
+            float        totalH = maxCellH * gridRows + scaledGapY * Math.max(0, gridRows - 1);
+            MPGuiPadding pad    = getPadding();
+            totalH += calculateFlowComponentY(pDefSize, pContentSize, pad.getTop() + pad.getBottom());
+            result.withY(totalH);
+        }
     }
 
     public void addChild(MPGuiElement<?> child, @Nullable MPGuiMargin margin, @Nullable MPAnchorPos anchor, @Nullable MPGuiVector offset, @Nullable MPGridPos gridPos) {

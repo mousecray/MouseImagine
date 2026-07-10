@@ -50,6 +50,11 @@ public class MPGuiScaleRules {
             scaleTypes.remove(MPGuiScaleType.PARENT_VERTICAL);
             addType(MPGuiScaleType.PARENT);
         }
+        if (scaleTypes.contains(MPGuiScaleType.WRAP_HORIZONTAL) && scaleTypes.contains(MPGuiScaleType.WRAP_VERTICAL)) {
+            scaleTypes.remove(MPGuiScaleType.WRAP_HORIZONTAL);
+            scaleTypes.remove(MPGuiScaleType.WRAP_VERTICAL);
+            addType(MPGuiScaleType.WRAP);
+        }
     }
 
     private boolean isIncompatible(MPGuiScaleType a, MPGuiScaleType b) {
@@ -67,6 +72,9 @@ public class MPGuiScaleRules {
         return false;
     }
 
+    public boolean isWrap()                    { return isWrapHorizontal() && isWrapVertical(); }
+    public boolean isWrapHorizontal()          { return scaleTypes.contains(MPGuiScaleType.WRAP) || scaleTypes.contains(MPGuiScaleType.WRAP_HORIZONTAL); }
+    public boolean isWrapVertical()            { return scaleTypes.contains(MPGuiScaleType.WRAP) || scaleTypes.contains(MPGuiScaleType.WRAP_VERTICAL); }
     public boolean isSizeable()                { return isSizeableHorizontal() || isSizeableVertical(); }
     public boolean isSizeableHorizontal()      { return scaleTypes.contains(MPGuiScaleType.FLOW) || scaleTypes.contains(MPGuiScaleType.FLOW_HORIZONTAL); }
     public boolean isSizeableVertical()        { return scaleTypes.contains(MPGuiScaleType.FLOW) || scaleTypes.contains(MPGuiScaleType.FLOW_VERTICAL); }

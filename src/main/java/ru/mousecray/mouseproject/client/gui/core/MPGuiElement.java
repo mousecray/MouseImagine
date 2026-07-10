@@ -138,10 +138,19 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
 
     default void calculate(IGuiVector pDefSize, IGuiVector pContentSize, IGuiShape available) {
         MPMutableGuiShape calcShape = getCalculatedShape();
+        MPGuiScaleRules   rules     = getScaleRules();
 
         calculateFlowComponentShape(
-                calcShape, pDefSize, pContentSize, getShape(), getScaleRules(), available
+                calcShape, pDefSize, pContentSize, getShape(), rules, available
         );
+
+        if (rules.isWrapHorizontal() || rules.isWrapVertical()) {
+            MPMutableGuiVector pref = new MPMutableGuiVector();
+            measurePreferred(pDefSize, pContentSize, available.width(), available.height(), pref);
+
+            if (rules.isWrapHorizontal()) calcShape.withWidth(pref.x());
+            if (rules.isWrapVertical()) calcShape.withHeight(pref.y());
+        }
 
         if (calcShape.width() <= 0 || calcShape.height() <= 0) return;
 

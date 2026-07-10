@@ -11,6 +11,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiPanel;
 import ru.mousecray.mouseproject.client.gui.core.dim.*;
+import ru.mousecray.mouseproject.client.gui.core.dim.layout.MPGuiPadding;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -28,6 +29,37 @@ public class MPGuiLinearPanel extends MPGuiPanel<MPGuiLinearPanel> {
     }
 
     public void setOrientation(MPOrientation linearOrientation) { this.linearOrientation = linearOrientation; }
+
+    @Override
+    public void measurePreferred(IGuiVector pDefSize, IGuiVector pContentSize, float sugX, float sugY, MPMutableGuiVector result) {
+        super.measurePreferred(pDefSize, pContentSize, sugX, sugY, result);
+        MPGuiScaleRules rules = getScaleRules();
+        if (!rules.isWrapHorizontal() && !rules.isWrapVertical()) return;
+
+        float totalW = 0;
+        float totalH = 0;
+
+        for (MPGuiElement<?> child : children) {
+            measureChildWithMargin(pDefSize, pContentSize, child, getChildMargin(child), marginTemp, measureTemp);
+            float w = measureTemp.x() + marginTemp[0] + marginTemp[2];
+            float h = measureTemp.y() + marginTemp[1] + marginTemp[3];
+
+            if (linearOrientation == MPOrientation.HORIZONTAL) {
+                totalW += w;
+                if (h > totalH) totalH = h;
+            } else {
+                totalH += h;
+                if (w > totalW) totalW = w;
+            }
+        }
+
+        MPGuiPadding pad = getPadding();
+        totalW += calculateFlowComponentX(pDefSize, pContentSize, pad.getLeft() + pad.getRight());
+        totalH += calculateFlowComponentY(pDefSize, pContentSize, pad.getTop() + pad.getBottom());
+
+        if (rules.isWrapHorizontal()) result.withX(totalW);
+        if (rules.isWrapVertical()) result.withY(totalH);
+    }
 
     @Override
     protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MPMutableGuiShape inner) {

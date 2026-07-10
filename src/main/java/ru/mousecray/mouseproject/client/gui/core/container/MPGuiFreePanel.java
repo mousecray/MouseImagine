@@ -10,9 +10,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiPanel;
-import ru.mousecray.mouseproject.client.gui.core.dim.IGuiVector;
-import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
-import ru.mousecray.mouseproject.client.gui.core.dim.MPMutableGuiShape;
+import ru.mousecray.mouseproject.client.gui.core.dim.*;
+import ru.mousecray.mouseproject.client.gui.core.dim.layout.MPGuiPadding;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -23,6 +22,41 @@ import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHel
 @MethodsReturnNonnullByDefault
 public class MPGuiFreePanel extends MPGuiPanel<MPGuiFreePanel> {
     public MPGuiFreePanel(MPGuiShape elementShape) { super(elementShape); }
+
+    @Override
+    public void measurePreferred(IGuiVector pDefSize, IGuiVector pContentSize, float sugX, float sugY, MPMutableGuiVector result) {
+        super.measurePreferred(pDefSize, pContentSize, sugX, sugY, result);
+        MPGuiScaleRules rules = getScaleRules();
+        if (!rules.isWrapHorizontal() && !rules.isWrapVertical()) return;
+
+        float maxR = 0;
+        float maxB = 0;
+
+        for (MPGuiElement<?> child : children) {
+            if (!child.isVisible()) continue;
+            measureChildWithMargin(pDefSize, pContentSize, child, getChildMargin(child), marginTemp, measureTemp);
+
+            float posX = child.getScaleRules().isFixedHorizontal() ? child.getShape().x()
+                    : calculateFlowComponentX(pDefSize, pContentSize, child.getShape().x());
+            float posY = child.getScaleRules().isFixedVertical() ? child.getShape().y()
+                    : calculateFlowComponentY(pDefSize, pContentSize, child.getShape().y());
+
+            float[] scaledOffset = calculateScaledOffset(child, pDefSize, pContentSize);
+
+            float right  = posX + scaledOffset[0] + marginTemp[0] + measureTemp.x() + marginTemp[2];
+            float bottom = posY + scaledOffset[1] + marginTemp[1] + measureTemp.y() + marginTemp[3];
+
+            if (right > maxR) maxR = right;
+            if (bottom > maxB) maxB = bottom;
+        }
+
+        MPGuiPadding pad = getPadding();
+        maxR += calculateFlowComponentX(pDefSize, pContentSize, pad.getLeft() + pad.getRight());
+        maxB += calculateFlowComponentY(pDefSize, pContentSize, pad.getTop() + pad.getBottom());
+
+        if (rules.isWrapHorizontal()) result.withX(maxR);
+        if (rules.isWrapVertical()) result.withY(maxB);
+    }
 
     @Override
     protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MPMutableGuiShape inner) {

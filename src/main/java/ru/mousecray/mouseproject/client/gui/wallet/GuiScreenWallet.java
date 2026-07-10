@@ -294,15 +294,12 @@ public class GuiScreenWallet extends MPGuiScreen {
 
                     IntRef rowsNum = new IntRef((int) Math.ceil(groupSlots.getValue().size() / (double) slot_count_x));
                     if (rowsNum.$() == 0) rowsNum.$(1);
-                    float gridActualH = rowsNum.$() * coinH + (rowsNum.$() - 1) * CELL_GAP;
-                    float groupH      = 18f + gridActualH;
-
 
                     MPGuiLinearPanel groupPanel = createCachedElement("group_panel_" + idx, columnPanel)
-                            .construct(() -> new MPGuiLinearPanel(new MPGuiShape(0, 0, colWidth, groupH), MPOrientation.VERTICAL))
+                            .construct(() -> new MPGuiLinearPanel(new MPGuiShape(0, 0, colWidth, 0), MPOrientation.VERTICAL))
                             .setMargin(new MPGuiMargin(0, 0, 8f, 8f))
+                            .setCreateAction(t -> t.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT_HORIZONTAL, MPGuiScaleType.WRAP_VERTICAL)))
                             .setFinalAction(t -> {
-                                t.setShape(t.getShape().withHeight(groupH));
                                 t.removeAllChildren();
                                 t.getStateManager().clearStates();
                             })
@@ -311,6 +308,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                     MPGuiAnchorPanel titlePanel = createCachedElement("title_panel_" + idx, groupPanel)
                             .construct(() -> new MPGuiAnchorPanel(new MPGuiShape(0, 0, colWidth, 12)))
                             .setMargin(new MPGuiMargin(0, 3f))
+                            .setCreateAction(t -> t.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT_HORIZONTAL)))
                             .setFinalAction(t -> {
                                 t.removeAllChildren();
                                 t.getStateManager().clearStates();
@@ -339,12 +337,15 @@ public class GuiScreenWallet extends MPGuiScreen {
                             .build();
 
                     MPGuiGridPanel coinsGrid = createCachedElement("coins_grid_" + idx, groupPanel)
-                            .construct(() -> new MPGuiGridPanel(new MPGuiShape(0, 0, colWidth, gridActualH), rowsNum.$(), slot_count_x))
+                            .construct(() -> new MPGuiGridPanel(new MPGuiShape(0, 0, colWidth, 0), rowsNum.$(), slot_count_x))
                             .setMargin(new MPGuiMargin(2, 0, 0, 0))
-                            .setCreateAction(t -> t.setGaps(0, CELL_GAP))
+                            .setCreateAction(t -> {
+                                t.setGaps(0, CELL_GAP);
+                                t.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT_HORIZONTAL, MPGuiScaleType.WRAP_VERTICAL));
+
+                            })
                             .setFinalAction(t -> {
                                 t.setGridSize(rowsNum.$(), slot_count_x);
-                                t.setShape(t.getShape().withHeight(gridActualH));
                                 t.removeAllChildren();
                                 t.getStateManager().clearStates();
                             })
