@@ -1,6 +1,6 @@
 package ru.mousecray.mouseproject.api.utils;
 
-import ru.mousecray.realdream.api.customtype.CustomType;
+import ru.mousecray.mouseproject.api.customtype.CustomType;
 
 public class MouseLambdas {
     public static <T> T THIS(T val)                                           { return val; }

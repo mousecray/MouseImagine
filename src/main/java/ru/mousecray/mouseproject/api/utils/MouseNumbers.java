@@ -1,6 +1,6 @@
 package ru.mousecray.mouseproject.api.utils;
 
-import ru.mousecray.realdream.api.anno.MethodReturnsNonnullByDefault;
+import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
