@@ -9,7 +9,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.Tags;
-import ru.mousecray.mouseproject.api.client.dim.GuiVector;
+import ru.mousecray.mouseproject.api.client.gui.dim.GuiVector;
 
 public class MouseStaticData {
     @SideOnly(Side.CLIENT)

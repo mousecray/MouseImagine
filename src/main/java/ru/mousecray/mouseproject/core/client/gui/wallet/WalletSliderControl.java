@@ -7,17 +7,17 @@ package ru.mousecray.mouseproject.core.client.gui.wallet;
 
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.mouseproject.api.client.component.lang.MGuiString;
-import ru.mousecray.mouseproject.api.client.container.MGuiLinearPanel;
-import ru.mousecray.mouseproject.api.client.control.MGuiNumberField;
-import ru.mousecray.mouseproject.api.client.control.MGuiSimpleSlider;
-import ru.mousecray.mouseproject.api.client.dim.GuiShape;
-import ru.mousecray.mouseproject.api.client.dim.layout.GuiOrientation;
-import ru.mousecray.mouseproject.api.client.dim.layout.GuiPadding;
-import ru.mousecray.mouseproject.api.client.dim.layout.GuiScaleRules;
-import ru.mousecray.mouseproject.api.client.dim.layout.GuiScaleType;
-import ru.mousecray.mouseproject.api.client.event.GuiTextTypedEvent;
-import ru.mousecray.mouseproject.api.client.misc.NumberMode;
+import ru.mousecray.mouseproject.api.client.gui.component.lang.MGuiString;
+import ru.mousecray.mouseproject.api.client.gui.container.MGuiLinearPanel;
+import ru.mousecray.mouseproject.api.client.gui.control.MGuiNumberField;
+import ru.mousecray.mouseproject.api.client.gui.control.MGuiSimpleSlider;
+import ru.mousecray.mouseproject.api.client.gui.dim.GuiShape;
+import ru.mousecray.mouseproject.api.client.gui.dim.layout.GuiOrientation;
+import ru.mousecray.mouseproject.api.client.gui.dim.layout.GuiPadding;
+import ru.mousecray.mouseproject.api.client.gui.dim.layout.GuiScaleRules;
+import ru.mousecray.mouseproject.api.client.gui.dim.layout.GuiScaleType;
+import ru.mousecray.mouseproject.api.client.gui.event.GuiTextTypedEvent;
+import ru.mousecray.mouseproject.api.client.gui.misc.NumberMode;
 
 import java.util.function.Consumer;
 
