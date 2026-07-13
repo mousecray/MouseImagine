@@ -1,0 +1,48 @@
+package ru.mousecray.mouseproject.api.config.values.list.conditional;
+
+import ru.mousecray.mouseproject.api.anno.FieldsAreNonnullByDefault;
+import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
+import ru.mousecray.mouseproject.api.config.specific.ConfigValType;
+import ru.mousecray.mouseproject.api.config.utils.Constraint;
+import ru.mousecray.mouseproject.api.config.utils.PredefinedValue;
+import ru.mousecray.mouseproject.api.config.values.base.list.conditional.ConfigConditionalListNumberVal;
+import ru.mousecray.mouseproject.api.customtype.CustomType;
+import ru.mousecray.mouseproject.api.customtype.range.Range;
+import ru.mousecray.mouseproject.api.customtype.range.RangeContainer;
+import ru.mousecray.mouseproject.api.customtype.values.ConditionalListType;
+import ru.mousecray.mouseproject.api.customtype.values.IntegralType;
+
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Function;
+
+@ParametersAreNonnullByDefault
+@MethodReturnsNonnullByDefault
+@FieldsAreNonnullByDefault
+public class ConfigValIntegralConditionalList extends ConfigConditionalListNumberVal<IntegralType> {
+    @SafeVarargs
+    public ConfigValIntegralConditionalList(
+            @Nullable ConditionalListType<IntegralType> defaultValue, @Nullable ConditionalListType<IntegralType> disabledValue,
+            @Nullable RangeContainer<IntegralType> range,
+            @Nullable Constraint<?>[] constraints,
+            @Nullable PredefinedValue<ConditionalListType<IntegralType>>... configureValues
+    ) {
+        super(
+                ConfigValType.INTEGRAL, IntegralType.class, createValCreator(),
+                defaultValue == null
+                        ? ConditionalListType.create(IntegralType.class, createValCreator())
+                        : defaultValue,
+                disabledValue == null
+                        ? ConditionalListType.create(IntegralType.class, createValCreator())
+                        : disabledValue,
+                range == null
+                        ? new RangeContainer<>(Range.of(IntegralType.MIN, IntegralType.MAX))
+                        : range,
+                constraints, configureValues
+        );
+    }
+
+    private static Function<String, IntegralType> createValCreator() {
+        return str -> CustomType.parse(IntegralType.class, str);
+    }
+}

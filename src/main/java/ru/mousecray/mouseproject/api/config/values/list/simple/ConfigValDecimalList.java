@@ -1,0 +1,48 @@
+package ru.mousecray.mouseproject.api.config.values.list.simple;
+
+import ru.mousecray.mouseproject.api.anno.FieldsAreNonnullByDefault;
+import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
+import ru.mousecray.mouseproject.api.config.specific.ConfigValType;
+import ru.mousecray.mouseproject.api.config.utils.Constraint;
+import ru.mousecray.mouseproject.api.config.utils.PredefinedValue;
+import ru.mousecray.mouseproject.api.config.values.base.list.simple.ConfigSimpleListNumberVal;
+import ru.mousecray.mouseproject.api.customtype.CustomType;
+import ru.mousecray.mouseproject.api.customtype.range.Range;
+import ru.mousecray.mouseproject.api.customtype.range.RangeContainer;
+import ru.mousecray.mouseproject.api.customtype.values.DecimalType;
+import ru.mousecray.mouseproject.api.customtype.values.SimpleListType;
+
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Function;
+
+@ParametersAreNonnullByDefault
+@MethodReturnsNonnullByDefault
+@FieldsAreNonnullByDefault
+public class ConfigValDecimalList extends ConfigSimpleListNumberVal<DecimalType> {
+    @SafeVarargs
+    public ConfigValDecimalList(
+            @Nullable SimpleListType<DecimalType> defaultValue, @Nullable SimpleListType<DecimalType> disabledValue,
+            @Nullable RangeContainer<DecimalType> range,
+            @Nullable Constraint<?>[] constraints,
+            @Nullable PredefinedValue<SimpleListType<DecimalType>>... configureValues
+    ) {
+        super(
+                ConfigValType.DECIMAL, DecimalType.class, createValCreator(),
+                defaultValue == null
+                        ? SimpleListType.create(DecimalType.class, createValCreator())
+                        : defaultValue,
+                disabledValue == null
+                        ? SimpleListType.create(DecimalType.class, createValCreator())
+                        : disabledValue,
+                range == null
+                        ? new RangeContainer<>(Range.of(DecimalType.MIN, DecimalType.MAX))
+                        : range,
+                constraints, configureValues
+        );
+    }
+
+    private static Function<String, DecimalType> createValCreator() {
+        return str -> CustomType.parse(DecimalType.class, str);
+    }
+}

@@ -1,0 +1,32 @@
+package ru.mousecray.mouseproject.api.config.specific;
+
+import ru.mousecray.mouseproject.api.config.IValType;
+import ru.mousecray.mouseproject.api.customtype.CustomValType;
+
+import javax.annotation.Nonnull;
+
+public enum ConfigValType implements IValType {
+    LOGICAL("Logical", CustomValType.LOGICAL),
+    INTEGRAL("Integral Number", CustomValType.NUMBER),
+    DECIMAL("Decimal Number", CustomValType.NUMBER),
+    STRING("String", CustomValType.OTHER),
+    PERCENT("PercentType", CustomValType.NUMBER),
+    RANDOM_QUANTITY("Random Quantity", CustomValType.NUMBER),
+    CONDITION("Condition", CustomValType.OTHER),
+    LIST("List", CustomValType.LIST),
+    CONDITIONAL_LIST("Conditional List", CustomValType.LIST),
+    UNDEFINED("Undefined");
+
+    private final String        displayName;
+    private final CustomValType valType;
+
+    ConfigValType(String displayName, CustomValType valType) {
+        this.displayName = displayName;
+        this.valType = valType;
+    }
+
+    ConfigValType(String displayName)                    { this(displayName, CustomValType.UNDEFINED); }
+
+    @Nonnull @Override public String getDisplayName()    { return displayName; }
+    @Nonnull @Override public CustomValType getValType() { return valType; }
+}

@@ -1,0 +1,23 @@
+package ru.mousecray.mouseproject.api.config.pars;
+
+import org.apache.commons.lang3.tuple.Pair;
+import ru.mousecray.mouseproject.api.DisplayName;
+import ru.mousecray.mouseproject.api.config.ConfigParBase;
+import ru.mousecray.mouseproject.api.config.ConfigVal;
+import ru.mousecray.mouseproject.api.customtype.CustomType;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@ParametersAreNonnullByDefault
+public class ConfigPar<T extends CustomType<?>> extends ConfigParBase<T> {
+    public ConfigPar(
+            @Nonnull DisplayName name, boolean canBeDisabled,
+            ConfigVal<T> value, @Nullable String comment
+    ) {
+        super(name, canBeDisabled, Pair.of(name, value), null, comment);
+    }
+
+    @Override public boolean isSupportAdditionalValue(ConfigVal<?> val) { return false; }
+}
