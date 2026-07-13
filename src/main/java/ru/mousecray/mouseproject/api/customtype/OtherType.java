@@ -34,7 +34,7 @@ public abstract class OtherType<T extends Comparable<T>> extends CustomType<Othe
                 throw new UnsupportedValException();
             }
 
-            @Override
+            @SuppressWarnings("unchecked") @Override
             public <TYPE extends CustomType<TYPE>> TYPE asValue(TYPE other) {
                 if (other instanceof OtherType) {
                     return (TYPE) ((OtherType<?>) other).createType(getValue());

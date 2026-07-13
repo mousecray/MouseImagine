@@ -51,7 +51,7 @@ public abstract class NumberType<T extends Comparable<T>> extends CustomType<Num
                 throw new UnsupportedValException();
             }
 
-            @Override
+            @SuppressWarnings("unchecked") @Override
             public <TYPE extends CustomType<TYPE>> TYPE asValue(TYPE other) {
                 if (other instanceof NumberType) {
                     return (TYPE) ((NumberType<?>) other).createType(asNumber());

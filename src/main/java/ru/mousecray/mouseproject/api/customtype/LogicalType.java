@@ -50,7 +50,7 @@ public abstract class LogicalType<T extends Comparable<T>> extends CustomType<Lo
                 throw new UnsupportedValException();
             }
 
-            @Override
+            @SuppressWarnings("unchecked") @Override
             public <TYPE extends CustomType<TYPE>> TYPE asValue(TYPE other) {
                 if (other instanceof LogicalType) {
                     return (TYPE) ((LogicalType<?>) other).createType(isTrue());
@@ -133,13 +133,13 @@ public abstract class LogicalType<T extends Comparable<T>> extends CustomType<Lo
     @Override
     protected CustomArithmetic<LogicalType<?>> createArithmeticPipeline() {
         return new CustomArithmetic<LogicalType<?>>() {
-            @Override
+            @SuppressWarnings("unchecked") @Override
             public LogicalType<T> invert() { return (LogicalType<T>) getLogicPipeline().not(); }
 
-            @Override
+            @SuppressWarnings("unchecked") @Override
             public LogicalType<T> increment() { return (LogicalType<T>) getLogicPipeline().not(); }
 
-            @Override
+            @SuppressWarnings("unchecked") @Override
             public LogicalType<T> decrement() { return (LogicalType<T>) getLogicPipeline().not(); }
 
             @Override
