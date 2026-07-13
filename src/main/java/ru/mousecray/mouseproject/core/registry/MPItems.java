@@ -17,8 +17,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.registries.IForgeRegistry;
+import ru.mousecray.mouseproject.api.utils.MouseReflection;
 import ru.mousecray.mouseproject.core.MouseProject;
-import ru.mousecray.mouseproject.api.utils.MReflectionUtils;
 import ru.mousecray.mouseproject.core.common.economy.capacity.NormalWalletCapacity;
 import ru.mousecray.mouseproject.core.common.economy.capacity.ResourceWalletCapacity;
 import ru.mousecray.mouseproject.core.common.economy.capacity.SpecificWalletCapacity;
@@ -263,13 +263,13 @@ public class MPItems {
         onInit();
         MouseProject.LOGGER.info("Initialized items");
         IForgeRegistry<Item> registry = e.getRegistry();
-        MReflectionUtils.prepare(MPItems.class).<Item>getPublicStaticFields().forEach(registry::register);
+        MouseReflection.prepare(MPItems.class).<Item>getPublicStaticFields().forEach(registry::register);
         MouseProject.LOGGER.info("Registered items");
     }
 
     @SubscribeEvent @SideOnly(Side.CLIENT)
     public static void onRegistryModel(ModelRegistryEvent e) {
-        MReflectionUtils.prepare(MPItems.class).<Item>getPublicStaticFields().forEach(MPItems::registerModel);
+        MouseReflection.prepare(MPItems.class).<Item>getPublicStaticFields().forEach(MPItems::registerModel);
         MouseProject.LOGGER.info("Registered item models");
     }
 

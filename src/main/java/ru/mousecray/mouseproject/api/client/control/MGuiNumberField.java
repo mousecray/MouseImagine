@@ -20,8 +20,8 @@ import ru.mousecray.mouseproject.api.client.misc.NumberMode;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
 
-import static ru.mousecray.mouseproject.api.utils.MStaticData.CONTROLS_TEXTURES;
-import static ru.mousecray.mouseproject.api.utils.MStaticData.CONTROLS_TEXTURES_SIZE;
+import static ru.mousecray.mouseproject.api.utils.MouseStaticData.CONTROLS_TEXTURES;
+import static ru.mousecray.mouseproject.api.utils.MouseStaticData.CONTROLS_TEXTURES_SIZE;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault

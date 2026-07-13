@@ -10,7 +10,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 
-public final class MJsonUtils {
+public final class MouseJson {
     public static long getLong(JsonObject json, String memberName) {
         if (json.has(memberName)) return getLong(json.get(memberName), memberName);
         else throw new JsonSyntaxException("Missing " + memberName + ", expected to find a Int");
@@ -40,5 +40,5 @@ public final class MJsonUtils {
         }
     }
 
-    private MJsonUtils() { throw new UnsupportedOperationException("Cannot create utility class"); }
+    private MouseJson() { throw new UnsupportedOperationException("Cannot create utility class"); }
 }

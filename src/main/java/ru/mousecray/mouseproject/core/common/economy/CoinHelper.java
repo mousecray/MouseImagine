@@ -16,7 +16,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
-import ru.mousecray.mouseproject.api.utils.MMathUtils;
+import ru.mousecray.mouseproject.api.utils.MouseMath;
 import ru.mousecray.mouseproject.core.common.economy.coin.NormalCoinType;
 import ru.mousecray.mouseproject.core.common.event.CoinDropEvent;
 import ru.mousecray.mouseproject.core.common.event.MPEventPipeline;
@@ -118,11 +118,11 @@ public class CoinHelper {
                 displayCoins.forEach((type, value) -> {
                     int i = rand.nextInt(4) + 2;
                     if (fullNormal.isLessOrEqual(CoinValue.create((long) i, type))) i = fullNormal.getAsInt();
-                    long[] groups = MMathUtils.distributeNumber(value, i);
+                    long[] groups = MouseMath.distributeNumber(value, i);
                     if (groups != null) {
                         for (long group : groups) {
                             if (group > 0) {
-                                long[] stacks = MMathUtils.distributeNumber(group, 64);
+                                long[] stacks = MouseMath.distributeNumber(group, 64);
                                 if (stacks != null) {
                                     for (long stack : stacks) if (stack > 0) finalCoins.add(CoinValue.create(stack, type));
                                 }
@@ -138,7 +138,7 @@ public class CoinHelper {
                 if (spec != null && spec.isPositive()) {
                     int i = rand.nextInt(4) + 2;
                     if (spec.isLessOrEqual(CoinValue.create(i, spec.getType()))) i = spec.getAsInt();
-                    int[] array = MMathUtils.distributeNumber(spec.getAsInt(), i);
+                    int[] array = MouseMath.distributeNumber(spec.getAsInt(), i);
                     if (array != null) for (int i1 : array) if (i1 > 0) finalCoins.add(CoinValue.create(i1, spec.getType()));
                 }
             }
@@ -149,7 +149,7 @@ public class CoinHelper {
                 if (res != null && res.isPositive()) {
                     int i = rand.nextInt(4) + 2;
                     if (res.isLessOrEqual(CoinValue.create(i, res.getType()))) i = res.getAsInt();
-                    int[] array = MMathUtils.distributeNumber(res.getAsInt(), i);
+                    int[] array = MouseMath.distributeNumber(res.getAsInt(), i);
                     if (array != null) for (int i1 : array) if (i1 > 0) finalCoins.add(CoinValue.create(i1, res.getType()));
                 }
             }
@@ -160,7 +160,7 @@ public class CoinHelper {
                 if (oth != null && oth.isPositive()) {
                     int i = rand.nextInt(4) + 2;
                     if (oth.isLessOrEqual(CoinValue.create(i, oth.getType()))) i = oth.getAsInt();
-                    long[] array = MMathUtils.distributeNumber(oth.getValue(), i);
+                    long[] array = MouseMath.distributeNumber(oth.getValue(), i);
                     if (array != null) for (long i1 : array) if (i1 > 0) finalCoins.add(CoinValue.create(i1, oth.getType()));
                 }
             }

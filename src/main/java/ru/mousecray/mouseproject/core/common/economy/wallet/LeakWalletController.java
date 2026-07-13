@@ -8,7 +8,7 @@ package ru.mousecray.mouseproject.core.common.economy.wallet;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import ru.mousecray.mouseproject.api.utils.MRandomUtils;
+import ru.mousecray.mouseproject.api.utils.MouseRandom;
 import ru.mousecray.mouseproject.core.common.economy.CoinHelper;
 import ru.mousecray.mouseproject.core.common.economy.CoinValue;
 import ru.mousecray.mouseproject.core.common.economy.coin.CoinType;
@@ -24,7 +24,7 @@ import java.util.Random;
 
 public class LeakWalletController {
     public static void fireDrop(World world, EntityLiving entity, ItemStack wallet, Random rand, IWallet provider) {
-        if (MRandomUtils.normalChance(rand, 1)) {
+        if (MouseRandom.normalChance(rand, 1)) {
             List<CoinType>  coins     = provider.getCurrentCoins(world, entity, wallet);
             List<CoinValue> normal    = new ArrayList<>();
             List<CoinValue> specific  = new ArrayList<>();

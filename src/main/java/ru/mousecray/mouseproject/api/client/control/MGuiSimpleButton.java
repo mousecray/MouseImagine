@@ -17,8 +17,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import static ru.mousecray.mouseproject.api.client.component.state.MGuiElementState.HOVERED;
 import static ru.mousecray.mouseproject.api.client.component.state.MGuiElementState.PRESSED;
-import static ru.mousecray.mouseproject.api.utils.MStaticData.CONTROLS_TEXTURES;
-import static ru.mousecray.mouseproject.api.utils.MStaticData.CONTROLS_TEXTURES_SIZE;
+import static ru.mousecray.mouseproject.api.utils.MouseStaticData.CONTROLS_TEXTURES;
+import static ru.mousecray.mouseproject.api.utils.MouseStaticData.CONTROLS_TEXTURES_SIZE;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault

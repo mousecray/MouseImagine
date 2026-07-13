@@ -15,8 +15,8 @@ import ru.mousecray.mouseproject.api.client.dim.GuiVector;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import static ru.mousecray.mouseproject.api.utils.MStaticData.CONTROLS_TEXTURES;
-import static ru.mousecray.mouseproject.api.utils.MStaticData.CONTROLS_TEXTURES_SIZE;
+import static ru.mousecray.mouseproject.api.utils.MouseStaticData.CONTROLS_TEXTURES;
+import static ru.mousecray.mouseproject.api.utils.MouseStaticData.CONTROLS_TEXTURES_SIZE;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault

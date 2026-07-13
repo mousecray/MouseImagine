@@ -1,0 +1,38 @@
+package ru.mousecray.mouseproject.api.customtype.values;
+
+import ru.mousecray.mouseproject.api.customtype.LogicalType;
+import ru.mousecray.mouseproject.api.utils.MouseStrings;
+
+import javax.annotation.Nonnull;
+
+public final class PlusMinusType extends LogicalType<String> {
+    public static final PlusMinusType TRUE  = new PlusMinusType(Boolean.TRUE);
+    public static final PlusMinusType FALSE = new PlusMinusType(Boolean.FALSE);
+    public static final PlusMinusType NULL  = new PlusMinusType(Boolean.FALSE);
+
+    static {
+        storage.put(PlusMinusType.class, str -> {
+            str = MouseStrings.trimWith(str, true, '\t');
+            if (str == null || str.isEmpty()) return NULL;
+            switch (str.charAt(0)) {
+                case '+':
+                    return TRUE;
+                case '-':
+                    return FALSE;
+                default:
+                    return NULL;
+            }
+        });
+    }
+
+    private PlusMinusType(boolean isYes)              { super("+", "-", isYes); }
+    public static PlusMinusType create(boolean isYes) { return isYes ? TRUE : FALSE; }
+
+    @Nonnull @Override
+    public IntegralType asNumberType() { return IntegralType.create(asInt()); }
+
+    @SuppressWarnings("unchecked") @Nonnull @Override
+    public PlusMinusType createType(boolean isYes) {
+        return create(isYes);
+    }
+}

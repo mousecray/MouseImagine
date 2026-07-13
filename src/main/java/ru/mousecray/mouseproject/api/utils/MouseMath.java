@@ -10,7 +10,7 @@ import net.minecraft.util.math.MathHelper;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 
-public final class MMathUtils {
+public final class MouseMath {
     @Nullable
     public static int[] distributeNumber(int total, int numGroups) {
         if (numGroups <= 0 || total <= 0) return null;
@@ -84,5 +84,5 @@ public final class MMathUtils {
         return MathHelper.clamp(normalized, 0.0f, 1.0f); // Ограничиваем [0, 1]
     }
 
-    private MMathUtils() { throw new UnsupportedOperationException("Cannot create utility class"); }
+    private MouseMath() { throw new UnsupportedOperationException("Cannot create utility class"); }
 }

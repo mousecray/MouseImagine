@@ -23,8 +23,8 @@ import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerDropsEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import ru.mousecray.mouseproject.api.utils.MMathUtils;
-import ru.mousecray.mouseproject.api.utils.MRandomUtils;
+import ru.mousecray.mouseproject.api.utils.MouseMath;
+import ru.mousecray.mouseproject.api.utils.MouseRandom;
 import ru.mousecray.mouseproject.core.common.capability.ICapabilityInventory;
 import ru.mousecray.mouseproject.core.common.capability.impl.CapabilityWalletInventory;
 import ru.mousecray.mouseproject.core.common.economy.CoinHelper;
@@ -79,7 +79,7 @@ public class CoinHandler {
             specific.add(CoinValue.create(rng.nextInt(3) + 1, SpecificCoinType.MYTHIC));
         }
         if (bronze > 0) {
-            bronze += MRandomUtils.normalPercentFrom(rng, bronze, 25, 1);
+            bronze += MouseRandom.normalPercentFrom(rng, bronze, 25, 1);
             if (mob.isChild()) bronze /= 2;
             if (bronze > 0) normal.add(CoinValue.create(bronze, NormalCoinType.BRONZE));
         }
@@ -126,7 +126,7 @@ public class CoinHandler {
                 if (bronze != null) {
                     bronze = bronze.plus(
                             CoinValue.create(
-                                    MRandomUtils.normalPercentFrom(rand, bronze.getValue(), 25, 1),
+                                    MouseRandom.normalPercentFrom(rand, bronze.getValue(), 25, 1),
                                     NormalCoinType.BRONZE)
                     );
                     CoinValue actualBronze = wallet.takeCoin(world, player, stack, bronze);
@@ -138,7 +138,7 @@ public class CoinHandler {
                     if (spec != null) {
                         spec = spec.plus(
                                 CoinValue.create(
-                                        MRandomUtils.normalPercentFrom(rand, spec.getAsInt(), 25, 1),
+                                        MouseRandom.normalPercentFrom(rand, spec.getAsInt(), 25, 1),
                                         value)
                         );
                         CoinValue actualSpec = wallet.takeCoin(world, player, stack, spec);
@@ -151,7 +151,7 @@ public class CoinHandler {
                     if (res != null) {
                         res = res.plus(
                                 CoinValue.create(
-                                        MRandomUtils.normalPercentFrom(rand, res.getAsInt(), 25, 1),
+                                        MouseRandom.normalPercentFrom(rand, res.getAsInt(), 25, 1),
                                         value)
                         );
                         CoinValue actualRes = wallet.takeCoin(world, player, stack, res);
@@ -220,7 +220,7 @@ public class CoinHandler {
                         });
                     } else {
                         //Для других типов разбиваем на группы по 64
-                        int[] groups = MMathUtils.toGroupWithMax(remain.getValue(), 64);
+                        int[] groups = MouseMath.toGroupWithMax(remain.getValue(), 64);
                         if (groups != null) {
                             for (int group : groups) {
                                 if (group > 0) stackToDrop.add(new ItemStack(remain.getType().getItem(), group));

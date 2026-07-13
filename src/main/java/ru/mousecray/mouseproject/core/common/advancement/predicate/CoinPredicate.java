@@ -8,7 +8,7 @@ package ru.mousecray.mouseproject.core.common.advancement.predicate;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.util.JsonUtils;
-import ru.mousecray.mouseproject.api.utils.MJsonUtils;
+import ru.mousecray.mouseproject.api.utils.MouseJson;
 import ru.mousecray.mouseproject.core.common.economy.CoinValue;
 import ru.mousecray.mouseproject.core.common.economy.coin.CoinType;
 
@@ -45,7 +45,7 @@ public class CoinPredicate {
             }
 
             if (jsonobject.has("value")) {
-                value = MJsonUtils.getLong(jsonobject, "value");
+                value = MouseJson.getLong(jsonobject, "value");
             }
 
             if (actualType == null && value <= 0) return ANY;

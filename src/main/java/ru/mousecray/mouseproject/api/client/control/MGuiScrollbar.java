@@ -8,7 +8,6 @@ package ru.mousecray.mouseproject.api.client.control;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.mouseproject.core.MouseProject;
 import ru.mousecray.mouseproject.api.client.MGuiButton;
 import ru.mousecray.mouseproject.api.client.MGuiPanel;
 import ru.mousecray.mouseproject.api.client.component.state.MGuiElementState;
@@ -21,13 +20,14 @@ import ru.mousecray.mouseproject.api.client.dim.layout.GuiScaleType;
 import ru.mousecray.mouseproject.api.client.event.GuiMouseClickEvent;
 import ru.mousecray.mouseproject.api.client.event.GuiMouseDragEvent;
 import ru.mousecray.mouseproject.api.client.event.GuiTickEvent;
+import ru.mousecray.mouseproject.core.MouseProject;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import static ru.mousecray.mouseproject.api.utils.MStaticData.CONTROLS_TEXTURES;
-import static ru.mousecray.mouseproject.api.utils.MStaticData.CONTROLS_TEXTURES_SIZE;
+import static ru.mousecray.mouseproject.api.utils.MouseStaticData.CONTROLS_TEXTURES;
+import static ru.mousecray.mouseproject.api.utils.MouseStaticData.CONTROLS_TEXTURES_SIZE;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault

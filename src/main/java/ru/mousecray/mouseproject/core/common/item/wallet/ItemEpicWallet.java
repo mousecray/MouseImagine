@@ -9,7 +9,7 @@ import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import ru.mousecray.mouseproject.api.utils.MRandomUtils;
+import ru.mousecray.mouseproject.api.utils.MouseRandom;
 import ru.mousecray.mouseproject.core.common.economy.CoinValue;
 import ru.mousecray.mouseproject.core.common.economy.capacity.WalletCapacity;
 import ru.mousecray.mouseproject.core.common.economy.wallet.WalletType;
@@ -36,7 +36,7 @@ public class ItemEpicWallet extends ItemWallet {
 
                 if (MouseProjectNBT.get(coin).getCoinPipe().loadIsNew()) {
                     Random rand = entity.getRNG();
-                    if (MRandomUtils.accurateChance(rand, 0.1f)) {
+                    if (MouseRandom.accurateChance(rand, 0.1f)) {
                         super.putCoin(world, entity, wallet, coin.copy());
                     }
                 }
