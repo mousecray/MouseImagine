@@ -1,0 +1,30 @@
+package ru.mousecray.mouseproject.api.config.build;
+
+import ru.mousecray.mouseproject.api.DisplayName;
+import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
+import ru.mousecray.mouseproject.api.config.pars.ConfigParGroup;
+import ru.mousecray.mouseproject.api.utils.MouseReflection;
+
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Objects;
+
+@MethodReturnsNonnullByDefault
+@ParametersAreNonnullByDefault
+public abstract class ConfigCustomParGroupBuilder<VAL extends Comparable<VAL>, BUILDER extends ConfigParameterGroupBuilder<VAL>> {
+    private BUILDER parBuilder;
+
+    @Nonnull protected abstract ConfigParGroup<VAL> createGroup(DisplayName groupName);
+
+    public final BUILDER buildGroup() {
+        ConfigParGroup<?> val = createGroup(parBuilder.name);
+        Objects.requireNonNull(val);
+        if (!MouseReflection.invokeMethod(
+                parBuilder.getClass(), ConfigParGroup.class,
+                "setGroup", parBuilder, val, parBuilder.configBuilder.logger
+        )) {
+            throw new RuntimeException("Config building error");
+        }
+        return parBuilder;
+    }
+}

@@ -1,0 +1,63 @@
+package ru.mousecray.mouseproject.api.config.build;
+
+import ru.mousecray.mouseproject.api.DisplayName;
+import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
+import ru.mousecray.mouseproject.api.config.pars.ConfigParDisabler;
+import ru.mousecray.mouseproject.api.config.sections.ConfigSect;
+import ru.mousecray.mouseproject.api.log.ConsoleColor;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Objects;
+
+@MethodReturnsNonnullByDefault
+@ParametersAreNonnullByDefault
+public final class ConfigSectionBuilder extends AbstractConfigChildBuilder {
+    private ConfigParDisabler disablePar;
+
+    private ConfigSectionBuilder(MouseConfigBuilder configBuilder, @Nullable String path, DisplayName name) {
+        super(configBuilder, path, name);
+    }
+
+    @Nullable String getPath() { return path; }
+
+    static ConfigSectionBuilder create(MouseConfigBuilder configBuilder, DisplayName name, @Nullable String path) {
+        return new ConfigSectionBuilder(
+                Objects.requireNonNull(configBuilder), path == null ? "" : path,
+                Objects.requireNonNull(name)
+        );
+    }
+
+    @Override
+    public ConfigSectionBuilder setComment(@Nullable String comment) {
+        this.comment = comment;
+        return this;
+    }
+
+    public ConfigDisablerBuilder<ConfigSectionBuilder> createDisabler(@Nonnull String displayName) {
+        return ConfigDisablerBuilder.create(this, Objects.requireNonNull(displayName), false);
+    }
+
+    public ConfigDisablerBuilder<ConfigSectionBuilder> createDisabler() {
+        return ConfigDisablerBuilder.create(this, "Disabler", true);
+    }
+
+    @Override
+    void addDisabler(ConfigParDisabler disabler) {
+        if (disablePar != null && configBuilder.logger != null) {
+            configBuilder.logger.warn(
+                    "Disabler \"" + disablePar.getName().getInternalName() + "\"in ConfigSection \"" +
+                            path + "." + name.getInternalName() + "\" was overwritten by Disabler \"" +
+                            disablePar.getName().getInternalName() + "\"", "Config", ConsoleColor.YELLOW_BG
+            );
+        }
+        disablePar = disabler;
+    }
+
+    public MouseConfigBuilder buildSection() {
+        ConfigSect section = new ConfigSect(name, disablePar, comment);
+        configBuilder.putSection(path, section);
+        return configBuilder;
+    }
+}
