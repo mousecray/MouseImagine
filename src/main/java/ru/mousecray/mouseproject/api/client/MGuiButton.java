@@ -14,7 +14,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
-import ru.mousecray.mouseproject.MouseProject;
+import ru.mousecray.mouseproject.core.MouseProject;
 import ru.mousecray.mouseproject.api.client.component.color.MGuiColorPack;
 import ru.mousecray.mouseproject.api.client.component.lang.MGuiString;
 import ru.mousecray.mouseproject.api.client.component.sound.MGuiSoundPack;

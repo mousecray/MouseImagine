@@ -12,7 +12,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.mouseproject.MouseProject;
+import ru.mousecray.mouseproject.core.MouseProject;
 import ru.mousecray.mouseproject.api.client.component.MGuiRenderHelper;
 import ru.mousecray.mouseproject.api.client.component.lang.MGuiString;
 import ru.mousecray.mouseproject.api.client.component.sound.MSoundSourceType;

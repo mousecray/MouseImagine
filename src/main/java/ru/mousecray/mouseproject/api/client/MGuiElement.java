@@ -15,7 +15,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
-import ru.mousecray.mouseproject.MouseProject;
+import ru.mousecray.mouseproject.core.MouseProject;
 import ru.mousecray.mouseproject.api.client.component.MGuiRenderHelper;
 import ru.mousecray.mouseproject.api.client.component.color.MGuiColorPack;
 import ru.mousecray.mouseproject.api.client.component.lang.MGuiString;

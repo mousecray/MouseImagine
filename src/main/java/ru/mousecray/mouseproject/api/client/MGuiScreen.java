@@ -19,7 +19,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import ru.mousecray.mouseproject.MouseProject;
+import ru.mousecray.mouseproject.core.MouseProject;
 import ru.mousecray.mouseproject.api.client.component.MGuiRenderHelper;
 import ru.mousecray.mouseproject.api.client.component.state.MGuiElementState;
 import ru.mousecray.mouseproject.api.client.container.MGuiAnchorPanel;

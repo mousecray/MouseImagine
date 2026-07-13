@@ -1,0 +1,26 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
+package ru.mousecray.mouseproject.core.registry;
+
+import net.minecraft.util.DamageSource;
+import ru.mousecray.mouseproject.core.MouseProject;
+import ru.mousecray.mouseproject.Tags;
+import ru.mousecray.mouseproject.core.registry.constants.DamageSourceNames;
+
+public class MPDamageSources {
+    public static final MPDamageSources INSTANCE = new MPDamageSources();
+
+    public static DamageSource ON_DROPPED_COIN = MPPlugFactory.CREATE_DAMAGE_SOURCE_PLUG();
+
+    private void onInit() {
+        ON_DROPPED_COIN = new DamageSource(Tags.MOD_ID + ":" + DamageSourceNames.ON_DROPPED_COIN_NAME);
+    }
+
+    public void register() {
+        onInit();
+        MouseProject.LOGGER.info("Registered DamageSources");
+    }
+}

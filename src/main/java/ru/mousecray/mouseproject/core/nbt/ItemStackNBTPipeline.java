@@ -1,0 +1,15 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
+package ru.mousecray.mouseproject.core.nbt;
+
+public class ItemStackNBTPipeline {
+    static final  String                                   TAG_BASE_KEY = "Base";
+    private final MouseProjectNBT.MouseProjectNBTItemStack container;
+    private ItemStackNBTPipeline(MouseProjectNBT.MouseProjectNBTItemStack container) { this.container = container; }
+    static ItemStackNBTPipeline get(MouseProjectNBT.MouseProjectNBTItemStack base)   { return new ItemStackNBTPipeline(base); }
+
+    public void saveBase(int value)                                                  { container.getBaseTag().setInteger(TAG_BASE_KEY, value); }
+}

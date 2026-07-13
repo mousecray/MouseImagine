@@ -14,7 +14,7 @@ import net.minecraft.client.gui.GuiLabel;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.mouseproject.MouseProject;
+import ru.mousecray.mouseproject.core.MouseProject;
 import ru.mousecray.mouseproject.api.client.component.MGuiRenderHelper;
 import ru.mousecray.mouseproject.api.client.component.color.MGuiColorPack;
 import ru.mousecray.mouseproject.api.client.component.lang.MGuiString;

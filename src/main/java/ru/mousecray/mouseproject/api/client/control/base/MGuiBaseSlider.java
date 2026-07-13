@@ -11,7 +11,7 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.mouseproject.MouseProject;
+import ru.mousecray.mouseproject.core.MouseProject;
 import ru.mousecray.mouseproject.api.client.MGuiButton;
 import ru.mousecray.mouseproject.api.client.MGuiPanel;
 import ru.mousecray.mouseproject.api.client.component.sound.MGuiSoundPack;

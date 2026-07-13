@@ -5,7 +5,7 @@
 
 package ru.mousecray.mouseproject.api.client.misc.cache;
 
-import ru.mousecray.mouseproject.MouseProject;
+import ru.mousecray.mouseproject.core.MouseProject;
 import ru.mousecray.mouseproject.api.client.MGuiElement;
 import ru.mousecray.mouseproject.api.client.MGuiPanel;
 import ru.mousecray.mouseproject.api.client.MGuiScreen;

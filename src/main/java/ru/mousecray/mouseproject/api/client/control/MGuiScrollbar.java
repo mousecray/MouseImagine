@@ -8,7 +8,7 @@ package ru.mousecray.mouseproject.api.client.control;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.mouseproject.MouseProject;
+import ru.mousecray.mouseproject.core.MouseProject;
 import ru.mousecray.mouseproject.api.client.MGuiButton;
 import ru.mousecray.mouseproject.api.client.MGuiPanel;
 import ru.mousecray.mouseproject.api.client.component.state.MGuiElementState;
