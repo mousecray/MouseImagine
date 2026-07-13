@@ -13,10 +13,10 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import ru.mousecray.mouseproject.MouseProject;
 import ru.mousecray.mouseproject.Tags;
+import ru.mousecray.mouseproject.api.utils.MReflectionUtils;
 import ru.mousecray.mouseproject.common.entity.potion.PotionMagicWallet;
 import ru.mousecray.mouseproject.registry.constants.PotionNames;
 import ru.mousecray.mouseproject.registry.constants.PotionTextures;
-import ru.mousecray.mouseproject.utils.MPReflectionUtils;
 
 @GameRegistry.ObjectHolder(Tags.MOD_ID)
 @Mod.EventBusSubscriber
@@ -41,7 +41,7 @@ public class MPPotions {
         MouseProject.LOGGER.info("Initialized potions");
 
         IForgeRegistry<Potion> registry = e.getRegistry();
-        MPReflectionUtils.prepare(MPPotions.class).<Potion>getPublicStaticFields().forEach(registry::register);
+        MReflectionUtils.prepare(MPPotions.class).<Potion>getPublicStaticFields().forEach(registry::register);
         MouseProject.LOGGER.info("Registered potions");
     }
 }

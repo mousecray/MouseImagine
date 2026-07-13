@@ -20,8 +20,6 @@ import ru.mousecray.mouseproject.common.item.wallet.IWallet;
 import java.util.*;
 
 public class TooltipHandler {
-
-    //Сохраняем индексы и оригинальные строки
     private static final Map<Integer, String> savedTooltipLines = new HashMap<>();
 
     @SubscribeEvent
@@ -30,15 +28,14 @@ public class TooltipHandler {
         ItemStack stack = event.getItemStack();
         if (!(stack.getItem() instanceof IWallet)) return;
 
-        //Сохраняем строки с плейсхолдерами и заменяем их на пустые
         savedTooltipLines.clear();
         List<String> lines = event.getToolTip();
         for (int i = 0; i < lines.size(); ++i) {
             String line = lines.get(i);
             if (line.contains("@")) {
-                savedTooltipLines.put(i, line); //Сохраняем оригинал
-                lines.set(i, "·"); //Заменяем на маркер
-                lines.add(i + 1, ""); //Заменяем на пустую строку
+                savedTooltipLines.put(i, line);
+                lines.set(i, "·");
+                lines.add(i + 1, "");
             }
         }
     }

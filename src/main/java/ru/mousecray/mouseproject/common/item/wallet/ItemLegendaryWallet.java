@@ -9,12 +9,12 @@ import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import ru.mousecray.mouseproject.api.utils.MRandomUtils;
 import ru.mousecray.mouseproject.common.economy.CoinValue;
 import ru.mousecray.mouseproject.common.economy.capacity.WalletCapacity;
 import ru.mousecray.mouseproject.common.economy.wallet.WalletType;
 import ru.mousecray.mouseproject.common.item.coin.ICoin;
 import ru.mousecray.mouseproject.nbt.MouseProjectNBT;
-import ru.mousecray.mouseproject.utils.MPRandomUtils;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -36,7 +36,7 @@ public class ItemLegendaryWallet extends ItemWallet {
 
                 if (MouseProjectNBT.get(coin).getCoinPipe().loadIsNew()) {
                     Random rand = entity.getRNG();
-                    if (MPRandomUtils.normalChance(rand, 1)) {
+                    if (MRandomUtils.normalChance(rand, 1)) {
                         super.putCoin(world, entity, wallet, coin.copy());
                     }
                 }

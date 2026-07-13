@@ -2,21 +2,24 @@ package ru.mousecray.mouseproject.client.gui.wallet;
 
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.mouseproject.client.gui.core.component.lang.MPGuiString;
-import ru.mousecray.mouseproject.client.gui.core.container.MPGuiFreePanel;
-import ru.mousecray.mouseproject.client.gui.core.control.MPGuiNumberField;
-import ru.mousecray.mouseproject.client.gui.core.control.MPGuiSimpleSlider;
-import ru.mousecray.mouseproject.client.gui.core.dim.*;
-import ru.mousecray.mouseproject.client.gui.core.dim.layout.MPGuiPadding;
-import ru.mousecray.mouseproject.client.gui.core.event.MPGuiTextTypedEvent;
-import ru.mousecray.mouseproject.client.gui.core.misc.MPNumberMode;
+import ru.mousecray.mouseproject.api.client.component.lang.MGuiString;
+import ru.mousecray.mouseproject.api.client.container.MGuiLinearPanel;
+import ru.mousecray.mouseproject.api.client.control.MGuiNumberField;
+import ru.mousecray.mouseproject.api.client.control.MGuiSimpleSlider;
+import ru.mousecray.mouseproject.api.client.dim.GuiShape;
+import ru.mousecray.mouseproject.api.client.dim.layout.GuiOrientation;
+import ru.mousecray.mouseproject.api.client.dim.layout.GuiPadding;
+import ru.mousecray.mouseproject.api.client.dim.layout.GuiScaleRules;
+import ru.mousecray.mouseproject.api.client.dim.layout.GuiScaleType;
+import ru.mousecray.mouseproject.api.client.event.GuiTextTypedEvent;
+import ru.mousecray.mouseproject.api.client.misc.NumberMode;
 
 import java.util.function.Consumer;
 
 @SideOnly(Side.CLIENT)
-public class WalletSliderControl extends MPGuiFreePanel {
-    private final MPGuiNumberField  field;
-    private final MPGuiSimpleSlider slider;
+public class WalletSliderControl extends MGuiLinearPanel {
+    private final MGuiNumberField  field;
+    private final MGuiSimpleSlider slider;
 
     private final long maxCoinValue;
 
@@ -27,35 +30,35 @@ public class WalletSliderControl extends MPGuiFreePanel {
             float height,
             long maxCoinValue
     ) {
-        super(new MPGuiShape(0, 0, width, height));
+        super(new GuiShape(0, 0, width, height), GuiOrientation.VERTICAL);
         this.maxCoinValue = maxCoinValue;
 
-        field = new MPGuiNumberField(
-                new MPGuiShape(0, 0, width, height * 0.8f),
-                MPGuiString.localizedGuiTag("wallet.text_field.take_put_count"),
-                MPNumberMode.POSITIVE
+        field = new MGuiNumberField(
+                new GuiShape(0, 0, width, height * 0.65f),
+                MGuiString.localizedGuiTag("wallet.text_field.take_put_count"),
+                NumberMode.POSITIVE
         );
         field.setOnTextTypedListener(this::onInternalTextTyped);
 
-        field.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT_HORIZONTAL));
-        field.setPadding(new MPGuiPadding(3f, 0, 0, 0));
+        field.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_HORIZONTAL));
+        field.setPadding(new GuiPadding(3f, 0, 0, 0));
 
         float sliderH = height * 0.5f;
         float knobW   = sliderH * (5f / 7f);
 
-        slider = new MPGuiSimpleSlider(new MPGuiShape(0, 0, width, sliderH), knobW, sliderH, 0, 100, MPOrientation.HORIZONTAL);
-        slider.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT_HORIZONTAL));
+        slider = new MGuiSimpleSlider(new GuiShape(0, 0, width, sliderH), knobW, sliderH, 0, 100, GuiOrientation.HORIZONTAL);
+        slider.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_HORIZONTAL));
 
         slider.setOnSliderChangedListener(event -> {
             long newValue = event.getNewValue() == 0 ? 1 : (long) event.getNewValue() * this.maxCoinValue / 100;
             field.setNumberText(newValue);
         });
 
-        addChild(field, null, null, null);
-        addChild(slider, null, null, MPGuiVector.of(0, height / 1.8f));
+        addChild(field);
+        addChild(slider);
     }
 
-    private void onInternalTextTyped(MPGuiTextTypedEvent<MPGuiNumberField> event) {
+    private void onInternalTextTyped(GuiTextTypedEvent<MGuiNumberField> event) {
         String newText = event.getNewText();
 
         if (newText == null || newText.trim().isEmpty()) {

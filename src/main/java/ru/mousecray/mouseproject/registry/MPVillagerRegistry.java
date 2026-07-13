@@ -34,12 +34,12 @@ public class MPVillagerRegistry {
     );
 
     public static void clearVanilla() {
-//        Field careers = MPReflectionUtils.getField(VillagerRegistry.VillagerProfession.class, "careers");
-//        Field trades  = MPReflectionUtils.getField(VillagerRegistry.VillagerCareer.class, "trades");
+//        Field careers = MReflectionUtils.getField(VillagerRegistry.VillagerProfession.class, "careers");
+//        Field trades  = MReflectionUtils.getField(VillagerRegistry.VillagerCareer.class, "trades");
         ForgeRegistries.VILLAGER_PROFESSIONS.getValuesCollection().forEach(profession -> {
-//            List<VillagerRegistry.VillagerCareer> list = MPReflectionUtils.getFieldValue(careers, profession);
+//            List<VillagerRegistry.VillagerCareer> list = MReflectionUtils.getFieldValue(careers, profession);
 //            list.forEach(c -> {
-//                List<List<EntityVillager.ITradeList>> recipes = MPReflectionUtils.getFieldValue(trades, c);
+//                List<List<EntityVillager.ITradeList>> recipes = MReflectionUtils.getFieldValue(trades, c);
 //                recipes.clear();
 //            });
         });

@@ -11,9 +11,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.registries.IForgeRegistry;
 import ru.mousecray.mouseproject.MouseProject;
+import ru.mousecray.mouseproject.api.utils.MReflectionUtils;
 import ru.mousecray.mouseproject.common.sound.MPDefaultSound;
 import ru.mousecray.mouseproject.registry.constants.SoundNames;
-import ru.mousecray.mouseproject.utils.MPReflectionUtils;
 
 @Mod.EventBusSubscriber
 public class MPSounds {
@@ -41,7 +41,7 @@ public class MPSounds {
         MouseProject.LOGGER.info("Initialized sounds");
 
         IForgeRegistry<SoundEvent> registry = e.getRegistry();
-        MPReflectionUtils.prepare(MPSounds.class).<SoundEvent>getPublicStaticFields().forEach(registry::register);
+        MReflectionUtils.prepare(MPSounds.class).<SoundEvent>getPublicStaticFields().forEach(registry::register);
         MouseProject.LOGGER.info("Registered sounds");
     }
 }

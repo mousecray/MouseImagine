@@ -26,11 +26,11 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import ru.mousecray.mouseproject.Tags;
+import ru.mousecray.mouseproject.api.utils.MRandomUtils;
 import ru.mousecray.mouseproject.common.item.coin.ICoin;
 import ru.mousecray.mouseproject.nbt.MouseProjectNBT;
 import ru.mousecray.mouseproject.registry.MPPotions;
 import ru.mousecray.mouseproject.registry.MPSounds;
-import ru.mousecray.mouseproject.utils.MPRandomUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +39,7 @@ import java.util.Random;
 public class MagicWalletController {
     public static void onPutCoin(World world, EntityLivingBase entity) {
         Random rand = entity.getRNG();
-        if (MPRandomUtils.accurateChance(rand, 0.5f)) {
+        if (MRandomUtils.accurateChance(rand, 0.5f)) {
             int effectType = rand.nextInt(28);
             switch (effectType) {
                 case 0:
@@ -344,58 +344,58 @@ public class MagicWalletController {
         int effectType = rand.nextInt(18);
         switch (effectType) {
             case 0:
-                entity.addPotionEffect(new PotionEffect(MobEffects.SPEED, 400 + MPRandomUtils.normalPercentFrom(rand, 400, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.SPEED, 400 + MRandomUtils.normalPercentFrom(rand, 400, 24, 1), 0));
                 break;
             case 1:
-                entity.addPotionEffect(new PotionEffect(MobEffects.BLINDNESS, 200 + MPRandomUtils.normalPercentFrom(rand, 200, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.BLINDNESS, 200 + MRandomUtils.normalPercentFrom(rand, 200, 24, 1), 0));
                 break;
             case 2:
-                entity.addPotionEffect(new PotionEffect(MobEffects.LEVITATION, 100 + MPRandomUtils.normalPercentFrom(rand, 100, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.LEVITATION, 100 + MRandomUtils.normalPercentFrom(rand, 100, 24, 1), 0));
                 break;
             case 3:
-                entity.addPotionEffect(new PotionEffect(MobEffects.NAUSEA, 200 + MPRandomUtils.normalPercentFrom(rand, 200, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.NAUSEA, 200 + MRandomUtils.normalPercentFrom(rand, 200, 24, 1), 0));
                 break;
             case 4:
-                entity.addPotionEffect(new PotionEffect(MobEffects.HUNGER, 200 + MPRandomUtils.normalPercentFrom(rand, 200, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.HUNGER, 200 + MRandomUtils.normalPercentFrom(rand, 200, 24, 1), 0));
                 break;
             case 5:
-                entity.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 300 + MPRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 300 + MRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
                 break;
             case 6:
-                entity.addPotionEffect(new PotionEffect(MobEffects.MINING_FATIGUE, 300 + MPRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.MINING_FATIGUE, 300 + MRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
                 break;
             case 7:
-                entity.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 300 + MPRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 300 + MRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
                 break;
             case 8:
-                entity.addPotionEffect(new PotionEffect(MobEffects.NIGHT_VISION, 400 + MPRandomUtils.normalPercentFrom(rand, 400, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.NIGHT_VISION, 400 + MRandomUtils.normalPercentFrom(rand, 400, 24, 1), 0));
                 break;
             case 9:
-                entity.addPotionEffect(new PotionEffect(MobEffects.REGENERATION, 200 + MPRandomUtils.normalPercentFrom(rand, 200, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.REGENERATION, 200 + MRandomUtils.normalPercentFrom(rand, 200, 24, 1), 0));
                 break;
             case 10:
-                entity.addPotionEffect(new PotionEffect(MobEffects.WATER_BREATHING, 400 + MPRandomUtils.normalPercentFrom(rand, 400, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.WATER_BREATHING, 400 + MRandomUtils.normalPercentFrom(rand, 400, 24, 1), 0));
                 break;
             case 11:
-                entity.addPotionEffect(new PotionEffect(MobEffects.FIRE_RESISTANCE, 400 + MPRandomUtils.normalPercentFrom(rand, 400, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.FIRE_RESISTANCE, 400 + MRandomUtils.normalPercentFrom(rand, 400, 24, 1), 0));
                 break;
             case 12:
-                entity.addPotionEffect(new PotionEffect(MobEffects.JUMP_BOOST, 300 + MPRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.JUMP_BOOST, 300 + MRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
                 break;
             case 13:
-                entity.addPotionEffect(new PotionEffect(MobEffects.POISON, 200 + MPRandomUtils.normalPercentFrom(rand, 200, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.POISON, 200 + MRandomUtils.normalPercentFrom(rand, 200, 24, 1), 0));
                 break;
             case 14:
-                entity.addPotionEffect(new PotionEffect(MobEffects.HASTE, 300 + MPRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.HASTE, 300 + MRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
                 break;
             case 15:
-                entity.addPotionEffect(new PotionEffect(MobEffects.GLOWING, 300 + MPRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.GLOWING, 300 + MRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
                 break;
             case 16:
-                entity.addPotionEffect(new PotionEffect(MobEffects.LUCK, 600 + MPRandomUtils.normalPercentFrom(rand, 600, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.LUCK, 600 + MRandomUtils.normalPercentFrom(rand, 600, 24, 1), 0));
                 break;
             case 17:
-                entity.addPotionEffect(new PotionEffect(MobEffects.STRENGTH, 300 + MPRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
+                entity.addPotionEffect(new PotionEffect(MobEffects.STRENGTH, 300 + MRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
                 break;
         }
     }
@@ -483,23 +483,23 @@ public class MagicWalletController {
         int amplifier  = 0;
         switch (effectType) {
             case 0:
-                amplifier = MPRandomUtils.normalChance(rand, 50) ? MPRandomUtils.normalChance(rand, 50) ? 2 : 1 : 0;
-                player.addPotionEffect(new PotionEffect(MPPotions.DOUBLE_CRAFT, 240 + MPRandomUtils.normalPercentFrom(rand, 300, 24, 1), amplifier));
+                amplifier = MRandomUtils.normalChance(rand, 50) ? MRandomUtils.normalChance(rand, 50) ? 2 : 1 : 0;
+                player.addPotionEffect(new PotionEffect(MPPotions.DOUBLE_CRAFT, 240 + MRandomUtils.normalPercentFrom(rand, 300, 24, 1), amplifier));
                 break;
             case 1:
-                amplifier = MPRandomUtils.normalChance(rand, 50) ? MPRandomUtils.normalChance(rand, 50) ? 2 : 1 : 0;
-                player.addPotionEffect(new PotionEffect(MPPotions.DOUBLE_FISHING, 240 + MPRandomUtils.normalPercentFrom(rand, 300, 24, 1), amplifier));
+                amplifier = MRandomUtils.normalChance(rand, 50) ? MRandomUtils.normalChance(rand, 50) ? 2 : 1 : 0;
+                player.addPotionEffect(new PotionEffect(MPPotions.DOUBLE_FISHING, 240 + MRandomUtils.normalPercentFrom(rand, 300, 24, 1), amplifier));
                 break;
             case 2:
-                amplifier = MPRandomUtils.normalChance(rand, 50) ? MPRandomUtils.normalChance(rand, 50) ? 2 : 1 : 0;
-                player.addPotionEffect(new PotionEffect(MPPotions.DOUBLE_MYTHIC, 240 + MPRandomUtils.normalPercentFrom(rand, 300, 24, 1), amplifier));
+                amplifier = MRandomUtils.normalChance(rand, 50) ? MRandomUtils.normalChance(rand, 50) ? 2 : 1 : 0;
+                player.addPotionEffect(new PotionEffect(MPPotions.DOUBLE_MYTHIC, 240 + MRandomUtils.normalPercentFrom(rand, 300, 24, 1), amplifier));
                 break;
             case 3:
-                amplifier = MPRandomUtils.normalChance(rand, 50) ? MPRandomUtils.normalChance(rand, 50) ? 2 : 1 : 0;
-                player.addPotionEffect(new PotionEffect(MPPotions.DOUBLE_FARM_HARVEST, 240 + MPRandomUtils.normalPercentFrom(rand, 300, 24, 1), amplifier));
+                amplifier = MRandomUtils.normalChance(rand, 50) ? MRandomUtils.normalChance(rand, 50) ? 2 : 1 : 0;
+                player.addPotionEffect(new PotionEffect(MPPotions.DOUBLE_FARM_HARVEST, 240 + MRandomUtils.normalPercentFrom(rand, 300, 24, 1), amplifier));
                 break;
             case 4:
-                player.addPotionEffect(new PotionEffect(MPPotions.IMMORTALITY, 240 + MPRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
+                player.addPotionEffect(new PotionEffect(MPPotions.IMMORTALITY, 240 + MRandomUtils.normalPercentFrom(rand, 300, 24, 1), 0));
                 break;
         }
     }

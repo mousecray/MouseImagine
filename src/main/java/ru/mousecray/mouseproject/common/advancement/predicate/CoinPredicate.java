@@ -8,9 +8,9 @@ package ru.mousecray.mouseproject.common.advancement.predicate;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.util.JsonUtils;
+import ru.mousecray.mouseproject.api.utils.MJsonUtils;
 import ru.mousecray.mouseproject.common.economy.CoinValue;
 import ru.mousecray.mouseproject.common.economy.coin.CoinType;
-import ru.mousecray.mouseproject.utils.MPJsonUtils;
 
 import javax.annotation.Nullable;
 
@@ -45,7 +45,7 @@ public class CoinPredicate {
             }
 
             if (jsonobject.has("value")) {
-                value = MPJsonUtils.getLong(jsonobject, "value");
+                value = MJsonUtils.getLong(jsonobject, "value");
             }
 
             if (actualType == null && value <= 0) return ANY;
