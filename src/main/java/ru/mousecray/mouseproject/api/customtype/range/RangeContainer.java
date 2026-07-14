@@ -15,6 +15,7 @@ public class RangeContainer<T extends NumberType<?>> implements Comparable<Range
     private final T          minValue;
     private final T          maxValue;
 
+    @SuppressWarnings("unchecked")
     public RangeContainer(Range<T>... ranges) {
         if (ranges == null) ranges = (Range<T>[]) Array.newInstance(Range.class, 0);
 
@@ -34,6 +35,7 @@ public class RangeContainer<T extends NumberType<?>> implements Comparable<Range
         maxValue = getMaxFromRanges(this.ranges);
     }
 
+    @SuppressWarnings("unchecked")
     public RangeContainer(Collection<Range<T>> ranges) {
         if (ranges == null) ranges = new ArrayList<>();
 
@@ -96,6 +98,7 @@ public class RangeContainer<T extends NumberType<?>> implements Comparable<Range
 
     @Nonnull public ImmutableList<Range<T>> getRanges() { return ImmutableList.copyOf(ranges); }
 
+    @SuppressWarnings("unchecked")
     private static <T extends NumberType<?>> Range<T>[] mergeOverlap(Range<T>[] array) {
         Arrays.sort(array, Comparator.comparing(Range::getMinValue));
 

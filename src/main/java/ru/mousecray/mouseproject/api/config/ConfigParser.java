@@ -1,4 +1,9 @@
-package ru.mousecray.mouseproject.api.config.utils;
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
+package ru.mousecray.mouseproject.api.config;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
@@ -6,16 +11,13 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.mousecray.mouseproject.api.VariableValue;
-import ru.mousecray.mouseproject.api.config.ConfigParBase;
-import ru.mousecray.mouseproject.api.config.ConfigSectBase;
-import ru.mousecray.mouseproject.api.config.ConfigVal;
-import ru.mousecray.mouseproject.api.config.MouseConfig;
 import ru.mousecray.mouseproject.api.config.pars.ConfigPar;
-import ru.mousecray.mouseproject.api.config.pars.ConfigParDisabler;
 import ru.mousecray.mouseproject.api.config.pars.ConfigParGroup;
-import ru.mousecray.mouseproject.api.config.sections.ConfigSect;
 import ru.mousecray.mouseproject.api.config.specific.ConfigLocaleType;
 import ru.mousecray.mouseproject.api.config.specific.ConfigValType;
+import ru.mousecray.mouseproject.api.config.utils.ConfigDictionary;
+import ru.mousecray.mouseproject.api.config.utils.Constraint;
+import ru.mousecray.mouseproject.api.config.utils.PredefinedValue;
 import ru.mousecray.mouseproject.api.config.values.base.list.simple.ConfigSimpleListVal;
 import ru.mousecray.mouseproject.api.container.ImmutableDisplayNameMap;
 import ru.mousecray.mouseproject.api.customtype.range.Range;

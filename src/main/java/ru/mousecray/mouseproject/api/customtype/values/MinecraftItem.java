@@ -1,23 +1,23 @@
 package ru.mousecray.mouseproject.api.customtype.values;
 
-import net.minecraft.item.Item;
 import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mouseproject.api.customtype.CustomType;
+import ru.mousecray.mouseproject.api.customtype.OtherType;
 import ru.mousecray.mouseproject.api.error.UnsupportedValException;
 import ru.mousecray.mouseproject.api.error.ValueFormatException;
-import ru.mousecray.mouseproject.api.minecraft.IItemState;
+import ru.mousecray.mouseproject.api.minecraft.MouseIItemState;
 import ru.mousecray.mouseproject.api.utils.MouseNumbers;
 import ru.mousecray.mouseproject.api.utils.MouseStrings;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Comparator;
 import java.util.Objects;
 
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
-public class MinecraftItem implements CustomType<MinecraftItem> {
+public class MinecraftItem extends OtherType<MouseIItemState> {
+    public static final MinecraftItem AIR = MinecraftItem.create("air");
+
     static { storage.put(MinecraftItem.class, MinecraftItem::parse); }
 
     @Nonnull protected final String prefix;
@@ -25,6 +25,7 @@ public class MinecraftItem implements CustomType<MinecraftItem> {
     protected final          int    meta;
 
     protected MinecraftItem(String prefix, String name, int meta) {
+        super(MouseIItemState.create(prefix, name, meta));
         this.prefix = prefix;
         this.name = name;
         this.meta = meta;
@@ -44,77 +45,18 @@ public class MinecraftItem implements CustomType<MinecraftItem> {
         return new MinecraftItem(prefix, name, meta);
     }
 
-    public static MinecraftItem create(String name, int meta) {
-        return create("minecraft", name, meta);
-    }
+    public static MinecraftItem create(String name, int meta) { return create("minecraft", name, meta); }
+    public static MinecraftItem create(String name)           { return create(name, 0); }
 
-    @Override public boolean isLess(MinecraftItem other)        { return false; }
-    @Override public boolean isMore(MinecraftItem other)        { return false; }
-    @Override public boolean isLessOrEqual(MinecraftItem other) { return isEqual(other); }
-    @Override public boolean isMoreOrEqual(MinecraftItem other) { return isEqual(other); }
+    @Nullable public MouseIItemState asItemState()            { return value; }
 
-    @Override
-    public boolean isEqual(MinecraftItem other) {
-        return prefix.equals(other.prefix) && name.equals(other.name) && meta == other.meta;
-    }
-
-    @Override public boolean isLessValue(Object other)        { return false; }
-    @Override public boolean isMoreValue(Object other)        { return false; }
-    @Override public boolean isMoreOrEqualValue(Object other) { return isEqualValue(other); }
-    @Override public boolean isLessOrEqualValue(Object other) { return isEqualValue(other); }
-
-    @Override
-    public boolean isEqualValue(Object other) {
-        return other instanceof MinecraftItem && isEqual(((MinecraftItem) other));
-    }
-
-    @Override public MinecraftItem plus(MinecraftItem other)     { return this; }
-    @Override public MinecraftItem minus(MinecraftItem other)    { return this; }
-    @Override public MinecraftItem divide(MinecraftItem other)   { return this; }
-    @Override public MinecraftItem multiply(MinecraftItem other) { return this; }
-    @Override public MinecraftItem modulo(MinecraftItem other)   { return this; }
-    @Override public MinecraftItem invert()                      { return this; }
-
-    @Override public MinecraftItem plusValue(Object other)       { return this; }
-    @Override public MinecraftItem minusValue(Object other)      { return this; }
-    @Override public MinecraftItem divideValue(Object other)     { return this; }
-    @Override public MinecraftItem multiplyValue(Object other)   { return this; }
-    @Override public MinecraftItem moduloValue(Object other)     { return this; }
-
-    @Override
-    public MinecraftItem fromValue(Object other) {
-        return other instanceof String ? fromString(((String) other)) : CustomType.super.fromValue(other);
-    }
-
-    @Override
-    public MinecraftItem fromString(String other) throws ValueFormatException {
-        MinecraftItem obj = parse(prefix, other);
-        if (obj == null) throw new ValueFormatException("String broken");
-        return obj;
-    }
-
-    @Override public String asString() { return prefix + ":" + name + ":" + meta; }
-
-    @SuppressWarnings("unchecked") @Override
-    public <TYPE> TYPE asValue(Class<TYPE> clazz) {
-        return clazz == String.class ? (TYPE) asString() : CustomType.super.asValue(clazz);
-    }
-
-    @Override public Class<MinecraftItem> getTypeClass() { return MinecraftItem.class; }
-
-    public String getPrefix()                            { return prefix; }
-    public String getName()                              { return name; }
-    public int getMeta()                                 { return meta; }
-
-    @Nullable
-    public IItemState getItemState() {
-        Item item = (Item) Item.itemRegistry.getObject(prefix + ':' + name);
-        return item != null ? IItemState.create(item, meta) : null;
-    }
+    public String getPrefix()                                 { return prefix; }
+    public String getName()                                   { return name; }
+    public int getMeta()                                      { return meta; }
 
     public static MinecraftItem parse(@Nullable Object value) throws UnsupportedValException, ValueFormatException {
         if (value instanceof MinecraftItem) return ((MinecraftItem) value);
-        else if (value instanceof String) return parse(null, ((String) value));
+        else if (value instanceof String) return parse((String) null, ((String) value));
         throw new UnsupportedValException();
     }
 
@@ -150,25 +92,10 @@ public class MinecraftItem implements CustomType<MinecraftItem> {
         throw new ValueFormatException();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MinecraftItem)) return false;
-        MinecraftItem minecraftBlock = (MinecraftItem) o;
-        return meta == minecraftBlock.meta
-                && Objects.equals(prefix, minecraftBlock.prefix)
-                && Objects.equals(name, minecraftBlock.name);
+    @SuppressWarnings("unchecked") @Override
+    public MinecraftItem createType(Object value) {
+        return create(value.toString());
     }
 
-    @Override public String toString() { return asString(); }
-    @Override public int hashCode()    { return Objects.hash(prefix, name, meta); }
-
-    @Override
-    public int compareTo(MinecraftItem o) {
-        return Comparator
-                .comparing(MinecraftItem::getPrefix)
-                .thenComparing(MinecraftItem::getName)
-                .thenComparing(MinecraftItem::getMeta)
-                .compare(this, o);
-    }
+    public StringType asStringType() { return StringType.create(toString()); }
 }

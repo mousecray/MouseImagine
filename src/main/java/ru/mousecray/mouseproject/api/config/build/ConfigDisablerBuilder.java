@@ -2,7 +2,7 @@ package ru.mousecray.mouseproject.api.config.build;
 
 import ru.mousecray.mouseproject.api.DisplayName;
 import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mouseproject.api.config.pars.ConfigParDisabler;
+import ru.mousecray.mouseproject.api.config.ConfigParDisabler;
 import ru.mousecray.mouseproject.api.config.specific.ConfigValType;
 import ru.mousecray.mouseproject.api.config.utils.PredefinedValue;
 import ru.mousecray.mouseproject.api.config.values.ConfigValDisabler;

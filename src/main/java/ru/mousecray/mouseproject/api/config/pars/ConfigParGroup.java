@@ -3,10 +3,7 @@ package ru.mousecray.mouseproject.api.config.pars;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.mousecray.mouseproject.api.DisplayName;
 import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mouseproject.api.config.ConfigParBase;
-import ru.mousecray.mouseproject.api.config.ConfigSectBase;
-import ru.mousecray.mouseproject.api.config.ConfigVal;
-import ru.mousecray.mouseproject.api.config.MouseConfig;
+import ru.mousecray.mouseproject.api.config.*;
 import ru.mousecray.mouseproject.api.customtype.CustomType;
 import ru.mousecray.mouseproject.api.utils.MouseReflection;
 
@@ -18,7 +15,7 @@ import java.util.Map;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 public abstract class ConfigParGroup<T extends CustomType<?>> extends ConfigParBase<T> {
-    @Nullable protected final ConfigParDisabler disablePar;
+    @Nullable public final ConfigParDisabler disablePar;
 
     public ConfigParGroup(
             DisplayName name,

@@ -4,6 +4,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import ru.mousecray.mouseproject.api.DisplayName;
 import ru.mousecray.mouseproject.api.VariableValue;
 import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
+import ru.mousecray.mouseproject.api.config.ConfigParDisabler;
 import ru.mousecray.mouseproject.api.config.values.ConfigConditionVal;
 import ru.mousecray.mouseproject.api.config.values.ConfigValRandomQuantity;
 import ru.mousecray.mouseproject.api.config.values.base.ConfigListVal;

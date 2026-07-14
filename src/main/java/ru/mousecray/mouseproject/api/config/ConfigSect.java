@@ -1,10 +1,11 @@
-package ru.mousecray.mouseproject.api.config.sections;
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
+package ru.mousecray.mouseproject.api.config;
 
 import ru.mousecray.mouseproject.api.DisplayName;
-import ru.mousecray.mouseproject.api.config.ConfigParBase;
-import ru.mousecray.mouseproject.api.config.ConfigSectBase;
-import ru.mousecray.mouseproject.api.config.MouseConfig;
-import ru.mousecray.mouseproject.api.config.pars.ConfigParDisabler;
 import ru.mousecray.mouseproject.api.utils.MouseReflection;
 
 import javax.annotation.Nullable;

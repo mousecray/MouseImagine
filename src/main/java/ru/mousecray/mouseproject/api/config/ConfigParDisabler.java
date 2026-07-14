@@ -1,8 +1,13 @@
-package ru.mousecray.mouseproject.api.config.pars;
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
+package ru.mousecray.mouseproject.api.config;
 
 import ru.mousecray.mouseproject.api.DisplayName;
 import ru.mousecray.mouseproject.api.VariableValue;
-import ru.mousecray.mouseproject.api.config.ConfigVal;
+import ru.mousecray.mouseproject.api.config.pars.ConfigPar;
 import ru.mousecray.mouseproject.api.config.specific.ConfigLocaleType;
 import ru.mousecray.mouseproject.api.config.values.ConfigValDisabler;
 import ru.mousecray.mouseproject.api.customtype.values.PlusMinusType;

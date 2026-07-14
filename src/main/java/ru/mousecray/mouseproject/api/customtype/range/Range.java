@@ -78,6 +78,7 @@ public class Range<T extends NumberType<?>> implements Comparable<Range<T>> {
                 .toString();
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends NumberType<?>> T distanceBetween(T first, T second) {
         return (T) second.getArithmeticPipeline().minus(first);
     }

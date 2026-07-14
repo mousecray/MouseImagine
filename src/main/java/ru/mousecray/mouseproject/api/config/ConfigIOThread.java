@@ -1,7 +1,11 @@
-package ru.mousecray.mouseproject.api.config.utils;
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
+package ru.mousecray.mouseproject.api.config;
 
 import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mouseproject.api.config.MouseConfig;
 import ru.mousecray.mouseproject.api.log.ConsoleColor;
 
 import javax.annotation.Nonnull;
@@ -27,7 +31,7 @@ public class ConfigIOThread extends Thread {
 
     public IOFuture loadIntermediately(MouseConfig config) {
         return new IOFuture(false, config, service.submit(() -> {
-            if (!Files.getLastModifiedTime(config.path.getAbsoluteFile().toPath()).equals(
+            if (!Files.getLastModifiedTime(config.getPath().getAbsoluteFile().toPath()).equals(
                     config.parser.lastModTime)) {
                 IOResult load = config.loadInternal();
                 config.lastSyncSec = sec;

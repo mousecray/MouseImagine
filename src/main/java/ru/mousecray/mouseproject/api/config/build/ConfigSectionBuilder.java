@@ -2,8 +2,8 @@ package ru.mousecray.mouseproject.api.config.build;
 
 import ru.mousecray.mouseproject.api.DisplayName;
 import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mouseproject.api.config.pars.ConfigParDisabler;
-import ru.mousecray.mouseproject.api.config.sections.ConfigSect;
+import ru.mousecray.mouseproject.api.config.ConfigParDisabler;
+import ru.mousecray.mouseproject.api.config.ConfigSect;
 import ru.mousecray.mouseproject.api.log.ConsoleColor;
 
 import javax.annotation.Nonnull;

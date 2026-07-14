@@ -3,10 +3,7 @@ package ru.mousecray.mouseproject.api.config;
 import ru.mousecray.mouseproject.api.DisplayName;
 import ru.mousecray.mouseproject.api.config.pars.ConfigPar;
 import ru.mousecray.mouseproject.api.config.pars.ConfigParGroup;
-import ru.mousecray.mouseproject.api.config.sections.ConfigSect;
 import ru.mousecray.mouseproject.api.config.utils.ConfigDictionary;
-import ru.mousecray.mouseproject.api.config.utils.ConfigIOThread;
-import ru.mousecray.mouseproject.api.config.utils.ConfigParser;
 import ru.mousecray.mouseproject.api.config.values.*;
 import ru.mousecray.mouseproject.api.config.values.base.ConfigListVal;
 import ru.mousecray.mouseproject.api.container.ImmutableDisplayNameMap;
@@ -32,7 +29,7 @@ public class MouseConfig {
     protected final          String                                      name;
     protected final          File                                        path;
     protected final          ImmutableDisplayNameMap.Mutable<ConfigSect> sections      = new ImmutableDisplayNameMap.Mutable<>();
-    final                    ConfigParser                                parser;
+    public final             ConfigParser                                parser;
     @Nullable                MouseLogger                                 logger;
     protected                boolean                                     loaded;
     protected final @Nonnull ConfigDictionary                            dictionary;
@@ -209,7 +206,7 @@ public class MouseConfig {
 
     @Nullable public ConfigValPlusMinus getBooleanVal(@Nullable String fullName)             { return getValue(fullName); }
     @Nullable public ConfigValDecimal getDecimalVal(@Nullable String fullName)               { return getValue(fullName); }
-    @Nullable public ConfigValInteger getIntegerVal(@Nullable String fullName)               { return getValue(fullName); }
+    @Nullable public ConfigValIntegral getIntegerVal(@Nullable String fullName)              { return getValue(fullName); }
     @Nullable public ConfigValString getStringVal(@Nullable String fullName)                 { return getValue(fullName); }
     @Nullable public ConfigValRandomQuantity getRandomQuantityVal(@Nullable String fullName) { return getValue(fullName); }
     @Nullable public ConfigValPercent getPercentVal(@Nullable String fullName)               { return getValue(fullName); }

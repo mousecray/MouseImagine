@@ -1,23 +1,23 @@
 package ru.mousecray.mouseproject.api.customtype.values;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mouseproject.api.customtype.CustomType;
+import ru.mousecray.mouseproject.api.customtype.OtherType;
 import ru.mousecray.mouseproject.api.error.UnsupportedValException;
 import ru.mousecray.mouseproject.api.error.ValueFormatException;
+import ru.mousecray.mouseproject.api.minecraft.MouseIBlockState;
 import ru.mousecray.mouseproject.api.utils.MouseNumbers;
 import ru.mousecray.mouseproject.api.utils.MouseStrings;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Comparator;
 import java.util.Objects;
 
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
-public class MinecraftBlock implements CustomType<MinecraftBlock> {
+public class MinecraftBlock extends OtherType<MouseIBlockState> {
+    public static final MinecraftBlock AIR = MinecraftBlock.create("air");
+
     static { storage.put(MinecraftBlock.class, MinecraftBlock::parse); }
 
     @Nonnull protected final String prefix;
@@ -25,6 +25,7 @@ public class MinecraftBlock implements CustomType<MinecraftBlock> {
     protected final          int    meta;
 
     protected MinecraftBlock(String prefix, String name, int meta) {
+        super(MouseIBlockState.create(prefix, name, meta));
         this.prefix = prefix;
         this.name = name;
         this.meta = meta;
@@ -44,68 +45,18 @@ public class MinecraftBlock implements CustomType<MinecraftBlock> {
         return new MinecraftBlock(prefix, name, meta);
     }
 
-    public static MinecraftBlock create(String name, int meta) {
-        return create("minecraft", name, meta);
-    }
+    public static MinecraftBlock create(String name, int meta) { return create("minecraft", name, meta); }
+    public static MinecraftBlock create(String name)           { return create(name, 0); }
 
-    @Override public boolean isLess(MinecraftBlock other)        { return false; }
-    @Override public boolean isMore(MinecraftBlock other)        { return false; }
-    @Override public boolean isLessOrEqual(MinecraftBlock other) { return isEqual(other); }
-    @Override public boolean isMoreOrEqual(MinecraftBlock other) { return isEqual(other); }
+    @Nullable public MouseIBlockState asBlockState()           { return value; }
 
-    @Override
-    public boolean isEqual(MinecraftBlock other) {
-        return prefix.equals(other.prefix) && name.equals(other.name) && meta == other.meta;
-    }
-
-    @Override public boolean isLessValue(Object other)        { return false; }
-    @Override public boolean isMoreValue(Object other)        { return false; }
-    @Override public boolean isMoreOrEqualValue(Object other) { return isEqualValue(other); }
-    @Override public boolean isLessOrEqualValue(Object other) { return isEqualValue(other); }
-
-    @Override
-    public boolean isEqualValue(Object other) {
-        return other instanceof MinecraftBlock && isEqual(((MinecraftBlock) other));
-    }
-
-    @Override public MinecraftBlock plus(MinecraftBlock other)                           { return this; }
-    @Override public MinecraftBlock minus(MinecraftBlock other)                          { return this; }
-    @Override public MinecraftBlock divide(MinecraftBlock other)                         { return this; }
-    @Override public MinecraftBlock multiply(MinecraftBlock other)                       { return this; }
-    @Override public MinecraftBlock modulo(MinecraftBlock other)                         { return this; }
-    @Override public MinecraftBlock invert()                                             { return this; }
-
-    @Override public MinecraftBlock plusValue(Object other)                              { return this; }
-    @Override public MinecraftBlock minusValue(Object other)                             { return this; }
-    @Override public MinecraftBlock divideValue(Object other)                            { return this; }
-    @Override public MinecraftBlock multiplyValue(Object other)                          { return this; }
-    @Override public MinecraftBlock moduloValue(Object other)                            { return this; }
-
-    @Override public MinecraftBlock fromValue(Object other)                              { return parse(other); }
-    @Override public MinecraftBlock fromString(String other) throws ValueFormatException { return parse(prefix, other); }
-
-    @Override public String asString()                                                   { return prefix + ":" + name + ":" + meta; }
-
-    @SuppressWarnings("unchecked") @Override
-    public <TYPE> TYPE asValue(Class<TYPE> clazz) {
-        return clazz == String.class ? (TYPE) asString() : CustomType.super.asValue(clazz);
-    }
-
-    @Override public Class<MinecraftBlock> getTypeClass() { return MinecraftBlock.class; }
-
-    public String getPrefix()                             { return prefix; }
-    public String getName()                               { return name; }
-    public int getMeta()                                  { return meta; }
-
-    @Nullable
-    public IBlockState getBlockState() {
-        Block block = (Block) Block.blockRegistry.getObject(prefix + ':' + name);
-        return block != null ? IBlockState.create(block, meta) : null;
-    }
+    public String getPrefix()                                  { return prefix; }
+    public String getName()                                    { return name; }
+    public int getMeta()                                       { return meta; }
 
     public static MinecraftBlock parse(@Nullable Object value) throws UnsupportedValException, ValueFormatException {
         if (value instanceof MinecraftBlock) return ((MinecraftBlock) value);
-        else if (value instanceof String) return parse(null, ((String) value));
+        else if (value instanceof String) return parse((String) null, ((String) value));
         throw new UnsupportedValException();
     }
 
@@ -141,25 +92,10 @@ public class MinecraftBlock implements CustomType<MinecraftBlock> {
         throw new ValueFormatException();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MinecraftBlock)) return false;
-        MinecraftBlock minecraftBlock = (MinecraftBlock) o;
-        return meta == minecraftBlock.meta
-                && Objects.equals(prefix, minecraftBlock.prefix)
-                && Objects.equals(name, minecraftBlock.name);
+    @SuppressWarnings("unchecked") @Override
+    public MinecraftBlock createType(Object value) {
+        return create(value.toString());
     }
 
-    @Override public String toString() { return asString(); }
-    @Override public int hashCode()    { return Objects.hash(prefix, name, meta); }
-
-    @Override
-    public int compareTo(MinecraftBlock o) {
-        return Comparator
-                .comparing(MinecraftBlock::getPrefix)
-                .thenComparing(MinecraftBlock::getName)
-                .thenComparing(MinecraftBlock::getMeta)
-                .compare(this, o);
-    }
+    public StringType asStringType() { return StringType.create(toString()); }
 }

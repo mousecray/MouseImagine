@@ -1,7 +1,7 @@
 package ru.mousecray.mouseproject.api.config.build;
 
 import ru.mousecray.mouseproject.api.DisplayName;
-import ru.mousecray.mouseproject.api.config.pars.ConfigParDisabler;
+import ru.mousecray.mouseproject.api.config.ConfigParDisabler;
 import ru.mousecray.mouseproject.api.config.utils.ConfigDictionary;
 
 import javax.annotation.Nullable;
