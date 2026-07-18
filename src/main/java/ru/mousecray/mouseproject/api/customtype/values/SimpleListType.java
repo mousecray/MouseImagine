@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
 package ru.mousecray.mouseproject.api.customtype.values;
 
 import org.apache.commons.lang3.StringUtils;
@@ -102,12 +107,20 @@ public final class SimpleListType<T extends CustomType<?>> extends ListType<T, T
 
                         if (val != null) list.addValue(val);
                         else {
-                            if (logger != null) logger.warn("ListType skipped null value '" + str + "'",
-                                    "customtype", ConsoleColor.YELLOW_BG);
+                            if (logger != null) {
+                                logger.atWarn()
+                                        .withPrefix("Customtype")
+                                        .withStyle(ConsoleColor.YELLOW_BG)
+                                        .log("ListType skipped null value '{0}'", str);
+                            }
                         }
                     } catch (NumberFormatException e) {
-                        if (logger != null) logger.warn("ListType skipped broken or unsupported value '" + str + "'",
-                                "customtype", ConsoleColor.YELLOW_BG);
+                        if (logger != null) {
+                            logger.atWarn()
+                                    .withPrefix("Customtype")
+                                    .withStyle(ConsoleColor.YELLOW_BG)
+                                    .log("ListType skipped broken or unsupported value '{0}'", str);
+                        }
                     }
                 }
             }

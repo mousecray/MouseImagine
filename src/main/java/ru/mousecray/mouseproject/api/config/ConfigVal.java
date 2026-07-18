@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
 package ru.mousecray.mouseproject.api.config;
 
 import com.google.common.collect.ImmutableList;
@@ -116,9 +121,10 @@ public abstract class ConfigVal<V extends CustomType<?>> {
         if (!value.equals(val)) {
             if (hasLogger()) {
                 assert owner != null;
-                getLogger().warn("ConfigValue \"" + owner.getFullInternalName() +
-                                "\" got value that not valid. It was adapted",
-                        "Config", ConsoleColor.YELLOW_BG);
+                getLogger().atWarn()
+                        .withPrefix("Config")
+                        .withStyle(ConsoleColor.YELLOW_BG)
+                        .log("ConfigValue '{0}' got value that not valid. It was adapted", owner.getFullInternalName());
             }
         }
         currentConfigure = getCurrConfigureFromValue(this.value);
@@ -154,9 +160,10 @@ public abstract class ConfigVal<V extends CustomType<?>> {
         if (val != adaptedVal) {
             if (hasLogger()) {
                 assert owner != null;
-                getLogger().warn("ConfigValue \"" + owner.getFullInternalName() +
-                                "\" got value that not valid. It was adapted",
-                        "Config", ConsoleColor.YELLOW_BG);
+                getLogger().atWarn()
+                        .withPrefix("Config")
+                        .withStyle(ConsoleColor.YELLOW_BG)
+                        .log("ConfigValue '{0}' got value that not valid. It was adapted", owner.getFullInternalName());
             }
             return ValueParseResult.ADAPTED;
         }
@@ -183,132 +190,110 @@ public abstract class ConfigVal<V extends CustomType<?>> {
     private void logConstraintsConstrainingDisabled() {
         if (hasLogger()) {
             assert owner != null;
-            getLogger().warn("ConfigValue '" + owner.getFullInternalName() +
-                            "' got a Constraints but it constraining is disabled. Constraints will be skipped",
-                    "Config", ConsoleColor.YELLOW_BG
-            );
+            getLogger().atWarn()
+                    .withPrefix("Config")
+                    .withStyle(ConsoleColor.YELLOW_BG)
+                    .log("ConfigValue '{0}' got a Constraint but it constraining is disabled. Constraints will be skipped",
+                            owner.getFullInternalName());
         }
     }
 
     private void logConstraintsConfigNotPresentOrNotBuilt() {
         if (hasLogger()) {
             assert owner != null;
-            getLogger().warn("ConfigValue '" + owner.getFullInternalName() +
-                            "' got a Constraints but it config not found or not already built. Constraints will be skipped",
-                    "Config", ConsoleColor.YELLOW_BG
-            );
+            getLogger().atWarn()
+                    .withPrefix("Config")
+                    .withStyle(ConsoleColor.YELLOW_BG)
+                    .log(
+                            "ConfigValue '{0}' got a Constraints but it config not found or not already built. Constraints will be skipped",
+                            owner.getFullInternalName()
+                    );
         }
     }
 
     private void logConstraintDisabledConditionEnd(Constraint<?> constraint) {
         if (hasLogger()) {
             assert owner != null;
-            getLogger().info("ConfigValue '" + owner.getFullInternalName() +
-                    "' got a Constraint '" + constraint.getConditionType() + "' with path '" + constraint.getPath() +
-                    "' and that Constraint was applied. " +
-                    "All other Constraints will be skipped", "Config");
+            getLogger().atInfo()
+                    .withPrefix("Config")
+                    .log("ConfigValue '{0}' got a Constraint '{1}' with path '{2}'" +
+                                    "and that Constraint was applied. All other Constraints will be skipped",
+                            owner.getFullInternalName(), constraint.getConditionType(), constraint.getPath());
         }
     }
 
     private void logConstraintDisabledConditionNotDisabling(Constraint<?> constraint) {
         if (hasLogger()) {
             assert owner != null;
-            getLogger().warn("ConfigValue '" + owner.getFullInternalName() +
-                    "' got a Constraint '" + constraint.getConditionType() + "' with path '" + constraint.getPath() +
-                    "' to ConfigSectBase that cannot disabling. " +
-                    "It Constraint will be skipped", "Config", ConsoleColor.YELLOW_BG);
+            getLogger().atWarn()
+                    .withPrefix("Config")
+                    .withStyle(ConsoleColor.YELLOW_BG)
+                    .log("ConfigValue '{0}' got a Constraint '{1}' with path '{2}' to ConfigSectBase that cannot disabling. " +
+                                    "It Constraint will be skipped",
+                            owner.getFullInternalName(), constraint.getConditionType(), constraint.getPath()
+                    );
         }
     }
 
     private void logConstraintValNull(Constraint<?> constraint) {
-        if (hasLogger()) {
-            assert owner != null;
-            getLogger().warn("ConfigValue '" + owner.getFullInternalName() +
-                    "' got a " + constraint.getValType() + " Constraint '" + constraint.getConditionType() + "' with path '"
-                    + constraint.getPath() + "' but constraint val is null. " +
-                    "It Constraint will be skipped", "Config", ConsoleColor.YELLOW_BG);
-        }
+        if (hasLogger()) logConstraintWarn(constraint, "but constraint val is null.");
     }
 
     private void logConstraintRangeNull(Constraint<?> constraint) {
-        if (hasLogger()) {
-            assert owner != null;
-            getLogger().warn("ConfigValue '" + owner.getFullInternalName() +
-                    "' got a " + constraint.getValType() + " Constraint '" + constraint.getConditionType() + "' with path '" +
-                    constraint.getPath() + "' but constraint range is null. " +
-                    "It Constraint will be skipped", "Config", ConsoleColor.YELLOW_BG);
-        }
+        if (hasLogger()) logConstraintWarn(constraint, "but constraint range is null.");
     }
 
     private void logConstraintConditionNotValid(Constraint<?> constraint) {
-        if (hasLogger()) {
-            assert owner != null;
-            getLogger().warn("ConfigValue '" + owner.getFullInternalName() +
-                    "' got a " + constraint.getValType() + " Constraint '" + constraint.getConditionType() + "' with path '" +
-                    constraint.getPath() + "' but constraint condition isn't valid. " +
-                    "It Constraint will be skipped", "Config", ConsoleColor.YELLOW_BG);
-        }
+        if (hasLogger()) logConstraintWarn(constraint, "but constraint condition isn't valid.");
     }
 
     private void logConstraintIncompatibleTargetType(Constraint<?> constraint) {
-        if (hasLogger()) {
-            assert owner != null;
-            getLogger().warn("ConfigValue '" + owner.getFullInternalName() +
-                    "' got a " + constraint.getValType() + " Constraint '" + constraint.getConditionType() + "' with path '" +
-                    constraint.getPath() + "' that has incompatible type with target. " +
-                    "It Constraint will be skipped", "Config", ConsoleColor.YELLOW_BG);
-        }
+        if (hasLogger()) logConstraintWarn(constraint, "that has incompatible type with target.");
     }
 
     private void logConstraintIncompatibleOwnerType(Constraint<?> constraint) {
-        if (hasLogger()) {
-            assert owner != null;
-            getLogger().warn("ConfigValue '" + owner.getFullInternalName() +
-                    "' got a " + constraint.getValType() + " Constraint '" + constraint.getConditionType() + "' with path '" +
-                    constraint.getPath() + "' that has incompatible type with owner. " +
-                    "It Constraint will be skipped", "Config", ConsoleColor.YELLOW_BG);
-        }
+        if (hasLogger()) logConstraintWarn(constraint, "that has incompatible type with owner.");
     }
 
     private void logConstraintIncompatibleTargetValue(Constraint<?> constraint) {
-        if (hasLogger()) {
-            assert owner != null;
-            getLogger().warn("ConfigValue '" + owner.getFullInternalName() +
-                    "' got a " + constraint.getValType() + " Constraint '" + constraint.getConditionType() + "' with path '" +
-                    constraint.getPath() + "' but target value is incompatible. " +
-                    "It Constraint will be skipped", "Config", ConsoleColor.YELLOW_BG);
-        }
+        if (hasLogger()) logConstraintWarn(constraint, "but target value is incompatible.");
     }
 
     private void logConstraintConditionNotSupport(Constraint<?> constraint) {
-        if (hasLogger()) {
-            assert owner != null;
-            getLogger().warn("ConfigValue '" + owner.getFullInternalName() +
-                    "' got a " + constraint.getValType() + " Constraint '" + constraint.getConditionType() + "' with path '" +
-                    constraint.getPath() + "' but constraint condition type isn't support. " +
-                    "It Constraint will be skipped", "Config", ConsoleColor.YELLOW_BG);
-        }
+        if (hasLogger()) logConstraintWarn(constraint, "but constraint condition type isn't support.");
+    }
+
+    private void logConstraintWarn(Constraint<?> constraint, String uniqueMessage) {
+        assert owner != null;
+        getLogger().atWarn()
+                .withPrefix("Config")
+                .withStyle(ConsoleColor.YELLOW_BG)
+                .log("ConfigValue '{0}' got a {1} Constraint '{2}' with path '{3}' {4} It Constraint will be skipped",
+                        owner.getFullInternalName(), constraint.getValType(), constraint.getConditionType(), constraint.getPath(), uniqueMessage
+                );
     }
 
     private void logConstraintDisabledEnd(Constraint<?> constraint) {
         if (hasLogger()) {
             assert owner != null;
-            getLogger().info("ConfigValue '" + owner.getFullInternalName() +
-                    "' got a " + constraint.getValType() + " Constraint '" + constraint.getConditionType() +
-                    "' of " + constraint.getType() + " type with path '" + constraint.getPath() +
-                    "' and that Constraint was applied. " +
-                    "All other Constraints will be skipped", "Config");
+            getLogger().atInfo()
+                    .withPrefix("Config")
+                    .log("ConfigValue '{0}' got a {1} Constraint '{2}' of {3} type with path '{4}'" +
+                                    "and that Constraint was applied. All other Constraints will be skipped",
+                            owner.getFullInternalName(), constraint.getValType(), constraint.getConditionType(),
+                            constraint.getType(), constraint.getPath());
         }
     }
 
     private void logConstraintRelationEnd(Constraint<?> constraint) {
         if (hasLogger()) {
             assert owner != null;
-            getLogger().info("ConfigValue '" + owner.getFullInternalName() +
-                    "' got a " + constraint.getValType() + " Constraint '" + constraint.getConditionType() +
-                    "' of " + constraint.getType() + " type with path '" + constraint.getPath() +
-                    "' and that Constraint was applied. " +
-                    "Current Value is '" + constrainedValue + "'", "Config");
+            getLogger().atInfo()
+                    .withPrefix("Config")
+                    .log("ConfigValue '{0}' got a {1} Constraint '{2}' of {3} type with path '{4}'" +
+                                    "and that Constraint was applied. Current Value is '{5}'",
+                            owner.getFullInternalName(), constraint.getValType(), constraint.getConditionType(),
+                            constraint.getType(), constraint.getPath(), constrainedValue);
         }
     }
 
@@ -699,24 +684,31 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                     } else {
                         if (hasLogger()) {
                             assert owner != null;
-                            getLogger().warn("ConfigValue '" + owner.getFullInternalName() +
-                                    "' got a Constraint with path '" + path + "' that isn't ConfigParBase. " +
-                                    "It Constraint will be skipped", "Config", ConsoleColor.YELLOW_BG);
+                            getLogger().atWarn()
+                                    .withPrefix("Config")
+                                    .withStyle(ConsoleColor.YELLOW_BG)
+                                    .log("ConfigValue '{0}' got a Constraint with path '{1}' that isn't ConfigParBase. " +
+                                            "It Constraint will be skipped", owner.getFullInternalName(), path);
                         }
                     }
                 } else {
                     if (hasLogger()) {
-                        getLogger().warn("ConfigValue '" + owner.getFullInternalName() +
-                                "' got a Constraint with path '" + path + "' to self. " +
-                                "It Constraint will be skipped", "Config", ConsoleColor.YELLOW_BG);
+                        getLogger().atWarn()
+                                .withPrefix("Config")
+                                .withStyle(ConsoleColor.YELLOW_BG)
+                                .log("ConfigValue '{0}' got a Constraint with path '{1}' to self. " +
+                                        "It Constraint will be skipped", owner.getFullInternalName(), path);
                     }
                 }
             } else {
                 if (hasLogger()) {
                     assert owner != null;
-                    getLogger().warn("ConfigValue '" + owner.getFullInternalName() +
-                            "' got a Constraint with path '" + path + "' that does not exist. " +
-                            "It Constraint will be skipped", "Config", ConsoleColor.YELLOW_BG);
+                    getLogger().atWarn()
+                            .withPrefix("Config")
+                            .withStyle(ConsoleColor.YELLOW_BG)
+                            .log("ConfigValue '{0}' got a Constraint with path '{1}' that does not exist. " +
+                                    "It Constraint will be skipped", owner.getFullInternalName(), path
+                            );
                 }
             }
         }

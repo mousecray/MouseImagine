@@ -1,9 +1,15 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
 package ru.mousecray.mouseproject.api.log;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
+import ru.mousecray.mouseproject.api.utils.MouseStrings;
 
-import java.text.MessageFormat;
+import java.util.Arrays;
 
 public class MouseLogger {
     private final Logger logger;
@@ -15,64 +21,67 @@ public class MouseLogger {
         this.prefixColors = ConsoleColor.getColorString(prefixColors);
     }
 
-    public void log(String text, Level level, ConsoleColor... colors) {
-        logger.log(level, "{0}{1}{2}", ConsoleColor.getColorString(colors), text, ConsoleColor.RESET);
-    }
+    public LogBuilder at(Level level)      { return new LogBuilder(level); }
+    public LogBuilder atInfo()             { return new LogBuilder(Level.INFO); }
+    public LogBuilder atWarn()             { return new LogBuilder(Level.WARN); }
+    public LogBuilder atError()            { return new LogBuilder(Level.ERROR); }
+    public LogBuilder atFatal(Exception e) { return new LogBuilder(Level.FATAL).withStyle(ConsoleColor.RED_BG).withException(e); }
+    public LogBuilder atDebug()            { return new LogBuilder(Level.DEBUG); }
 
-    public void log(String text, String prefix, Level level, ConsoleColor... colors) {
-        logger.log(level, MessageFormat.format(
-                "{0}{1}{2} {3}{4}{5}", prefixColors, prefixPattern.replace("${value}", prefix),
-                ConsoleColor.RESET, ConsoleColor.getColorString(colors), text, ConsoleColor.RESET
-        ));
-    }
+    public class LogBuilder {
+        private final Level          level;
+        private       ConsoleColor[] style     = new ConsoleColor[0];
+        private       String         prefix    = null;
+        private       Exception      exception = null;
 
-    public void info(String text, ConsoleColor... colors) {
-        logger.info("{0}{1}{2}", ConsoleColor.getColorString(colors), text, ConsoleColor.RESET);
-    }
+        private LogBuilder(Level level) {
+            this.level = level;
+        }
 
-    public void info(String text, String prefix, ConsoleColor... colors) {
-        logger.info(MessageFormat.format(
-                "{0}{1}{2} {3}{4}{5}", prefixColors, prefixPattern.replace("${value}", prefix),
-                ConsoleColor.RESET, ConsoleColor.getColorString(colors), text, ConsoleColor.RESET
-        ));
-    }
+        public LogBuilder withStyle(ConsoleColor... style) {
+            this.style = style;
+            return this;
+        }
 
-    public void warn(String text, ConsoleColor... colors) {
-        logger.warn("{0}{1}{2}", ConsoleColor.getColorString(colors), text, ConsoleColor.RESET);
-    }
+        public LogBuilder withPrefix(String prefix) {
+            this.prefix = prefix;
+            return this;
+        }
 
-    public void warn(String text, String prefix, ConsoleColor... colors) {
-        logger.warn(MessageFormat.format(
-                "{0}{1}{2} {3}{4}{5}", prefixColors, prefixPattern.replace("${value}", prefix),
-                ConsoleColor.RESET, ConsoleColor.getColorString(colors), text, ConsoleColor.RESET
-        ));
-    }
+        public LogBuilder withException(Exception exception) {
+            this.exception = exception;
+            return this;
+        }
 
-    public void error(String text, ConsoleColor... colors) {
-        logger.error("{0}{1}{2}", ConsoleColor.getColorString(colors), text, ConsoleColor.RESET);
-    }
+        public void log(String text, Object... args) {
+            String message = MouseStrings.format(text, args);
 
-    public void error(String text, String prefix, ConsoleColor... colors) {
-        logger.error(MessageFormat.format(
-                "{0}{1}{2} {3}{4}{5}", prefixColors, prefixPattern.replace("${value}", prefix),
-                ConsoleColor.RESET, ConsoleColor.getColorString(colors), text, ConsoleColor.RESET
-        ));
-    }
+            StringBuilder finalMessage = new StringBuilder();
 
-    public void fatal(String text, Exception e) {
-        logger.fatal("{0}{1}{2}{4}Exception: {5}{6}Stack trace: {7}",
-                ConsoleColor.getColorString(ConsoleColor.RED_BG), text,
-                ConsoleColor.RESET, System.lineSeparator(), e.getLocalizedMessage(),
-                System.lineSeparator(), e.getStackTrace());
-    }
+            if (prefix != null) {
+                finalMessage.append(prefixColors)
+                        .append(prefixPattern.replace("${value}", prefix))
+                        .append(ConsoleColor.RESET)
+                        .append(" ");
+            }
 
-    public void fatal(String text, String prefix, Exception e) {
-        logger.fatal("{0}{1}{2} {3}{4}{5}Exception: {6}{7}Stack trace: {8}",
-                prefixColors, prefixPattern.replace("${value}", prefix),
-                ConsoleColor.getColorString(ConsoleColor.RED_BG), text, ConsoleColor.RESET,
-                System.lineSeparator(), e.getLocalizedMessage(),
-                System.lineSeparator(), e.getStackTrace());
-    }
+            boolean hasStyle = style != null && style.length > 0;
+            if (hasStyle) finalMessage.append(ConsoleColor.getColorString(style));
 
-    public void debug(String text) { logger.debug(text); }
+            finalMessage.append(message);
+
+            if (hasStyle) finalMessage.append(ConsoleColor.RESET);
+
+            if (exception != null) {
+                finalMessage.append(System.lineSeparator())
+                        .append("Exception: ")
+                        .append(exception.getLocalizedMessage())
+                        .append(System.lineSeparator())
+                        .append("Stack trace: ")
+                        .append(Arrays.toString(exception.getStackTrace()));
+            }
+
+            logger.log(level, finalMessage.toString());
+        }
+    }
 }

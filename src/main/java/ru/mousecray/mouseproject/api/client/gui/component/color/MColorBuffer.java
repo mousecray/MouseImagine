@@ -3,7 +3,10 @@
  * Licensed under the GNU Lesser General Public License, Version 3.0
  ******************************************************************************/
 
-package ru.mousecray.mouseproject.api.client.gui.component.color;
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/ru.mousecray.mouseproject.api.client.gui.component.color;
 
 public class MColorBuffer {
     private final float[] COLOR_BUFFER = new float[4];

@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
 package ru.mousecray.mouseproject.api.config.values;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -217,24 +222,31 @@ public class ConfigConditionVal<
                         return;
                     } else {
                         if (hasLogger()) {
-                            getLogger().warn(
-                                    "'" + pathToParList + "' for ConfigConditionVal + '" + owner.getName() +
-                                            "' found but that method 'getList' not present or broken",
-                                    "Config", ConsoleColor.YELLOW_BG);
+                            getLogger().atWarn()
+                                    .withPrefix("Config")
+                                    .withStyle(ConsoleColor.YELLOW_BG)
+                                    .log("'{0}' for ConfigConditionVal '{1}' found but that method 'getList' not present or broken",
+                                            pathToParList, owner.getName());
                         }
                     }
                 }
             }
             if (hasLogger()) {
-                getLogger().warn("'" + pathToParList + "' is not found or incompatible type " +
-                        "for ConfigConditionVal + '" + owner.getName() + "'", "Config", ConsoleColor.YELLOW_BG);
+                getLogger().atWarn()
+                        .withPrefix("Config")
+                        .withStyle(ConsoleColor.YELLOW_BG)
+                        .log("'{0}' is not found or incompatible type for ConfigConditionVal '{1}'",
+                                pathToParList, owner.getName());
             }
         } else {
             ListType<?, V> list = listSupplier.get();
             if (list != null) cachedList = list;
             else if (hasLogger()) {
-                getLogger().warn("listSupplier returns null " +
-                        "for ConfigConditionVal + '" + owner.getName() + "'", "Config", ConsoleColor.YELLOW_BG);
+                getLogger().atWarn()
+                        .withPrefix("Config")
+                        .withStyle(ConsoleColor.YELLOW_BG)
+                        .log("listSupplier returns null for ConfigConditionVal '{0}'",
+                                owner.getName());
             }
         }
     }

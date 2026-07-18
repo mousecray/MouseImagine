@@ -3,7 +3,10 @@
  * Licensed under the GNU Lesser General Public License, Version 3.0
  ******************************************************************************/
 
-package ru.mousecray.mouseproject.core.client.gui.wallet;
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -28,6 +31,8 @@ import ru.mousecray.mouseproject.api.client.gui.misc.cache.GuiElementCache;
 import ru.mousecray.mouseproject.api.client.gui.misc.cache.GuiGridCacheBuilder;
 import ru.mousecray.mouseproject.api.utils.ref.IntRef;
 import ru.mousecray.mouseproject.api.utils.ref.StringRef;
+import ru.mousecray.mouseproject.core.MouseProject;
+import ru.mousecray.mouseproject.core.client.gui.wallet.WalletSliderControl;
 import ru.mousecray.mouseproject.core.common.economy.CoinHelper;
 import ru.mousecray.mouseproject.core.common.economy.CoinValue;
 import ru.mousecray.mouseproject.core.common.economy.coin.CoinType;
@@ -54,7 +59,7 @@ public class GuiScreenWallet extends MGuiScreen {
     private final ItemStack                  walletStack;
 
     public GuiScreenWallet(EntityPlayer player, int slot) {
-        super("wallet_screen", GuiVector.of(230, 200), GuiVector.of(4));
+        super("wallet_screen", GuiVector.of(230, 200), GuiVector.of(4), MouseProject.getInstance().getLogger());
         this.player = player;
         walletStack = player.inventory.getStackInSlot(slot).copy();
         walletPipe = !(walletStack.getItem() instanceof IWallet) ? null : MouseProjectNBT.get(walletStack).getWalletPipe();

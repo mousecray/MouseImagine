@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
 package ru.mousecray.mouseproject.api.config.values.base.list.simple;
 
 import ru.mousecray.mouseproject.api.VariableValue;
@@ -65,9 +70,11 @@ public abstract class ConfigSimpleListNumberVal<
     protected T adaptListValue(T value) {
         if (!isInRange(value)) {
             if (hasLogger()) {
-                getLogger().warn("ConfigValueSimpleListNumber \"" + owner.getFullInternalName() +
-                                "\" got value that not valid. It was adapted",
-                        "Config", ConsoleColor.YELLOW_BG);
+                getLogger().atWarn()
+                        .withPrefix("Config")
+                        .withStyle(ConsoleColor.YELLOW_BG)
+                        .log("ConfigValueSimpleListNumber '{0}' got value that not valid. It was adapted",
+                                owner.getFullInternalName());
             }
             return range.getNearValue(value);
         }

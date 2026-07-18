@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
 package ru.mousecray.mouseproject.api.config.build;
 
 import com.google.common.collect.ImmutableList;
@@ -6,6 +11,7 @@ import ru.mousecray.mouseproject.api.DisplayName;
 import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mouseproject.api.config.ConfigParDisabler;
 import ru.mousecray.mouseproject.api.config.ConfigSectBase;
+import ru.mousecray.mouseproject.api.config.ConfigVal;
 import ru.mousecray.mouseproject.api.config.pars.ConfigParGroupQuantityCondition;
 import ru.mousecray.mouseproject.api.config.specific.ConfigLocaleType;
 import ru.mousecray.mouseproject.api.config.specific.ConfigValType;
@@ -85,33 +91,31 @@ public final class ConfigParameterGroupQuantityConditionBuilder<T extends Compar
     @Override
     void addDisabler(ConfigParDisabler disabler) {
         if (disablePar != null && configBuilder.logger != null) {
-            configBuilder.logger.warn(
-                    "Disabler \"" + disablePar.getName().getInternalName() + "\"in ConfigSection \"" +
-                            path + "." + name.getInternalName() + "\" was overwritten by Disabler \"" +
-                            disablePar.getName().getInternalName() + "\"", "Config", ConsoleColor.YELLOW_BG
-            );
+            configBuilder.logger.atWarn()
+                    .withPrefix("Config")
+                    .withStyle(ConsoleColor.YELLOW_BG)
+                    .log("Disabler '{0}' in configSection '{1}.{2}' was overwritten by Disabler '{3}'",
+                            disablePar.getName().getInternalName(), path, name.getInternalName(), disabler.getName().getInternalName());
         }
         disablePar = disabler;
     }
 
     @SuppressWarnings("unchecked") @Override
     protected void setValue(ConfigVal value) {
+        boolean logVal = false;
         if (value instanceof ConfigSimpleListVal) {
-            if (listPar != null && configBuilder.logger != null) {
-                configBuilder.logger.warn(
-                        "ConfigValue \"" + listPar + "\" in ConfigParameter \"" + getFullName() +
-                                "\" was overwritten by ConfigValue \"" + value + "\"", "Config", ConsoleColor.YELLOW_BG
-                );
-            }
+            if (listPar != null) logVal = true;
             listPar = Pair.of(listName, (ConfigSimpleListVal<T>) value);
         } else if (value instanceof ConfigValRandomQuantity) {
-            if (randomPar != null && configBuilder.logger != null) {
-                configBuilder.logger.warn(
-                        "ConfigValue \"" + randomPar + "\" in ConfigParameter \"" + getFullName() +
-                                "\" was overwritten by ConfigValue \"" + value + "\"", "Config", ConsoleColor.YELLOW_BG
-                );
-            }
+            if (randomPar != null) logVal = true;
             randomPar = Pair.of(randomName, (ConfigValRandomQuantity) value);
+        }
+        if (logVal && configBuilder.logger != null) {
+            configBuilder.logger.atWarn()
+                    .withPrefix("Config")
+                    .withStyle(ConsoleColor.YELLOW_BG)
+                    .log("ConfigValue '{0}' in ConfigParameter '{1}' was overwritten by ConfigValue '{2}'",
+                            listPar, getFullName(), value);
         }
     }
 
@@ -130,9 +134,13 @@ public final class ConfigParameterGroupQuantityConditionBuilder<T extends Compar
         if (parent != null && parent.canBeDisabled() != canBeDisabled) {
             canBeDisabled = parent.canBeDisabled();
             if (configBuilder.logger != null && !configBuilder.autoDisable) {
-                configBuilder.logger.warn("The Parent section of ConfigParameterGroup \"" + getFullName() +
-                        "\" has flag \"canBeDisabled\" other then the ConfigParameterGroup value. " +
-                        "The value of ConfigParameterGroup has been changed", "Config", ConsoleColor.YELLOW_BG);
+                configBuilder.logger.atWarn()
+                        .withPrefix("Config")
+                        .withStyle(ConsoleColor.YELLOW_BG)
+                        .log("The Parent section of ConfigParameterGroup '{0}' has flag 'canBeDisabled' " +
+                                        "other then the ConfigParameterGroup value. " +
+                                        "The value of ConfigParameterGroup has been changed",
+                                getFullName());
             }
         }
         parBuilder.setGroup(new ConfigParGroupQuantityCondition<>(

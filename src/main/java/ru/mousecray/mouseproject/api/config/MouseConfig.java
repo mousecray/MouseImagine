@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
 package ru.mousecray.mouseproject.api.config;
 
 import ru.mousecray.mouseproject.api.DisplayName;
@@ -73,10 +78,10 @@ public class MouseConfig {
     public void addSection(ConfigSect section) {
         ImmutableDisplayNameMap.Entry<ConfigSect> prev = sections.put(section.getName(), Objects.requireNonNull(section));
         if (prev != null) {
-            if (logger != null) logger.debug(
-                    "ConfigSectBase \"" + prev.getValue().getFullInternalName() +
-                            "\" was overwritten by ConfigSectBase \"" + section.getName().getInternalName() + "\""
-            );
+            if (logger != null) {
+                logger.atDebug().log("ConfigSectBase '{0}' was overwritten by ConfigSectBase '{1}'",
+                        prev.getValue().getFullInternalName(), section.getName().getInternalName());
+            }
             if (built) {
                 ArrayList<ConfigSectBase> list = new ArrayList<>();
                 list.add(prev.getValue());

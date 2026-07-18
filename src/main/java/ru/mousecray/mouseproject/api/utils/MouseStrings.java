@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
 package ru.mousecray.mouseproject.api.utils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -75,5 +80,59 @@ public class MouseStrings {
 
     public static int compare(@Nullable String val1, @Nullable String val2) {
         return val1 == null ? val2 == null ? 0 : -1 : val2 == null ? 1 : val1.compareTo(val2);
+    }
+
+    /**
+     * @param text String template like "{0}, {1}, {2}"
+     * @param args Objects that be placed to template
+     * @return String like "object1, object2, object3"
+     */
+    @Fast
+    @Nullable
+    public static String format(@Nullable String text, @Nullable Object... args) {
+        if (text == null) return null;
+        if (args == null || args.length == 0) return text;
+
+        int           estimatedSize = text.length() + args.length * 16;
+        StringBuilder sb            = new StringBuilder(estimatedSize);
+
+        int len     = text.length();
+        int lastPos = 0;
+
+        while (lastPos < len) {
+            int openBrace = text.indexOf('{', lastPos);
+            if (openBrace == -1) {
+                sb.append(text, lastPos, len);
+                break;
+            }
+
+            sb.append(text, lastPos, openBrace);
+
+            int closeBrace = text.indexOf('}', openBrace + 1);
+            if (closeBrace == -1) {
+                sb.append(text, openBrace, len);
+                break;
+            }
+
+            int     index         = 0;
+            boolean isValidNumber = openBrace + 1 < closeBrace;
+            for (int i = openBrace + 1; i < closeBrace; i++) {
+                char c = text.charAt(i);
+                if (c >= '0' && c <= '9') index = index * 10 + (c - '0');
+                else {
+                    isValidNumber = false;
+                    break;
+                }
+            }
+
+            if (isValidNumber) {
+                if (index >= 0 && index < args.length) sb.append(args[index]);
+                else sb.append(text, openBrace, closeBrace + 1);
+            } else sb.append(text, openBrace, closeBrace + 1);
+
+            lastPos = closeBrace + 1;
+        }
+
+        return sb.toString();
     }
 }

@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -70,14 +69,18 @@ public final class ConfigParser {
     public ConfigIOThread.IOResult readFile() {
         if (!parentDir.exists() || !file.exists()) {
             if (logger != null) {
-                logger.info("Config file \"" + file.getAbsolutePath() + "\" is not found. It will be created on save",
-                        "Config", ConsoleColor.YELLOW_BG);
+                logger.atInfo()
+                        .withPrefix("Config")
+                        .withStyle(ConsoleColor.YELLOW_BG)
+                        .log("Config file '{0}' is not found. It will be created on save", file.getAbsolutePath());
             }
             return ConfigIOThread.IOResult.createNotFound();
         } else {
             if (logger != null) {
-                logger.info("Config file \"" + file.getAbsolutePath() + "\" is found. It will be reading",
-                        "Config", ConsoleColor.GREEN_BG);
+                logger.atInfo()
+                        .withPrefix("Config")
+                        .withStyle(ConsoleColor.GREEN_BG)
+                        .log("Config file '{0}' is found. It will be reading", file.getAbsolutePath());
             }
             return internalReadFile();
         }
@@ -366,41 +369,56 @@ public final class ConfigParser {
                         section.canBeDisabled() && section instanceof ConfigSect
                                 && !((ConfigSect) section).disablePar.setByConfig
                 ) {
-                    logger.warn("SectionDisabler \"" + section.getFullInternalName() + "\" is not found or corrupted",
-                            "Config", ConsoleColor.YELLOW_BG);
+                    logger.atWarn()
+                            .withPrefix("Config")
+                            .withStyle(ConsoleColor.YELLOW_BG)
+                            .log("SectionDisabler '{0}' is not found or corrupted", section.getFullInternalName());
                 }
 
                 if (
                         section.canBeDisabled() && section instanceof ConfigParGroup
                                 && !((ConfigParGroup) section).disablePar.setByConfig
                 ) {
-                    logger.warn("ParGroupDisabler \"" + section.getFullInternalName() + "\" is not found or corrupted",
-                            "Config", ConsoleColor.YELLOW_BG);
+                    logger.atWarn()
+                            .withPrefix("Config")
+                            .withStyle(ConsoleColor.YELLOW_BG)
+                            .log("ParGroupDisabler '{0}' is not found or corrupted", section.getFullInternalName());
                 }
 
                 if (section instanceof ConfigSect) {
                     if (!section.setByConfig) {
-                        logger.warn("Section \"" + section.getFullInternalName() + "\" is not found or corrupted",
-                                "Config", ConsoleColor.YELLOW_BG);
+                        logger.atWarn()
+                                .withPrefix("Config")
+                                .withStyle(ConsoleColor.YELLOW_BG)
+                                .log("Section '{0}' is not found or corrupted", section.getFullInternalName());
                     }
                 } else if (section instanceof ConfigPar) {
                     if (!section.setByConfig) {
-                        logger.warn("Parameter \"" + section.getFullInternalName() + "\" is not found or corrupted",
-                                "Config", ConsoleColor.YELLOW_BG);
+                        logger.atWarn()
+                                .withPrefix("Config")
+                                .withStyle(ConsoleColor.YELLOW_BG)
+                                .log("Parameter '{0}' is not found or corrupted", section.getFullInternalName());
                     }
                     if (!((ConfigPar) section).getConfigVal().setByConfig) {
-                        logger.warn("Parameter Value \"" + section.getFullInternalName() + "\" is not found or corrupted",
-                                "Config", ConsoleColor.YELLOW_BG);
+                        logger.atWarn()
+                                .withPrefix("Config")
+                                .withStyle(ConsoleColor.YELLOW_BG)
+                                .log("Parameter Value '{0}' is not found or corrupted", section.getFullInternalName());
                     }
                 } else if (section instanceof ConfigParGroup) {
                     if (!section.setByConfig) {
-                        logger.warn("ParameterGroup \"" + section.getFullInternalName() + "\" is not found or corrupted",
-                                "Config", ConsoleColor.YELLOW_BG);
+                        logger.atWarn()
+                                .withPrefix("Config")
+                                .withStyle(ConsoleColor.YELLOW_BG)
+                                .log("ParameterGroup '{0}' is not found or corrupted", section.getFullInternalName());
                     }
                     ((ConfigParGroup<?>) section).getValues().forEach((name, value) -> {
                         if (!value.setByConfig) {
-                            logger.warn("Value \"" + name + "\" of ParameterGroup \"" + section.getFullInternalName() +
-                                    "\" is not found or corrupted", "Config", ConsoleColor.YELLOW_BG);
+                            logger.atWarn()
+                                    .withPrefix("Config")
+                                    .withStyle(ConsoleColor.YELLOW_BG)
+                                    .log("Value '{0}' of ParameterGroup '{1}' is not found or corrupted",
+                                            name, section.getFullInternalName());
                         }
                     });
                 }
@@ -432,16 +450,15 @@ public final class ConfigParser {
                                     for (String s : MouseStrings.splitWordsBaseOnLength(
                                             fullSect.getComment(), delimiter, 120
                                     )) {
-                                        fileWriter.write(MessageFormat.format("{0}{1} {2}", bordersTab, comment, s));
+                                        fileWriter.write(MouseStrings.format("{0}{1} {2}", bordersTab, comment, s));
                                         fileWriter.newLine();
                                     }
                                 }
 
                                 //Section name
-                                fileWriter.write(MessageFormat.format(
-                                        "{0}{1} {2}{3}", bordersTab, sectionStart,
-                                        section.getName().getDisplayName(), sectionEqual
-                                ));
+                                fileWriter.write(MouseStrings.format("{0}{1} {2}{3}", bordersTab, sectionStart,
+                                        section.getName().getDisplayName(), sectionEqual)
+                                ))
                                 fileWriter.newLine();
 
                                 if (fullSect.canBeDisabled()) { //Section disabler
@@ -456,7 +473,7 @@ public final class ConfigParser {
                                             ? configure.getDisplayName()
                                             : MouseNumbers.formatObjectIfNumber(def.isPresent() ? def.getValue() : "",
                                             false, true);
-                                    fileWriter.write(MessageFormat.format(
+                                    fileWriter.write(MouseStrings.format(
                                             "{0}{1}{2}{3} {4}{5} {6}", bordersTab, sectionBorder, delimiter,
                                             ConfigParser.comment, dictionary.getLocaleForLocale(disablePar.getValue().getDefaultLocaleType()),
                                             sectionEqual, configure != null ? configure.getDisplayName() : defString
@@ -471,7 +488,7 @@ public final class ConfigParser {
                                                     dictionary.getLocaleForLocale(disablePar.getValue().getPredefinedLocaleType()),
                                                     parEqual, delimiter, configureValues, 120
                                             )) {
-                                                fileWriter.write(MessageFormat.format(
+                                                fileWriter.write(MouseStrings.format(
                                                         "{0}{1}{2}{3} {4}", bordersTab, sectionBorder,
                                                         delimiter, ConfigParser.comment, s
                                                 ));
@@ -480,7 +497,7 @@ public final class ConfigParser {
                                         }
                                     }
 
-                                    fileWriter.write(MessageFormat.format(
+                                    fileWriter.write(MouseStrings.format(
                                             "{0}{1}{2}{3} {4} {5} {6}", bordersTab, sectionBorder, delimiter, sectionDisabler,
                                             disablePar.getName().getDisplayName(), parEqual, disablePar.getValue().toString()
                                     ));
@@ -502,7 +519,7 @@ public final class ConfigParser {
                                     for (String s : MouseStrings.splitWordsBaseOnLength(
                                             par.getComment(), delimiter, 120
                                     )) {
-                                        fileWriter.write(MessageFormat.format(
+                                        fileWriter.write(MouseStrings.format(
                                                 "{0}{1} {2}",
                                                 bordersTab, ConfigParser.comment, s
                                         ));
@@ -527,7 +544,7 @@ public final class ConfigParser {
                                                 ? dictionary.getLocaleForType(((ConfigSimpleListVal<?>) configVal).getListType())
                                                 : configVal.getSpecificDataType();
 
-                                        fileWriter.write(MessageFormat.format(
+                                        fileWriter.write(MouseStrings.format(
                                                 "{0}{1} {2}{3} {4}{5}", bordersTab, ConfigParser.comment,
                                                 dictionary.getLocaleForLocale(configVal.getTypeLocaleType()), sectionEqual,
                                                 dictionary.getLocaleForType(type),
@@ -553,7 +570,7 @@ public final class ConfigParser {
                                                     dictionary.getLocaleForLocale(configVal.getRangeLocaleType()), parEqual, delimiter,
                                                     range.getRanges(), 120
                                             )) {
-                                                fileWriter.write(MessageFormat.format(
+                                                fileWriter.write(MouseStrings.format(
                                                         "{0}{1} {2}", bordersTab, ConfigParser.comment, s
                                                 ));
                                                 fileWriter.newLine();
@@ -577,7 +594,7 @@ public final class ConfigParser {
                                                 ? configure.getDisplayName()
                                                 : MouseNumbers.formatObjectIfNumber(def.isPresent() ? def.getValue() : "",
                                                 false, true);
-                                        fileWriter.write(MessageFormat.format(
+                                        fileWriter.write(MouseStrings.format(
                                                 "{0}{1} {2}{3} {4}", bordersTab,
                                                 ConfigParser.comment, dictionary.getLocaleForLocale(configVal.getDefaultLocaleType()),
                                                 sectionEqual, defString
@@ -599,7 +616,7 @@ public final class ConfigParser {
                                             for (String s : groupPredefinedBaseOnLength(
                                                     dictionary.getLocaleForLocale(configVal.getPredefinedLocaleType()),
                                                     parEqual, delimiter, configureValues, 120)) {
-                                                fileWriter.write(MessageFormat.format(
+                                                fileWriter.write(MouseStrings.format(
                                                         "{0}{1} {2}", bordersTab, ConfigParser.comment, s
                                                 ));
                                                 fileWriter.newLine();
@@ -623,7 +640,7 @@ public final class ConfigParser {
                                                     constrEqual, constrLess, constrMore, constrLessOrEqual, constrMoreOrEqual, constrNotEqual,
                                                     constraints, 120
                                             )) {
-                                                fileWriter.write(MessageFormat.format(
+                                                fileWriter.write(MouseStrings.format(
                                                         "{0}{1} {2}", bordersTab, ConfigParser.comment, s
                                                 ));
                                                 fileWriter.newLine();
@@ -643,7 +660,7 @@ public final class ConfigParser {
                                             for (String s : MouseStrings.splitWordsBaseOnLength(
                                                     config.dictionary.getLocaleForLocale(configVal.getTypeLocaleRules())
                                                             + ": " + rulesForType, delimiter, 120)) {
-                                                fileWriter.write(MessageFormat.format(
+                                                fileWriter.write(MouseStrings.format(
                                                         "{0}{1} {2}", bordersTab, ConfigParser.comment, s
                                                 ));
                                                 fileWriter.newLine();
@@ -657,22 +674,22 @@ public final class ConfigParser {
                                     String parIcon = type == ConfigValType.LIST ? parListStart
                                             : type == ConfigValType.CONDITION ? parConditionStart : parStart;
                                     fileWriter.write(bordersTab);
-                                    for (String s : MouseStrings.splitWordsBaseOnLength(MessageFormat.format(
+                                    for (String s : MouseStrings.splitWordsBaseOnLength(MouseStrings.format(
                                             "{0} {1} {2} {3}", parIcon,
                                             par.getName().getDisplayName(), parEqual, configVal.toString()
                                     ), delimiter, 120)) {
-                                        fileWriter.write(MessageFormat.format("{0}", s));
+                                        fileWriter.write(MouseStrings.format("{0}", s));
                                         fileWriter.newLine();
                                     }
                                 } else if (section instanceof ConfigParGroup) {
                                     ConfigParGroup<?> parGroup = (ConfigParGroup<?>) section;
 
                                     fileWriter.write(bordersTab);
-                                    for (String s : MouseStrings.splitWordsBaseOnLength(MessageFormat.format(
+                                    for (String s : MouseStrings.splitWordsBaseOnLength(MouseStrings.format(
                                             "{0} {1} {2} {3}", groupStart,
                                             par.getName().getDisplayName(), parEqual, groupOpen
                                     ), delimiter, 120)) {
-                                        fileWriter.write(MessageFormat.format("{0}", s));
+                                        fileWriter.write(MouseStrings.format("{0}", s));
                                         fileWriter.newLine();
                                     }
 
@@ -690,7 +707,7 @@ public final class ConfigParser {
                                                 ? configure.getDisplayName()
                                                 : MouseNumbers.formatObjectIfNumber(def.isPresent() ? def : "",
                                                 false, true);
-                                        fileWriter.write(MessageFormat.format(
+                                        fileWriter.write(MouseStrings.format(
                                                 "{0}{1}{2} {3}{4} {5}", bordersTab, delimiter,
                                                 ConfigParser.comment, dictionary.getLocaleForLocale(disablePar.getValue().getDefaultLocaleType()),
                                                 sectionEqual, configure != null ? configure.getDisplayName() : defString
@@ -705,7 +722,7 @@ public final class ConfigParser {
                                                         dictionary.getLocaleForLocale(disablePar.getValue().getPredefinedLocaleType()),
                                                         parEqual, delimiter, configureValues, 120
                                                 )) {
-                                                    fileWriter.write(MessageFormat.format(
+                                                    fileWriter.write(MouseStrings.format(
                                                             "{0}{1}{2} {3}", bordersTab, delimiter,
                                                             ConfigParser.comment, s
                                                     ));
@@ -714,7 +731,7 @@ public final class ConfigParser {
                                             }
                                         }
 
-                                        fileWriter.write(MessageFormat.format(
+                                        fileWriter.write(MouseStrings.format(
                                                 "{0}{1}{2} {3} {4} {5}", bordersTab, delimiter, groupDisabler,
                                                 disablePar.getName().getDisplayName(), parEqual, disablePar.getValue().toString()
                                         ));
@@ -736,7 +753,7 @@ public final class ConfigParser {
                                                     ? dictionary.getLocaleForType(((ConfigSimpleListVal<?>) configVal).getListType())
                                                     : configVal.getSpecificDataType();
 
-                                            fileWriter.write(MessageFormat.format(
+                                            fileWriter.write(MouseStrings.format(
                                                     "{0}{1}{2} {3}{4} {5}{6}", bordersTab, delimiter,
                                                     ConfigParser.comment,
                                                     dictionary.getLocaleForLocale(configVal.getTypeLocaleType()), sectionEqual,
@@ -762,7 +779,7 @@ public final class ConfigParser {
                                                         dictionary.getLocaleForLocale(configVal.getRangeLocaleType()),
                                                         parEqual, delimiter, range.getRanges(), 120
                                                 )) {
-                                                    fileWriter.write(MessageFormat.format(
+                                                    fileWriter.write(MouseStrings.format(
                                                             "{0}{1}{2} {3}", bordersTab, delimiter,
                                                             ConfigParser.comment, s
                                                     ));
@@ -786,7 +803,7 @@ public final class ConfigParser {
                                                     ? configure.getDisplayName()
                                                     : MouseNumbers.formatObjectIfNumber(def.isPresent() ? def.getValue() : "",
                                                     false, true);
-                                            fileWriter.write(MessageFormat.format(
+                                            fileWriter.write(MouseStrings.format(
                                                     "{0}{1}{2} {3}{4} {5}", bordersTab, delimiter,
                                                     ConfigParser.comment, dictionary.getLocaleForLocale(configVal.getDefaultLocaleType()),
                                                     sectionEqual, defString
@@ -809,7 +826,7 @@ public final class ConfigParser {
                                                 for (String s : groupPredefinedBaseOnLength(
                                                         dictionary.getLocaleForLocale(configVal.getPredefinedLocaleType()),
                                                         parEqual, delimiter, configureValues, 120)) {
-                                                    fileWriter.write(MessageFormat.format(
+                                                    fileWriter.write(MouseStrings.format(
                                                             "{0}{1}{2} {3}", bordersTab, delimiter,
                                                             ConfigParser.comment, s
                                                     ));
@@ -835,7 +852,7 @@ public final class ConfigParser {
                                                         constrEqual, constrLess, constrMore, constrLessOrEqual, constrMoreOrEqual, constrNotEqual,
                                                         constraints, 120
                                                 )) {
-                                                    fileWriter.write(MessageFormat.format(
+                                                    fileWriter.write(MouseStrings.format(
                                                             "{0}{1}{2} {3}", bordersTab, delimiter,
                                                             ConfigParser.comment, s
                                                     ));
@@ -856,7 +873,7 @@ public final class ConfigParser {
                                                 for (String s : MouseStrings.splitWordsBaseOnLength(
                                                         config.dictionary.getLocaleForLocale(configVal.getTypeLocaleRules())
                                                                 + ": " + rulesForType, delimiter, 120)) {
-                                                    fileWriter.write(MessageFormat.format(
+                                                    fileWriter.write(MouseStrings.format(
                                                             "{0}{1}{2} {3}", bordersTab, delimiter,
                                                             ConfigParser.comment, s
                                                     ));
@@ -871,11 +888,11 @@ public final class ConfigParser {
                                         String subParIcon = type == ConfigValType.LIST ? parSubListStart
                                                 : type == ConfigValType.CONDITION ? parSubConditionStart : parSubStart;
                                         fileWriter.write(bordersTab + delimiter);
-                                        for (String s : MouseStrings.splitWordsBaseOnLength(MessageFormat.format(
+                                        for (String s : MouseStrings.splitWordsBaseOnLength(MouseStrings.format(
                                                 "{0} {1} {2} {3}", subParIcon,
                                                 entry.getKey().getDisplayName(), parEqual, configVal.toString()
                                         ), delimiter, 120)) {
-                                            fileWriter.write(MessageFormat.format("{0}", s));
+                                            fileWriter.write(MouseStrings.format("{0}", s));
                                             fileWriter.newLine();
                                         }
 
@@ -921,8 +938,10 @@ public final class ConfigParser {
                 tempFile.renameTo(file);
             }
             if (logger != null) {
-                logger.info("Config file \"" + file.getAbsolutePath() + "\" has been saved",
-                        "Config", ConsoleColor.GREEN_BG);
+                logger.atInfo()
+                        .withPrefix("Config")
+                        .withStyle(ConsoleColor.GREEN_BG)
+                        .log("Config file '{0}' has been saved", file.getAbsolutePath());
             }
             return ConfigIOThread.IOResult.createSuccess();
         } catch (IOException e) { return ConfigIOThread.IOResult.createError(e); }

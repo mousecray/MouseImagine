@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
 package ru.mousecray.mouseproject.api.config.build;
 
 import ru.mousecray.mouseproject.api.DisplayName;
@@ -46,11 +51,11 @@ public final class ConfigSectionBuilder extends AbstractConfigChildBuilder {
     @Override
     void addDisabler(ConfigParDisabler disabler) {
         if (disablePar != null && configBuilder.logger != null) {
-            configBuilder.logger.warn(
-                    "Disabler \"" + disablePar.getName().getInternalName() + "\"in ConfigSection \"" +
-                            path + "." + name.getInternalName() + "\" was overwritten by Disabler \"" +
-                            disablePar.getName().getInternalName() + "\"", "Config", ConsoleColor.YELLOW_BG
-            );
+            configBuilder.logger.atWarn()
+                    .withPrefix("Config")
+                    .withStyle(ConsoleColor.YELLOW_BG)
+                    .log("Disabler '{0}' in ConfigSection '{1}.{2}' was overwritten by Disabler '{3}'",
+                            disablePar.getName().getInternalName(), path, name.getInternalName(), disabler.getName().getInternalName());
         }
         disablePar = disabler;
     }

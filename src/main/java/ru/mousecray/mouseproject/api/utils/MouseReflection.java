@@ -18,24 +18,33 @@ import java.util.List;
 
 
 public class MouseReflection {
-    private final           Class<?> clazz;
-    @Nullable private final Field    modifiers;
+    private final           Class<?>    clazz;
+    @Nullable private final Field       modifiers;
+    @Nullable private final MouseLogger logger;
 
-    private MouseReflection(Class<?> clazz, @Nullable Field modifiers) {
+    private MouseReflection(Class<?> clazz, @Nullable Field modifiers, @Nullable MouseLogger logger) {
         this.clazz = clazz;
         this.modifiers = modifiers;
+        this.logger = logger;
     }
 
-    public static MouseReflection prepare(Class<?> clazz) { return new MouseReflection(clazz, null); }
+    public static MouseReflection prepare(Class<?> clazz, @Nullable MouseLogger logger) { return new MouseReflection(clazz, null, logger); }
+    public static MouseReflection prepare(Class<?> clazz)                               { return prepare(clazz, null); }
 
-    public static MouseReflection prepareForFinal(Class<?> clazz) {
+    public static MouseReflection prepareForFinal(Class<?> clazz, @Nullable MouseLogger logger) {
         Field modifiersField;
         try {
             modifiersField = Field.class.getDeclaredField("modifiers");
-        } catch (NoSuchFieldException e) { throw new RuntimeException(e); }
+        } catch (NoSuchFieldException e) {
+            if (logger != null) logger.atFatal(e).withPrefix("Reflection").log("Cannot find modifiers field");
+            throw new RuntimeException(e);
+        }
         modifiersField.setAccessible(true);
-        return new MouseReflection(clazz, modifiersField);
+        return new MouseReflection(clazz, modifiersField, logger);
     }
+
+    public static MouseReflection prepareForFinal(Class<?> clazz) { return prepareForFinal(clazz, null); }
+
 
     @SuppressWarnings("unchecked")
     public <T> List<T> getPublicStaticFields() {
@@ -43,7 +52,10 @@ public class MouseReflection {
         for (Field field : clazz.getFields()) {
             if (Modifier.isStatic(field.getModifiers())) {
                 field.setAccessible(true);
-                try { result.add((T) field.get(null)); } catch (IllegalAccessException e) { throw new RuntimeException(e); }
+                try { result.add((T) field.get(null)); } catch (IllegalAccessException e) {
+                    if (logger != null) logger.atFatal(e).withPrefix("Reflection").log("While getting fields an error occurring");
+                    throw new RuntimeException(e);
+                }
             }
         }
         return result;
@@ -81,7 +93,7 @@ public class MouseReflection {
                         field.getType() + "'; Expected type '" + fieldType + "'");
             }
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            if (logger != null) logger.fatal("While setting field occur error", "Reflection", e);
+            if (logger != null) logger.atFatal(e).withPrefix("Reflection").log("While setting field occur error");
             return false;
         }
     }
@@ -101,7 +113,7 @@ public class MouseReflection {
             if (!isAccessible) method.setAccessible(false);
             return true;
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            if (logger != null) logger.fatal("While invoke method error occurring", "Reflection", e);
+            if (logger != null) logger.atFatal(e).withPrefix("Reflection").log("While invoke method error occurring");
             return false;
         }
     }
@@ -121,7 +133,7 @@ public class MouseReflection {
             if (!isAccessible) method.setAccessible(false);
             return true;
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            if (logger != null) logger.fatal("While invoke method error occurring", "Reflection", e);
+            if (logger != null) logger.atFatal(e).withPrefix("Reflection").log("While invoke method error occurring");
             return false;
         }
     }
@@ -148,7 +160,7 @@ public class MouseReflection {
                         method.getReturnType() + "'; Expected type '" + returnType + "'");
             }
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            if (logger != null) logger.fatal("While invoke method error occurring", "Reflection", e);
+            if (logger != null) logger.atFatal(e).withPrefix("Reflection").log("While invoke method error occurring");
             return VariableValue.create();
         }
     }
@@ -174,7 +186,7 @@ public class MouseReflection {
                         method.getReturnType() + "'; Expected type '" + returnType + "'");
             }
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            if (logger != null) logger.fatal("While invoke method error occurring", "Reflection", e);
+            if (logger != null) logger.atFatal(e).withPrefix("Reflection").log("While invoke method error occurring");
             return VariableValue.create();
         }
     }

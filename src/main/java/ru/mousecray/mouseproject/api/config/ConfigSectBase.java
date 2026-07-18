@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
 package ru.mousecray.mouseproject.api.config;
 
 import ru.mousecray.mouseproject.api.DisplayName;
@@ -92,25 +97,27 @@ public abstract class ConfigSectBase {
         }
         ImmutableDisplayNameMap.Entry<ConfigSectBase> prev = children.put(section.getName(), section);
         if (prev != null && hasLogger()) {
-            getLogger().debug(
-                    "ConfigSectBase \"" + prev.getValue().getFullInternalName() +
-                            "\" was overwritten by ConfigSectBase \"" + section.getName().getInternalName() + "\""
-            );
+            assert getLogger() != null;
+            getLogger().atDebug().log("ConfigSectBase '{0}' was overwritten by ConfigSectBase '{1}'",
+                    prev.getValue().getFullInternalName(), section.getName().getInternalName());
         }
         section.parent = this;
         section.setDeep(deep + 1);
         section.setConfig(config);
 
-        if (hasConfig() && getConfig().isBuilt()) {
-            ArrayList<ConfigSectBase> list = new ArrayList<>();
-            list.add(section);
-            List<ConfigParBase<?>> children = config.getChildrenRecursivelyInternal(list)
-                    .stream()
-                    .filter(val -> val instanceof ConfigParBase)
-                    .map(val -> ((ConfigParBase<?>) val))
-                    .collect(Collectors.toList());
-            if (section instanceof ConfigParBase) children.add(((ConfigParBase<?>) section));
-            synchronized (config.dirtySections) { config.dirtySections.addAll(children); }
+        if (hasConfig()) {
+            assert getConfig() != null;
+            if (getConfig().isBuilt()) {
+                ArrayList<ConfigSectBase> list = new ArrayList<>();
+                list.add(section);
+                List<ConfigParBase<?>> children = config.getChildrenRecursivelyInternal(list)
+                        .stream()
+                        .filter(val -> val instanceof ConfigParBase)
+                        .map(val -> ((ConfigParBase<?>) val))
+                        .collect(Collectors.toList());
+                if (section instanceof ConfigParBase) children.add(((ConfigParBase<?>) section));
+                synchronized (config.dirtySections) { config.dirtySections.addAll(children); }
+            }
         }
     }
 

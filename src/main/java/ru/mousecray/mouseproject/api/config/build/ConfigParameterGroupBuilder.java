@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
 package ru.mousecray.mouseproject.api.config.build;
 
 import ru.mousecray.mouseproject.api.DisplayName;
@@ -65,10 +70,11 @@ public final class ConfigParameterGroupBuilder<T extends Comparable<T>> {
 
     void setGroup(ConfigParGroup group) {
         if (this.group != null && configBuilder.logger != null) {
-            configBuilder.logger.warn(
-                    "Value \"" + this.group.getFullInternalName() + "\" in ConfigParGroup \"" + getFullName() +
-                            "\" was overwritten by ConfigParGroup \"" + this.group + "\"", "Config", ConsoleColor.YELLOW_BG
-            );
+            configBuilder.logger.atWarn()
+                    .withPrefix("Config")
+                    .withStyle(ConsoleColor.YELLOW_BG)
+                    .log("Value '{0}' in ConfigParGroup '{1}' was overwritten by ConfigParGroup '{2}'",
+                            this.group.getFullInternalName(), getFullName(), group.getFullInternalName());
         }
         this.group = group;
     }
@@ -86,9 +92,13 @@ public final class ConfigParameterGroupBuilder<T extends Comparable<T>> {
         if (parent != null && parent.canBeDisabled() != canBeDisabled) {
             canBeDisabled = parent.canBeDisabled();
             if (configBuilder.logger != null && !configBuilder.autoDisable) {
-                configBuilder.logger.warn("The Parent section of ConfigParameterGroup \"" + getFullName() +
-                        "\" has flag \"canBeDisabled\" other then the ConfigParameterGroup value. " +
-                        "The value of ConfigParameterGroup has been changed", "Config", ConsoleColor.YELLOW_BG);
+                configBuilder.logger.atWarn()
+                        .withPrefix("Config")
+                        .withStyle(ConsoleColor.YELLOW_BG)
+                        .log("The Parent section of ConfigParameterGroup '{0}' has flag 'canBeDisabled' " +
+                                        "other then the ConfigParameterGroup value. " +
+                                        "The value of ConfigParameterGroup has been changed",
+                                this.group.getFullInternalName(), getFullName(), group.getFullInternalName());
             }
         }
         configBuilder.putParameter(path, group);

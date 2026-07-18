@@ -32,7 +32,7 @@ import ru.mousecray.mouseproject.api.client.gui.dim.layout.GuiScaleType;
 import ru.mousecray.mouseproject.api.client.gui.misc.FontSize;
 import ru.mousecray.mouseproject.api.client.gui.misc.cache.GuiCacheBuilder;
 import ru.mousecray.mouseproject.api.client.gui.misc.cache.GuiCacheInitiator;
-import ru.mousecray.mouseproject.core.MouseProject;
+import ru.mousecray.mouseproject.api.log.MouseLogger;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -64,12 +64,14 @@ public abstract class MGuiScreen extends GuiScreen {
     @Nullable private MGuiAnchorPanel rootPanel;
     private           int             currentFocusIndex = -1;
 
-    protected FontSize fontSize = FontSize.NORMAL;
+    protected     FontSize    fontSize = FontSize.NORMAL;
+    private final MouseLogger logger;
 
-    protected MGuiScreen(String screenName, GuiVector guiDefaultSize, GuiVector guiDefaultBound) {
+    protected MGuiScreen(String screenName, GuiVector guiDefaultSize, GuiVector guiDefaultBound, MouseLogger logger) {
         this.screenName = screenName;
         this.guiDefaultSize = guiDefaultSize;
         this.guiDefaultBound = guiDefaultBound;
+        this.logger = logger;
     }
 
     public List<GuiButton> getButtonList()                 { return buttonList; }
@@ -195,7 +197,7 @@ public abstract class MGuiScreen extends GuiScreen {
     @SuppressWarnings({ "NullableProblems", "unchecked", "rawtypes" }) @Override @Nullable
     protected <T extends GuiButton> T addButton(T button) {
         if (button instanceof MGuiButton) return (T) addButton(((MGuiButton) button), null, null, null);
-        MouseProject.LOGGER.error("Button {} isn't MGuiButton. In will be skipped.", button.getClass());
+        logger.error("Button {} isn't MGuiButton. In will be skipped.", button.getClass());
         return null;
     }
 
@@ -391,4 +393,6 @@ public abstract class MGuiScreen extends GuiScreen {
     protected <D extends MGuiPanel<?>> GuiCacheInitiator<D> createCachedElement(String key, D parent) {
         return GuiCacheBuilder.<D>create(key).setScreen(this).setParent(parent);
     }
+
+    public MouseLogger getLogger() { return logger; }
 }

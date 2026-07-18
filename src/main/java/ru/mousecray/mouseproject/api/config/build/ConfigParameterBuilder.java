@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
 package ru.mousecray.mouseproject.api.config.build;
 
 import ru.mousecray.mouseproject.api.DisplayName;
@@ -60,10 +65,12 @@ public final class ConfigParameterBuilder<T extends Comparable<T>> extends Abstr
     @Override
     protected void setValue(ConfigVal value) {
         if (this.value != null && configBuilder.logger != null) {
-            configBuilder.logger.warn(
-                    "ConfigValue \"" + this.value + "\" in ConfigParameter \"" + getFullName() +
-                            "\" was overwritten by ConfigValue \"" + value + "\"", "Config", ConsoleColor.YELLOW_BG
-            );
+            configBuilder.logger.atWarn()
+                    .withPrefix("Config")
+                    .withStyle(ConsoleColor.YELLOW_BG)
+                    .log("ConfigValue '{0}' in ConfigParameter '{1}' was overwritten by ConfigValue '{2}' " +
+                            "It Constraint will be skipped", this.value, getFullName(), value
+                    );
         }
         this.value = value;
     }
@@ -81,9 +88,12 @@ public final class ConfigParameterBuilder<T extends Comparable<T>> extends Abstr
         if (parent != null && parent.canBeDisabled() != canBeDisabled) {
             canBeDisabled = parent.canBeDisabled();
             if (configBuilder.logger != null && !configBuilder.autoDisable) {
-                configBuilder.logger.warn("The Parent section of ConfigParameter \"" + getFullName() +
-                        "\" has flag \"canBeDisabled\" other then the ConfigParameter value. " +
-                        "The value of ConfigParameter has been changed", "Config", ConsoleColor.YELLOW_BG);
+                configBuilder.logger.atWarn()
+                        .withPrefix("Config")
+                        .withStyle(ConsoleColor.YELLOW_BG)
+                        .log("The Parent section of ConfigParameter '{0}' has flag 'canBeDisabled' other then the ConfigParameter value. " +
+                                "The value of ConfigParameter has been changed", getFullName()
+                        );
             }
         }
         configBuilder.putParameter(path, new ConfigPar(name, canBeDisabled, value, comment));

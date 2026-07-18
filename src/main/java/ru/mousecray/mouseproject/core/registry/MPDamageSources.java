@@ -6,8 +6,8 @@
 package ru.mousecray.mouseproject.core.registry;
 
 import net.minecraft.util.DamageSource;
-import ru.mousecray.mouseproject.core.MouseProject;
 import ru.mousecray.mouseproject.Tags;
+import ru.mousecray.mouseproject.core.MouseProject;
 import ru.mousecray.mouseproject.core.registry.constants.DamageSourceNames;
 
 public class MPDamageSources {

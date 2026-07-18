@@ -166,27 +166,25 @@ public class ConfigIOThread extends Thread {
                 if (result.getType() != IOResult.ConfigIOResultType.SUCCESS &&
                         result.getType() != IOResult.ConfigIOResultType.NOT_FOUND) {
                     if (config.logger != null) {
-                        config.logger.error(
-                                "MouseConfig '" + config.getName() + "' cannot be" + operationTypeCompl,
-                                "Config", ConsoleColor.RED_BG
-                        );
+                        config.logger.atError()
+                                .withPrefix("Config")
+                                .withStyle(ConsoleColor.RED_BG)
+                                .log("MouseConfig '{0}' cannot be '{1}", config.getName(), operationTypeCompl);
                     }
                 }
                 return result;
             } catch (InterruptedException e) {
                 if (config.logger != null) {
-                    config.logger.fatal(
-                            "During " + operationType + " of MouseConfig '" + config.getName() + "' an error occurred",
-                            "Config", e
-                    );
+                    config.logger.atFatal(e)
+                            .withPrefix("Config")
+                            .log("During {0} of MouseConfig '{1}' an error occurred", operationType, config.getName());
                 }
                 return IOResult.createError(e);
             } catch (ExecutionException e) {
                 if (config.logger != null) {
-                    config.logger.fatal(
-                            operationTypeUpperCase + " of MouseConfig '" + config.getName() + "' was interrupted",
-                            "Config", e
-                    );
+                    config.logger.atFatal(e)
+                            .withPrefix("Config")
+                            .log("{0} of MouseConfig '{1}' was interrupted", operationTypeUpperCase, config.getName());
                 }
                 return IOResult.createError(e);
             }
