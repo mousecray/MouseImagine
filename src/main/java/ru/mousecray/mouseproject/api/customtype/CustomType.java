@@ -8,7 +8,6 @@ package ru.mousecray.mouseproject.api.customtype;
 
 import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mouseproject.api.customtype.op.*;
-import ru.mousecray.mouseproject.api.customtype.values.IntegralType;
 import ru.mousecray.mouseproject.api.customtype.values.PlusMinusType;
 
 import javax.annotation.Nullable;
@@ -120,11 +119,19 @@ public abstract class CustomType<T extends CustomType<T>> implements Comparable<
                 public T not() { return (T) OperationRegistry.evaluateUnary(self(), BitwiseOperator.Unary.NOT); }
 
                 @SuppressWarnings("unchecked") @Override
-                public T leftShift(int other) { return (T) OperationRegistry.evaluateBinary(self(), IntegralType.create(other), BitwiseOperator.Binary.LEFT_SHIFT); }
+                public T leftShift(int other) {
+                    return (T) OperationRegistry.evaluateShift(self(), other, BitwiseOperator.Shift.LEFT_SHIFT);
+                }
+
                 @SuppressWarnings("unchecked") @Override
-                public T rightShift(int other) { return (T) OperationRegistry.evaluateBinary(self(), IntegralType.create(other), BitwiseOperator.Binary.RIGHT_SHIFT); }
+                public T rightShift(int other) {
+                    return (T) OperationRegistry.evaluateShift(self(), other, BitwiseOperator.Shift.RIGHT_SHIFT);
+                }
+
                 @SuppressWarnings("unchecked") @Override
-                public T uRightShift(int other) { return (T) OperationRegistry.evaluateBinary(self(), IntegralType.create(other), BitwiseOperator.Binary.U_RIGHT_SHIFT); }
+                public T uRightShift(int other) {
+                    return (T) OperationRegistry.evaluateShift(self(), other, BitwiseOperator.Shift.U_RIGHT_SHIFT);
+                }
             };
         }
         return bitwisePipeline;
