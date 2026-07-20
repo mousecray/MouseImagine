@@ -5,16 +5,9 @@
 
 package ru.mousecray.mouseproject.api.customtype.op;
 
-public interface BitwiseOperator {
-    enum Binary implements IBinaryOperator {
-        AND, OR, XOR
-    }
+import ru.mousecray.mouseproject.api.customtype.CustomType;
 
-    enum Unary implements IUnaryOperator {
-        NOT
-    }
-
-    enum Shift implements IShiftOperator {
-        LEFT_SHIFT, RIGHT_SHIFT, U_RIGHT_SHIFT
-    }
+@FunctionalInterface
+public interface ShiftOperation<T extends CustomType<?>, RES> {
+    RES execute(T target, int shiftAmount);
 }

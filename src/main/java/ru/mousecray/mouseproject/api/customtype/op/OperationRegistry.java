@@ -20,11 +20,13 @@ public class OperationRegistry {
 
     private static final List<BinaryRuleRecord<?, ?, ?>> BINARY_RULES = new CopyOnWriteArrayList<>();
     private static final List<UnaryRuleRecord<?, ?>>     UNARY_RULES  = new CopyOnWriteArrayList<>();
+    private static final List<ShiftRuleRecord<?, ?>>     SHIFT_RULES  = new CopyOnWriteArrayList<>();
     private static final List<CastRuleRecord<?, ?>>      CAST_RULES   = new CopyOnWriteArrayList<>();
 
-    private static final Map<String, BiFunction<?, ?, ?>> BINARY_CACHE = new ConcurrentHashMap<>();
-    private static final Map<String, Function<?, ?>>      UNARY_CACHE  = new ConcurrentHashMap<>();
-    private static final Map<String, Function<?, ?>>      CAST_CACHE   = new ConcurrentHashMap<>();
+    private static final Map<String, BiFunction<?, ?, ?>>  BINARY_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, Function<?, ?>>       UNARY_CACHE  = new ConcurrentHashMap<>();
+    private static final Map<String, ShiftOperation<?, ?>> SHIFT_CACHE  = new ConcurrentHashMap<>();
+    private static final Map<String, Function<?, ?>>       CAST_CACHE   = new ConcurrentHashMap<>();
 
     static {
         StandardOperations.registerDefaults();
@@ -40,6 +42,12 @@ public class OperationRegistry {
             Class<T> type, IUnaryOperator op, Function<T, RES> action) {
         UNARY_RULES.add(new UnaryRuleRecord<>(type, op, action));
         UNARY_CACHE.clear();
+    }
+
+    public static <T extends CustomType<?>, RES extends CustomType<?>> void registerShift(
+            Class<T> type, IShiftOperator op, ShiftOperation<T, RES> action) {
+        SHIFT_RULES.add(new ShiftRuleRecord<>(type, op, action));
+        SHIFT_CACHE.clear();
     }
 
     public static <S extends CustomType<?>, T extends CustomType<?>> void registerCast(
@@ -74,6 +82,19 @@ public class OperationRegistry {
         return action.apply(target);
     }
 
+    public static Object evaluateShift(CustomType<?> target, int shiftAmount, IShiftOperator op) {
+        if (target == null) throw new UnsupportedValException("Аргумент не может быть null");
+
+        String         cacheKey = target.getClass().getName() + "|" + op.toString();
+        ShiftOperation action   = SHIFT_CACHE.computeIfAbsent(cacheKey, k -> findBestShiftMatch(target.getClass(), op));
+
+        if (action == null) {
+            throw new UnsupportedValException(String.format("Операция сдвига %s не поддерживается для %s",
+                    op, target.getClass().getSimpleName()));
+        }
+        return action.execute(target, shiftAmount);
+    }
+
     @SuppressWarnings("unchecked")
     public static <T extends CustomType<?>> T evaluateCast(CustomType<?> source, Class<T> targetClass) {
         if (source == null) throw new UnsupportedValException("Cast source cannot be null");
@@ -100,6 +121,15 @@ public class OperationRegistry {
 
     private static Function<?, ?> findBestUnaryMatch(Class<?> targetCls, IUnaryOperator op) {
         for (UnaryRuleRecord<?, ?> rule : UNARY_RULES) {
+            if (rule.op.equals(op) && rule.type.isAssignableFrom(targetCls)) {
+                return rule.action;
+            }
+        }
+        return null;
+    }
+
+    private static ShiftOperation<?, ?> findBestShiftMatch(Class<?> targetCls, IShiftOperator op) {
+        for (ShiftRuleRecord<?, ?> rule : SHIFT_RULES) {
             if (rule.op.equals(op) && rule.type.isAssignableFrom(targetCls)) {
                 return rule.action;
             }
@@ -136,6 +166,18 @@ public class OperationRegistry {
         final Function<T, RES> action;
 
         UnaryRuleRecord(Class<T> t, IUnaryOperator o, Function<T, RES> a) {
+            type = t;
+            op = o;
+            action = a;
+        }
+    }
+
+    private static class ShiftRuleRecord<T extends CustomType<?>, RES> {
+        final Class<T>               type;
+        final IShiftOperator         op;
+        final ShiftOperation<T, RES> action;
+
+        ShiftRuleRecord(Class<T> t, IShiftOperator o, ShiftOperation<T, RES> a) {
             type = t;
             op = o;
             action = a;

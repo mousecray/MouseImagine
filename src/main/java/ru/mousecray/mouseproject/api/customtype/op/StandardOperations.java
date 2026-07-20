@@ -88,12 +88,12 @@ public class StandardOperations {
                 (left, right) -> left.createType(MouseNumbers.or(left.asNumber(), right.asNumber())));
         OperationRegistry.registerBinary(NumberType.class, NumberType.class, BitwiseOperator.Binary.XOR,
                 (left, right) -> left.createType(MouseNumbers.xor(left.asNumber(), right.asNumber())));
-        OperationRegistry.registerBinary(NumberType.class, NumberType.class, BitwiseOperator.Binary.LEFT_SHIFT,
-                (left, right) -> left.createType(MouseNumbers.leftShift(left.asNumber(), right.asInt())));
-        OperationRegistry.registerBinary(NumberType.class, NumberType.class, BitwiseOperator.Binary.RIGHT_SHIFT,
-                (left, right) -> left.createType(MouseNumbers.rightShift(left.asNumber(), right.asInt())));
-        OperationRegistry.registerBinary(NumberType.class, NumberType.class, BitwiseOperator.Binary.U_RIGHT_SHIFT,
-                (left, right) -> left.createType(MouseNumbers.uRightShift(left.asNumber(), right.asInt())));
+        OperationRegistry.registerShift(NumberType.class, BitwiseOperator.Shift.LEFT_SHIFT,
+                (target, shiftAmount) -> target.createType(MouseNumbers.leftShift(target.asNumber(), shiftAmount)));
+        OperationRegistry.registerShift(NumberType.class, BitwiseOperator.Shift.RIGHT_SHIFT,
+                (target, shiftAmount) -> target.createType(MouseNumbers.rightShift(target.asNumber(), shiftAmount)));
+        OperationRegistry.registerShift(NumberType.class, BitwiseOperator.Shift.U_RIGHT_SHIFT,
+                (target, shiftAmount) -> target.createType(MouseNumbers.uRightShift(target.asNumber(), shiftAmount)));
 
         OperationRegistry.registerUnary(NumberType.class, ArithmeticOperator.Unary.INVERT,
                 target -> target.createType(MouseNumbers.invert(target.asNumber())));
