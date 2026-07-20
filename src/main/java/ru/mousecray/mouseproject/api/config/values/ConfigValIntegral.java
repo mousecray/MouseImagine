@@ -12,7 +12,6 @@ import ru.mousecray.mouseproject.api.config.specific.ConfigValType;
 import ru.mousecray.mouseproject.api.config.utils.Constraint;
 import ru.mousecray.mouseproject.api.config.utils.PredefinedValue;
 import ru.mousecray.mouseproject.api.config.values.base.ConfigNumberVal;
-import ru.mousecray.mouseproject.api.customtype.CustomArithmetic;
 import ru.mousecray.mouseproject.api.customtype.CustomType;
 import ru.mousecray.mouseproject.api.customtype.range.Range;
 import ru.mousecray.mouseproject.api.customtype.range.RangeContainer;

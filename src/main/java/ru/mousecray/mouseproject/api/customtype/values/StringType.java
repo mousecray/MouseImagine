@@ -7,8 +7,6 @@ package ru.mousecray.mouseproject.api.customtype.values;
 
 import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mouseproject.api.customtype.OtherType;
-import ru.mousecray.mouseproject.api.error.ValueFormatException;
-import ru.mousecray.mouseproject.api.utils.MouseNumbers;
 import ru.mousecray.mouseproject.api.utils.MouseStrings;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -30,20 +28,6 @@ public final class StringType extends OtherType<String> {
     public static StringType create(String value) { return new StringType(value); }
 
     public String asString()                      { return value; }
-
-    private Number asNumber() {
-        Double v = MouseNumbers.tryParseDouble(value);
-        if (v == null) throw new ValueFormatException();
-        return v;
-    }
-
-    public DecimalType asDecimalType()   { return DecimalType.create(asNumber().doubleValue()); }
-    public IntegralType asIntegralType() { return IntegralType.create(asNumber().longValue()); }
-    public PercentType asPercentType()   { return PercentType.create(asNumber().doubleValue()); }
-
-    public RandomQuantityType asRandomQuantityType() {
-        return RandomQuantityType.create(asPercentType(), IntegralType.NULL, IntegralType.NULL);
-    }
 
     @SuppressWarnings("unchecked") @Override
     public StringType createType(Object value) {

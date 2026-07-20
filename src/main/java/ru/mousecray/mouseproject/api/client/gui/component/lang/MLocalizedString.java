@@ -3,10 +3,7 @@
  * Licensed under the GNU Lesser General Public License, Version 3.0
  ******************************************************************************/
 
-/*******************************************************************************
- * Copyright © 2026 mousecray
- * Licensed under the GNU Lesser General Public License, Version 3.0
- ******************************************************************************/
+package ru.mousecray.mouseproject.api.client.gui.component.lang;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraftforge.fml.relauncher.Side;

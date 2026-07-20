@@ -13,7 +13,6 @@ import ru.mousecray.mouseproject.api.config.ISupportRange;
 import ru.mousecray.mouseproject.api.config.IValType;
 import ru.mousecray.mouseproject.api.config.utils.Constraint;
 import ru.mousecray.mouseproject.api.config.utils.PredefinedValue;
-import ru.mousecray.mouseproject.api.customtype.CustomArithmetic;
 import ru.mousecray.mouseproject.api.customtype.NumberType;
 import ru.mousecray.mouseproject.api.customtype.range.RangeContainer;
 import ru.mousecray.mouseproject.api.utils.MouseNumbers;

@@ -49,7 +49,7 @@ public class MouseProject {
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
 //        MPVillagerRegistry.clearVanilla();
-//        MPVillagerRegistry.register();
+//        MPVillagerRegistry.registerBinary();
         proxy.postInit(event);
     }
 

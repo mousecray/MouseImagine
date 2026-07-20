@@ -5,7 +5,6 @@
 
 package ru.mousecray.mouseproject.api.customtype.values;
 
-import ru.mousecray.mouseproject.api.customtype.LogicalType;
 import ru.mousecray.mouseproject.api.customtype.NumberType;
 import ru.mousecray.mouseproject.api.error.ValueFormatException;
 import ru.mousecray.mouseproject.api.utils.MouseStrings;
@@ -51,14 +50,6 @@ public final class PercentType extends NumberType<Double> {
         return create((max.value + (min.value + max.value) / 2D) / 2D);
     }
 
-    @Nonnull @Override public LogicalType<?> asLogicalType() { return PlusMinusType.create(value > 0); }
-    public DecimalType asDecimalType()                       { return DecimalType.create(value); }
-    public IntegralType asIntegralType()                     { return IntegralType.create(value.longValue()); }
-    public StringType asStringType()                         { return StringType.create(toString()); }
-
-    public RandomQuantityType asRandomQuantityType() {
-        return RandomQuantityType.create(this, IntegralType.NULL, IntegralType.NULL);
-    }
     @Nonnull @Override public Double asNumber() { return value; }
     @Nonnull @Override public String toString() { return super.toString() + '%'; }
 

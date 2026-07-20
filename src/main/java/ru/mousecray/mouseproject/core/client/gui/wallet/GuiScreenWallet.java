@@ -3,10 +3,7 @@
  * Licensed under the GNU Lesser General Public License, Version 3.0
  ******************************************************************************/
 
-/*******************************************************************************
- * Copyright © 2026 mousecray
- * Licensed under the GNU Lesser General Public License, Version 3.0
- ******************************************************************************/
+package ru.mousecray.mouseproject.core.client.gui.wallet;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -32,7 +29,6 @@ import ru.mousecray.mouseproject.api.client.gui.misc.cache.GuiGridCacheBuilder;
 import ru.mousecray.mouseproject.api.utils.ref.IntRef;
 import ru.mousecray.mouseproject.api.utils.ref.StringRef;
 import ru.mousecray.mouseproject.core.MouseProject;
-import ru.mousecray.mouseproject.core.client.gui.wallet.WalletSliderControl;
 import ru.mousecray.mouseproject.core.common.economy.CoinHelper;
 import ru.mousecray.mouseproject.core.common.economy.CoinValue;
 import ru.mousecray.mouseproject.core.common.economy.coin.CoinType;

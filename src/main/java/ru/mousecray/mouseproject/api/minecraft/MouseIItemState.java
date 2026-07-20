@@ -65,7 +65,7 @@ public class MouseIItemState implements Comparable<MouseIItemState> {
 
     public IBlockState getBlock() {
         Block b = Block.getBlockFromItem(item);
-        return b != net.minecraft.init.Blocks.AIR ? b.getStateFromMeta(meta) : null
+        return b != net.minecraft.init.Blocks.AIR ? b.getStateFromMeta(meta) : null;
     }
 
     public boolean hasBlockCached() {

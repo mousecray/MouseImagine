@@ -458,7 +458,7 @@ public final class ConfigParser {
                                 //Section name
                                 fileWriter.write(MouseStrings.format("{0}{1} {2}{3}", bordersTab, sectionStart,
                                         section.getName().getDisplayName(), sectionEqual)
-                                ))
+                                );
                                 fileWriter.newLine();
 
                                 if (fullSect.canBeDisabled()) { //Section disabler

@@ -32,6 +32,7 @@ import ru.mousecray.mouseproject.api.client.gui.dim.layout.GuiScaleType;
 import ru.mousecray.mouseproject.api.client.gui.misc.FontSize;
 import ru.mousecray.mouseproject.api.client.gui.misc.cache.GuiCacheBuilder;
 import ru.mousecray.mouseproject.api.client.gui.misc.cache.GuiCacheInitiator;
+import ru.mousecray.mouseproject.api.log.ConsoleColor;
 import ru.mousecray.mouseproject.api.log.MouseLogger;
 
 import javax.annotation.Nullable;
@@ -197,7 +198,10 @@ public abstract class MGuiScreen extends GuiScreen {
     @SuppressWarnings({ "NullableProblems", "unchecked", "rawtypes" }) @Override @Nullable
     protected <T extends GuiButton> T addButton(T button) {
         if (button instanceof MGuiButton) return (T) addButton(((MGuiButton) button), null, null, null);
-        logger.error("Button {} isn't MGuiButton. In will be skipped.", button.getClass());
+        logger.atWarn()
+                .withPrefix("GUI")
+                .withStyle(ConsoleColor.YELLOW_BG)
+                .log("Button {0} isn't MGuiButton. In will be skipped.", button.getClass());
         return null;
     }
 

@@ -5,7 +5,6 @@
 
 package ru.mousecray.mouseproject.api.customtype.values;
 
-import ru.mousecray.mouseproject.api.customtype.LogicalType;
 import ru.mousecray.mouseproject.api.customtype.NumberType;
 import ru.mousecray.mouseproject.api.error.ValueFormatException;
 import ru.mousecray.mouseproject.api.utils.MouseStrings;
@@ -62,16 +61,16 @@ public final class RandomQuantityType extends NumberType<Double> {
     }
 
     public static RandomQuantityType create(PercentType chance, IntegralType min, IntegralType max) {
-        if (chance.getLogicPipeline().isLessOrEqual(MIN.getChance())
-                && min.getLogicPipeline().isLessOrEqual(MIN.getMin())
-                && max.getLogicPipeline().isLessOrEqual(MIN.getMax())
+        if (chance.getLogicPipeline().isLessOrEqual(MIN.getChance()).asBoolean()
+                && min.getLogicPipeline().isLessOrEqual(MIN.getMin()).asBoolean()
+                && max.getLogicPipeline().isLessOrEqual(MIN.getMax()).asBoolean()
         ) return MIN;
-        else if (chance.getLogicPipeline().isMoreOrEqual(MAX.getChance())
-                && min.getLogicPipeline().isMoreOrEqual(MIN.getMin())
-                && max.getLogicPipeline().isMoreOrEqual(MIN.getMax())) return MAX;
-        else if (chance.getLogicPipeline().isEqual(NULL.getChance())
-                && min.getLogicPipeline().isMoreOrEqual(MIN.getMin())
-                && max.getLogicPipeline().isMoreOrEqual(MIN.getMax())) return NULL;
+        else if (chance.getLogicPipeline().isMoreOrEqual(MAX.getChance()).asBoolean()
+                && min.getLogicPipeline().isMoreOrEqual(MIN.getMin()).asBoolean()
+                && max.getLogicPipeline().isMoreOrEqual(MIN.getMax()).asBoolean()) return MAX;
+        else if (chance.getLogicPipeline().isEqual(NULL.getChance()).asBoolean()
+                && min.getLogicPipeline().isMoreOrEqual(MIN.getMin()).asBoolean()
+                && max.getLogicPipeline().isMoreOrEqual(MIN.getMax()).asBoolean()) return NULL;
         else return new RandomQuantityType(chance, min, max);
     }
 
@@ -99,17 +98,11 @@ public final class RandomQuantityType extends NumberType<Double> {
         );
     }
 
-    public PercentType getChance()                           { return PercentType.create(value); }
-    public IntegralType getMin()                             { return IntegralType.create(min); }
-    public IntegralType getMax()                             { return IntegralType.create(max); }
+    public PercentType getChance()              { return PercentType.create(value); }
+    public IntegralType getMin()                { return IntegralType.create(min); }
+    public IntegralType getMax()                { return IntegralType.create(max); }
 
-    @Nonnull @Override public LogicalType<?> asLogicalType() { return PlusMinusType.create(value > 0); }
-    public DecimalType asDecimalType()                       { return DecimalType.create(value); }
-    public IntegralType asIntegralType()                     { return IntegralType.create(value.longValue()); }
-    public PercentType asPercentType()                       { return getChance(); }
-    public StringType asStringType()                         { return StringType.create(toString()); }
-
-    @Nonnull @Override public Double asNumber()              { return value; }
+    @Nonnull @Override public Double asNumber() { return value; }
 
     @SuppressWarnings("unchecked") @Nonnull @Override
     public RandomQuantityType createType(@Nonnull Number value) {
@@ -118,7 +111,9 @@ public final class RandomQuantityType extends NumberType<Double> {
 
     @Nonnull @Override
     public String toString() {
-        return String.format("%s-%s:%s%%", getMin().toString(), getMax().toString(), super.toString());
+        String result = MouseStrings.format("{0}-{1}:{2}%", getMin().toString(), getMax().toString(), super.toString());
+        assert result != null;
+        return result;
     }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass") @Override
@@ -130,6 +125,5 @@ public final class RandomQuantityType extends NumberType<Double> {
                 .equals(getClass(), this, o);
     }
 
-    @Override public int hashCode()                          { return Objects.hash(value, min, max); }
-    @Override public int compareTo(@Nonnull NumberType<?> o) { return Double.compare(value, o.asDouble()); }
+    @Override public int hashCode() { return Objects.hash(value, min, max); }
 }

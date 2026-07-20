@@ -33,9 +33,6 @@ public final class PlusMinusType extends LogicalType<String> {
     private PlusMinusType(boolean isYes)              { super("+", "-", isYes); }
     public static PlusMinusType create(boolean isYes) { return isYes ? TRUE : FALSE; }
 
-    @Nonnull @Override
-    public IntegralType asNumberType() { return IntegralType.create(asInt()); }
-
     @SuppressWarnings("unchecked") @Nonnull @Override
     public PlusMinusType createType(boolean isYes) {
         return create(isYes);

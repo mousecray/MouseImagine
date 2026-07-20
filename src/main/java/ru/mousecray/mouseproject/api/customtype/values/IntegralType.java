@@ -5,7 +5,6 @@
 
 package ru.mousecray.mouseproject.api.customtype.values;
 
-import ru.mousecray.mouseproject.api.customtype.LogicalType;
 import ru.mousecray.mouseproject.api.customtype.NumberType;
 import ru.mousecray.mouseproject.api.error.ValueFormatException;
 import ru.mousecray.mouseproject.api.utils.MouseNumbers;
@@ -47,15 +46,6 @@ public final class IntegralType extends NumberType<Long> {
 
     public static IntegralType calcHigh(@Nonnull IntegralType min, @Nonnull IntegralType max) {
         return create((long) ((max.value + (min.value + max.value) / 2D) / 2D));
-    }
-
-    @Nonnull @Override public LogicalType<?> asLogicalType() { return PlusMinusType.create(value > 0); }
-    public DecimalType asDecimalType()                       { return DecimalType.create(value.doubleValue()); }
-    public PercentType asPercentType()                       { return PercentType.create(value); }
-    public StringType asStringType()                         { return StringType.create(toString()); }
-
-    public RandomQuantityType asRandomQuantityType() {
-        return RandomQuantityType.create(asPercentType(), IntegralType.NULL, IntegralType.NULL);
     }
 
     @Nonnull @Override public Long asNumber() { return value; }

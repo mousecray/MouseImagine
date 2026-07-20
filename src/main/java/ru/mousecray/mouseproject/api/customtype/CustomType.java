@@ -7,6 +7,9 @@ package ru.mousecray.mouseproject.api.customtype;
 
 
 import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
+import ru.mousecray.mouseproject.api.customtype.op.*;
+import ru.mousecray.mouseproject.api.customtype.values.IntegralType;
+import ru.mousecray.mouseproject.api.customtype.values.PlusMinusType;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -18,24 +21,14 @@ import java.util.function.Function;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 public abstract class CustomType<T extends CustomType<T>> implements Comparable<T> {
-    private final CustomValType       valType;
-    private final CustomCast<T>       customCast       = createCastPipeline();
-    private final CustomArithmetic<T> customArithmetic = createArithmeticPipeline();
-    private final CustomLogic<T>      customLogic      = createLogicPipeline();
-    private final CustomBitwise<T>    customBitwise    = createBitwisePipeline();
-
-    public final CustomCast<T> getCastPipeline()                     { return customCast; }
-    public final CustomArithmetic<T> getArithmeticPipeline()         { return customArithmetic; }
-    public final CustomLogic<T> getLogicPipeline()                   { return customLogic; }
-    public final CustomBitwise<T> getBitwisePipeline()               { return customBitwise; }
+    private final     CustomValType       valType;
+    private transient CustomCast<T>       castPipeline;
+    private transient CustomArithmetic<T> arithmeticPipeline;
+    private transient CustomLogic<T>      logicPipeline;
+    private transient CustomBitwise<T>    bitwisePipeline;
 
     protected CustomType(CustomValType valType)                      { this.valType = Objects.requireNonNull(valType); }
     protected CustomType()                                           { valType = CustomValType.UNDEFINED; }
-
-    protected CustomCast<T> createCastPipeline()                     { return CustomCast.DEFAULT(); }
-    protected CustomArithmetic<T> createArithmeticPipeline()         { return CustomArithmetic.DEFAULT(); }
-    protected CustomLogic<T> createLogicPipeline()                   { return CustomLogic.DEFAULT(); }
-    protected CustomBitwise<T> createBitwisePipeline()               { return CustomBitwise.DEFAULT(); }
 
     public abstract ListType<?, ?> asListType();
     public abstract LogicalType<?> asLogicalType();
@@ -43,6 +36,99 @@ public abstract class CustomType<T extends CustomType<T>> implements Comparable<
     public abstract OtherType<?> asOtherType();
 
     @SuppressWarnings("unchecked") protected Class<T> getTypeClass() { return (Class<T>) getClass(); }
+
+    @SuppressWarnings("unchecked") protected T self()                { return (T) this; }
+
+    public <TYPE extends CustomType<?>> TYPE asValue(Class<TYPE> targetClass) {
+        return OperationRegistry.evaluateCast(this, targetClass);
+    }
+
+    public CustomCast<T> getCastPipeline() {
+        if (castPipeline == null) {
+            castPipeline = new CustomCast<T>() {
+                @Override
+                public <TYPE extends CustomType<?>> TYPE asValue(Class<TYPE> targetClass) { return OperationRegistry.evaluateCast(self(), targetClass); }
+                @Override public LogicalType<?> asLogicalType() { return asValue(LogicalType.class); }
+                @Override public NumberType<?> asNumberType()   { return asValue(NumberType.class); }
+                @Override public OtherType<?> asOtherType()     { return asValue(OtherType.class); }
+                @Override public ListType<?, ?> asListType()    { return asValue(ListType.class); }
+            };
+        }
+        return castPipeline;
+    }
+
+    public CustomArithmetic<T> getArithmeticPipeline() {
+        if (arithmeticPipeline == null) {
+            arithmeticPipeline = new CustomArithmetic<T>() {
+                @SuppressWarnings("unchecked") @Override
+                public T plus(CustomType<?> other) { return (T) OperationRegistry.evaluateBinary(self(), other, ArithmeticOperator.Binary.PLUS); }
+                @SuppressWarnings("unchecked") @Override
+                public T minus(CustomType<?> other) { return (T) OperationRegistry.evaluateBinary(self(), other, ArithmeticOperator.Binary.MINUS); }
+                @SuppressWarnings("unchecked") @Override
+                public T multiply(CustomType<?> other) { return (T) OperationRegistry.evaluateBinary(self(), other, ArithmeticOperator.Binary.MULTIPLY); }
+                @SuppressWarnings("unchecked") @Override
+                public T divide(CustomType<?> other) { return (T) OperationRegistry.evaluateBinary(self(), other, ArithmeticOperator.Binary.DIVIDE); }
+                @SuppressWarnings("unchecked") @Override
+                public T modulo(CustomType<?> other) { return (T) OperationRegistry.evaluateBinary(self(), other, ArithmeticOperator.Binary.MODULO); }
+
+                @SuppressWarnings("unchecked") @Override
+                public T invert() { return (T) OperationRegistry.evaluateUnary(self(), ArithmeticOperator.Unary.INVERT); }
+                @SuppressWarnings("unchecked") @Override
+                public T increment() { return (T) OperationRegistry.evaluateUnary(self(), ArithmeticOperator.Unary.INCREMENT); }
+                @SuppressWarnings("unchecked") @Override
+                public T decrement() { return (T) OperationRegistry.evaluateUnary(self(), ArithmeticOperator.Unary.DECREMENT); }
+            };
+        }
+        return arithmeticPipeline;
+    }
+
+    public CustomLogic<T> getLogicPipeline() {
+        if (logicPipeline == null) {
+            logicPipeline = new CustomLogic<T>() {
+                @Override
+                public PlusMinusType isLess(CustomType<?> other) { return (PlusMinusType) OperationRegistry.evaluateBinary(self(), other, LogicalOperator.Binary.LESS); }
+                @Override
+                public PlusMinusType isMore(CustomType<?> other) { return (PlusMinusType) OperationRegistry.evaluateBinary(self(), other, LogicalOperator.Binary.MORE); }
+                @Override
+                public PlusMinusType isEqual(CustomType<?> other) { return (PlusMinusType) OperationRegistry.evaluateBinary(self(), other, LogicalOperator.Binary.EQUAL); }
+                @Override
+                public PlusMinusType isLessOrEqual(CustomType<?> other) { return (PlusMinusType) OperationRegistry.evaluateBinary(self(), other, LogicalOperator.Binary.LESS_OR_EQUAL); }
+                @Override
+                public PlusMinusType isMoreOrEqual(CustomType<?> other) { return (PlusMinusType) OperationRegistry.evaluateBinary(self(), other, LogicalOperator.Binary.MORE_OR_EQUAL); }
+
+                @SuppressWarnings("unchecked") @Override
+                public T and(CustomType<?> other) { return (T) OperationRegistry.evaluateBinary(self(), other, LogicalOperator.Binary.AND); }
+                @SuppressWarnings("unchecked") @Override
+                public T or(CustomType<?> other) { return (T) OperationRegistry.evaluateBinary(self(), other, LogicalOperator.Binary.OR); }
+                @SuppressWarnings("unchecked") @Override
+                public T not() { return (T) OperationRegistry.evaluateUnary(self(), LogicalOperator.Unary.NOT); }
+            };
+        }
+        return logicPipeline;
+    }
+
+    public CustomBitwise<T> getBitwisePipeline() {
+        if (bitwisePipeline == null) {
+            bitwisePipeline = new CustomBitwise<T>() {
+                @SuppressWarnings("unchecked") @Override
+                public T and(CustomType<?> other) { return (T) OperationRegistry.evaluateBinary(self(), other, BitwiseOperator.Binary.AND); }
+                @SuppressWarnings("unchecked") @Override
+                public T or(CustomType<?> other) { return (T) OperationRegistry.evaluateBinary(self(), other, BitwiseOperator.Binary.OR); }
+                @SuppressWarnings("unchecked") @Override
+                public T xor(CustomType<?> other) { return (T) OperationRegistry.evaluateBinary(self(), other, BitwiseOperator.Binary.XOR); }
+                @SuppressWarnings("unchecked") @Override
+                public T not() { return (T) OperationRegistry.evaluateUnary(self(), BitwiseOperator.Unary.NOT); }
+
+                @SuppressWarnings("unchecked") @Override
+                public T leftShift(int other) { return (T) OperationRegistry.evaluateBinary(self(), IntegralType.create(other), BitwiseOperator.Binary.LEFT_SHIFT); }
+                @SuppressWarnings("unchecked") @Override
+                public T rightShift(int other) { return (T) OperationRegistry.evaluateBinary(self(), IntegralType.create(other), BitwiseOperator.Binary.RIGHT_SHIFT); }
+                @SuppressWarnings("unchecked") @Override
+                public T uRightShift(int other) { return (T) OperationRegistry.evaluateBinary(self(), IntegralType.create(other), BitwiseOperator.Binary.U_RIGHT_SHIFT); }
+            };
+        }
+        return bitwisePipeline;
+    }
 
     protected static final Map<Class<? extends CustomType<?>>, Function<String, ? extends CustomType<?>>> storage = new HashMap<>();
 
