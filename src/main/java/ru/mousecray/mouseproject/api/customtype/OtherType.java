@@ -23,16 +23,11 @@ public abstract class OtherType<T extends Comparable<T>> extends CustomType<Othe
         this.value = value;
     }
 
-    public T getValue()                             { return value; }
+    public T getValue()                { return value; }
+
+    @Override public int hashCode()    { return Objects.hash(value); }
     public abstract <TYPE extends OtherType<T>> TYPE createType(Object value);
-
-    @Override public ListType<?, ?> asListType()    { throw new UnsupportedOperationException(); }
-    @Override public LogicalType<?> asLogicalType() { return asValue(LogicalType.class); }
-    @Override public NumberType<?> asNumberType()   { return asValue(NumberType.class); }
-    @Override public OtherType<?> asOtherType()     { return this; }
-
-    @Override public int hashCode()                 { return Objects.hash(value); }
-    @Override public String toString()              { return value.toString(); }
+    @Override public String toString() { return value.toString(); }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass") @Override
     public boolean equals(Object o) {

@@ -24,26 +24,22 @@ public abstract class NumberType<T extends Comparable<T>> extends CustomType<Num
         this.value = value;
     }
 
-    public T getValue()                             { return value; }
-
-    @Override public ListType<?, ?> asListType()    { throw new UnsupportedOperationException(); }
-    @Override public NumberType<?> asNumberType()   { return this; }
-    @Override public LogicalType<?> asLogicalType() { return asValue(LogicalType.class); }
-    @Override public OtherType<?> asOtherType()     { throw new UnsupportedOperationException(); }
+    public T getValue()                { return value; }
 
     public abstract Number asNumber();
 
-    public double asDouble()                        { return asNumber().doubleValue(); }
-    public float asFloat()                          { return asNumber().floatValue(); }
-    public long asLong()                            { return asNumber().longValue(); }
-    public int asInt()                              { return asNumber().intValue(); }
-    public short asShort()                          { return asNumber().shortValue(); }
-    public byte asByte()                            { return asNumber().byteValue(); }
+    public double asDouble()           { return asNumber().doubleValue(); }
+    public float asFloat()             { return asNumber().floatValue(); }
+    public long asLong()               { return asNumber().longValue(); }
+    public int asInt()                 { return asNumber().intValue(); }
+    public short asShort()             { return asNumber().shortValue(); }
+    public byte asByte()               { return asNumber().byteValue(); }
+
+    @Override public String toString() { return MouseNumbers.formatObjectIfNumber(value, false, true); }
 
     public abstract <TYPE extends NumberType<?>> TYPE createType(Number value);
 
-    @Override public int hashCode()                 { return Objects.hash(value); }
-    @Override public String toString()              { return MouseNumbers.formatObjectIfNumber(value, false, true); }
+    @Override public int hashCode()    { return Objects.hash(value); }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass") @Override
     public boolean equals(Object o) {

@@ -101,6 +101,4 @@ public class MinecraftBlock extends OtherType<MouseIBlockState> {
     public MinecraftBlock createType(Object value) {
         return create(value.toString());
     }
-
-    public StringType asStringType() { return StringType.create(toString()); }
 }

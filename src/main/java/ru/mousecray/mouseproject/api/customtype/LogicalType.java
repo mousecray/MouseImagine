@@ -27,23 +27,17 @@ public abstract class LogicalType<T extends Comparable<T>> extends CustomType<Lo
         value = isYes ? yesVal : noVal;
     }
 
-    protected T getYesVal()                         { return yesVal; }
-    protected T getNoVal()                          { return noVal; }
-    protected T getValue()                          { return value; }
-    public boolean isTrue()                         { return value.equals(yesVal); }
-    public boolean isFalse()                        { return !isTrue(); }
-    public boolean asBoolean()                      { return isTrue(); }
-    public int asInt()                              { return isTrue() ? 1 : 0; }
+    protected T getYesVal()            { return yesVal; }
+    protected T getNoVal()             { return noVal; }
+    protected T getValue()             { return value; }
+    public boolean isTrue()            { return value.equals(yesVal); }
+    public boolean isFalse()           { return !isTrue(); }
+    public boolean asBoolean()         { return isTrue(); }
+    public int asInt()                 { return isTrue() ? 1 : 0; }
 
-    @Override public ListType<?, ?> asListType()    { throw new UnsupportedOperationException(); }
-    @Override public LogicalType<?> asLogicalType() { return this; }
-    @Override public OtherType<?> asOtherType()     { throw new UnsupportedOperationException(); }
-    @Override public NumberType<?> asNumberType()   { return asValue(NumberType.class); }
-
+    @Override public String toString() { return isTrue() ? yesVal.toString() : noVal.toString(); }
     public abstract <TYPE extends LogicalType<?>> TYPE createType(boolean isYes);
-
-    @Override public int hashCode()                 { return Objects.hash(yesVal, noVal, value); }
-    @Override public String toString()              { return isTrue() ? yesVal.toString() : noVal.toString(); }
+    @Override public int hashCode()    { return Objects.hash(yesVal, noVal, value); }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass") @Override
     public boolean equals(Object o) {

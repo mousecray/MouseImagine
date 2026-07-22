@@ -20,6 +20,19 @@ import java.util.function.Function;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 public abstract class CustomType<T extends CustomType<T>> implements Comparable<T> {
+    protected static final Map<Class<? extends CustomType<?>>, Function<String, ? extends CustomType<?>>> storage = new HashMap<>();
+
+    @SuppressWarnings("unchecked") @Nullable
+    public static <T> T parse(Class<T> clazz, @Nullable String val) {
+        Function<String, ? extends CustomType<?>> result = storage.get(clazz);
+        if (result != null) {
+            try {
+                return (T) result.apply(val);
+            } catch (ClassCastException ignore) { }
+        }
+        return null;
+    }
+
     private final     CustomValType       valType;
     private transient CustomCast<T>       castPipeline;
     private transient CustomArithmetic<T> arithmeticPipeline;
@@ -29,28 +42,15 @@ public abstract class CustomType<T extends CustomType<T>> implements Comparable<
     protected CustomType(CustomValType valType)                      { this.valType = Objects.requireNonNull(valType); }
     protected CustomType()                                           { valType = CustomValType.UNDEFINED; }
 
-    public abstract ListType<?, ?> asListType();
-    public abstract LogicalType<?> asLogicalType();
-    public abstract NumberType<?> asNumberType();
-    public abstract OtherType<?> asOtherType();
-
     @SuppressWarnings("unchecked") protected Class<T> getTypeClass() { return (Class<T>) getClass(); }
-
+    public CustomValType getValType()                                { return valType; }
     @SuppressWarnings("unchecked") protected T self()                { return (T) this; }
-
-    public <TYPE extends CustomType<?>> TYPE asValue(Class<TYPE> targetClass) {
-        return OperationRegistry.evaluateCast(this, targetClass);
-    }
 
     public CustomCast<T> getCastPipeline() {
         if (castPipeline == null) {
             castPipeline = new CustomCast<T>() {
                 @Override
                 public <TYPE extends CustomType<?>> TYPE asValue(Class<TYPE> targetClass) { return OperationRegistry.evaluateCast(self(), targetClass); }
-                @Override public LogicalType<?> asLogicalType() { return asValue(LogicalType.class); }
-                @Override public NumberType<?> asNumberType()   { return asValue(NumberType.class); }
-                @Override public OtherType<?> asOtherType()     { return asValue(OtherType.class); }
-                @Override public ListType<?, ?> asListType()    { return asValue(ListType.class); }
             };
         }
         return castPipeline;
@@ -137,16 +137,5 @@ public abstract class CustomType<T extends CustomType<T>> implements Comparable<
         return bitwisePipeline;
     }
 
-    protected static final Map<Class<? extends CustomType<?>>, Function<String, ? extends CustomType<?>>> storage = new HashMap<>();
-
-    @SuppressWarnings("unchecked") @Nullable
-    public static <T> T parse(Class<T> clazz, @Nullable String val) {
-        Function<String, ? extends CustomType<?>> result = storage.get(clazz);
-        if (result != null) {
-            try {
-                return (T) result.apply(val);
-            } catch (ClassCastException ignore) { }
-        }
-        return null;
-    }
+    @Override public abstract String toString();
 }

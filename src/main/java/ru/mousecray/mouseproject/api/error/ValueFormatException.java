@@ -5,7 +5,10 @@
 
 package ru.mousecray.mouseproject.api.error;
 
+import java.util.Arrays;
+
 public class ValueFormatException extends NumberFormatException {
-    public ValueFormatException(String message) { super(message); }
-    public ValueFormatException()               { super(); }
+    public ValueFormatException(String message)                  { super(message); }
+    public ValueFormatException()                                { super(); }
+    public ValueFormatException(String message, Throwable cause) { this(message + "\n" + Arrays.toString(cause.getStackTrace())); }
 }

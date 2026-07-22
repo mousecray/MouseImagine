@@ -101,6 +101,4 @@ public class MinecraftItem extends OtherType<MouseIItemState> {
     public MinecraftItem createType(Object value) {
         return create(value.toString());
     }
-
-    public StringType asStringType() { return StringType.create(toString()); }
 }

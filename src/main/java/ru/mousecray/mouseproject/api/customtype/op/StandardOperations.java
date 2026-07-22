@@ -7,13 +7,11 @@ package ru.mousecray.mouseproject.api.customtype.op;
 
 import ru.mousecray.mouseproject.api.customtype.*;
 import ru.mousecray.mouseproject.api.customtype.values.*;
-import ru.mousecray.mouseproject.api.error.ValueFormatException;
 import ru.mousecray.mouseproject.api.utils.MouseLogic;
 import ru.mousecray.mouseproject.api.utils.MouseNumbers;
 
 public class StandardOperations {
 
-    @SuppressWarnings("unchecked")
     public static void registerDefaults() {
         OperationRegistry.registerCast(LogicalType.class, NumberType.class,
                 source -> IntegralType.create(source.asBoolean() ? 1L : 0L));
@@ -23,6 +21,27 @@ public class StandardOperations {
 
         OperationRegistry.registerCast(CustomType.class, StringType.class,
                 source -> StringType.create(source.toString()));
+
+        OperationRegistry.registerCast(StringType.class, DecimalType.class,
+                source -> DecimalType.create(source.toString()));
+
+        OperationRegistry.registerCast(StringType.class, IntegralType.class,
+                source -> IntegralType.create(source.toString()));
+
+        OperationRegistry.registerCast(StringType.class, PercentType.class,
+                source -> PercentType.create(source.toString()));
+
+        OperationRegistry.registerCast(StringType.class, RandomQuantityType.class,
+                source -> RandomQuantityType.create(source.toString()));
+
+        OperationRegistry.registerCast(StringType.class, PlusMinusType.class,
+                source -> PlusMinusType.create(source.toString()));
+
+        OperationRegistry.registerCast(StringType.class, MinecraftItem.class,
+                source -> MinecraftItem.create(source.toString()));
+
+        OperationRegistry.registerCast(StringType.class, MinecraftBlock.class,
+                source -> MinecraftBlock.create(source.toString()));
 
         OperationRegistry.registerCast(NumberType.class, DecimalType.class,
                 source -> DecimalType.create(source.asDouble()));
@@ -35,30 +54,6 @@ public class StandardOperations {
 
         OperationRegistry.registerCast(NumberType.class, RandomQuantityType.class,
                 source -> RandomQuantityType.create(PercentType.create(source.asDouble()), IntegralType.NULL, IntegralType.NULL));
-
-        OperationRegistry.registerCast(StringType.class, DecimalType.class, source -> {
-            DecimalType result = CustomType.parse(DecimalType.class, source.asString());
-            if (result == null) throw new ValueFormatException();
-            return result;
-        });
-
-        OperationRegistry.registerCast(StringType.class, IntegralType.class, source -> {
-            IntegralType result = CustomType.parse(IntegralType.class, source.asString());
-            if (result == null) throw new ValueFormatException();
-            return result;
-        });
-
-        OperationRegistry.registerCast(StringType.class, PercentType.class, source -> {
-            PercentType result = CustomType.parse(PercentType.class, source.asString());
-            if (result == null) throw new ValueFormatException();
-            return result;
-        });
-
-        OperationRegistry.registerCast(StringType.class, RandomQuantityType.class, source -> {
-            RandomQuantityType result = CustomType.parse(RandomQuantityType.class, source.asString());
-            if (result == null) throw new ValueFormatException();
-            return result;
-        });
 
         OperationRegistry.registerBinary(NumberType.class, NumberType.class, ArithmeticOperator.Binary.PLUS,
                 (left, right) -> left.createType(MouseNumbers.plus(left.asNumber(), right.asNumber())));

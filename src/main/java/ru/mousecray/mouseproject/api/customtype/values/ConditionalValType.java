@@ -6,7 +6,7 @@
 package ru.mousecray.mouseproject.api.customtype.values;
 
 import ru.mousecray.mouseproject.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mouseproject.api.customtype.*;
+import ru.mousecray.mouseproject.api.customtype.CustomType;
 import ru.mousecray.mouseproject.api.error.UnsupportedValException;
 import ru.mousecray.mouseproject.api.error.ValueFormatException;
 import ru.mousecray.mouseproject.api.utils.MouseStrings;
@@ -68,17 +68,12 @@ public final class ConditionalValType<T extends CustomType<?>> extends CustomTyp
         return create(CustomType.parse(valClass, raw), PlusMinusType.create(anti));
     }
 
-    @Override public ListType<?, ?> asListType()    { throw new UnsupportedOperationException(); }
-    @Override public LogicalType<?> asLogicalType() { return value.asLogicalType(); }
-    @Override public NumberType<?> asNumberType()   { return value.asNumberType(); }
-    @Override public OtherType<?> asOtherType()     { return value.asOtherType(); }
-
     public ConditionalValType<T> createType(CustomType<?> value, PlusMinusType isAnti) {
-        return (ConditionalValType<T>) create(this.value.asValue(value.getClass()), isAnti.asBoolean());
+        return (ConditionalValType<T>) create(this.value.getCastPipeline().asValue(value.getClass()), isAnti.asBoolean());
     }
 
     private ConditionalValType<T> createType(CustomType<?> value, boolean isAnti) {
-        return (ConditionalValType<T>) create(this.value.asValue(value.getClass()), isAnti);
+        return (ConditionalValType<T>) create(this.value.getCastPipeline().asValue(value.getClass()), isAnti);
     }
 
     @Override public String toString() { return anti ? '!' + value.toString() : value.toString(); }

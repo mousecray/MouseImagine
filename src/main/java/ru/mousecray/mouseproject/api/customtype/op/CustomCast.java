@@ -5,13 +5,8 @@
 
 package ru.mousecray.mouseproject.api.customtype.op;
 
-import ru.mousecray.mouseproject.api.customtype.*;
+import ru.mousecray.mouseproject.api.customtype.CustomType;
 
 public interface CustomCast<T extends CustomType<?>> {
     <TYPE extends CustomType<?>> TYPE asValue(Class<TYPE> targetClass);
-
-    LogicalType<?> asLogicalType();
-    NumberType<?> asNumberType();
-    OtherType<?> asOtherType();
-    ListType<?, ?> asListType();
 }

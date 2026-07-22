@@ -58,15 +58,10 @@ public abstract class ListType<VAL extends CustomType<?>, T extends CustomType<?
         return createType(MouseCollections.map(func, false, list));
     }
 
-    @Override public ListType<?, ?> asListType()    { return this; }
-    @Override public LogicalType<?> asLogicalType() { throw new UnsupportedOperationException(); }
-    @Override public NumberType<?> asNumberType()   { throw new UnsupportedOperationException(); }
-    @Override public OtherType<?> asOtherType()     { throw new UnsupportedOperationException(); }
-
     @Override
     public String toString() {
         return list.stream()
-                .map(CustomType::toString)
+                .map(v -> v.toString())
                 .collect(Collectors.joining(", "));
     }
 
