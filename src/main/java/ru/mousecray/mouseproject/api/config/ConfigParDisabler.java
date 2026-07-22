@@ -9,6 +9,7 @@ import ru.mousecray.mouseproject.api.DisplayName;
 import ru.mousecray.mouseproject.api.VariableValue;
 import ru.mousecray.mouseproject.api.config.pars.ConfigPar;
 import ru.mousecray.mouseproject.api.config.specific.ConfigLocaleType;
+import ru.mousecray.mouseproject.api.config.utils.ValueParseResult;
 import ru.mousecray.mouseproject.api.config.values.ConfigValDisabler;
 import ru.mousecray.mouseproject.api.customtype.values.PlusMinusType;
 import ru.mousecray.mouseproject.api.utils.MouseReflection;
@@ -35,13 +36,13 @@ public class ConfigParDisabler extends ConfigPar<PlusMinusType> {
                 : super.getName();
     }
 
-    protected int setDisabledRaw(@Nullable String value) {
+    protected ValueParseResult setDisabledRaw(@Nullable String value) {
         ConfigValDisabler val = ((ConfigValDisabler) getConfigVal());
-        VariableValue<Integer> var = MouseReflection.invokeMethod(
-                ConfigVal.class, String.class, int.class, "setValueRaw",
+        VariableValue<ValueParseResult> var = MouseReflection.invokeMethod(
+                ConfigVal.class, String.class, ValueParseResult.class, "setValueRaw",
                 val, value, hasLogger() ? getLogger() : null
         );
-        int res = var.isPresent() ? var.getValue() : -1;
+        ValueParseResult res = var.isPresent() ? var.getValue() : ValueParseResult.ERROR;
         isDisabled = val.isDisabled();
         return res;
     }

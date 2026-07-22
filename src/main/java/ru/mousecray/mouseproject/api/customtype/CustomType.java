@@ -46,6 +46,11 @@ public abstract class CustomType<T extends CustomType<T>> implements Comparable<
     public CustomValType getValType()                                { return valType; }
     @SuppressWarnings("unchecked") protected T self()                { return (T) this; }
 
+    public ListType<?, ?> asListType()                               { return getCastPipeline().asValue(ListType.class); }
+    public NumberType<?> asNumberType()                              { return getCastPipeline().asValue(NumberType.class); }
+    public LogicalType<?> asLogicalType()                            { return getCastPipeline().asValue(LogicalType.class); }
+    public OtherType<?> asOtherType()                                { return getCastPipeline().asValue(OtherType.class); }
+
     public CustomCast<T> getCastPipeline() {
         if (castPipeline == null) {
             castPipeline = new CustomCast<T>() {

@@ -205,7 +205,7 @@ public class MouseConfig {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Comparable<T>, D extends ConfigParGroup<T>> D getGroup(@Nullable String fullName) {
+    public <T extends CustomType<T>, D extends ConfigParGroup<T>> D getGroup(@Nullable String fullName) {
         try { return (D) getGroup0(fullName); } catch (ClassCastException ignore) { return null; }
     }
 
@@ -217,7 +217,7 @@ public class MouseConfig {
     @Nullable public ConfigValPercent getPercentVal(@Nullable String fullName)               { return getValue(fullName); }
 
     @Nullable
-    public <TYPE extends Comparable<TYPE>> ConfigConditionVal<TYPE> getConditionVal(@Nullable String fullName) {
+    public <TYPE extends CustomType<TYPE>> ConfigConditionVal<TYPE> getConditionVal(@Nullable String fullName) {
         return getValue(fullName);
     }
 

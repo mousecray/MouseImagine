@@ -338,14 +338,14 @@ public abstract class ConfigVal<V extends CustomType<?>> {
 
                                             switch (constraint.getConditionType()) {
                                                 case EQUAL:
-                                                    if (val.getValue().getLogicPipeline().isEqual(constraint.getVal())) {
+                                                    if (val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
                                                     continue;
                                                 case NOT_EQUAL:
-                                                    if (!val.getValue().getLogicPipeline().isEqual(constraint.getVal())) {
+                                                    if (!val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
@@ -371,42 +371,42 @@ public abstract class ConfigVal<V extends CustomType<?>> {
 
                                             switch (constraint.getConditionType()) {
                                                 case LESS:
-                                                    if (val.getValue().getLogicPipeline().isLess(constraint.getVal())) {
+                                                    if (val.getValue().getLogicPipeline().isLess(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
                                                     continue;
                                                 case MORE:
-                                                    if (val.getValue().getLogicPipeline().isMore(constraint.getVal())) {
+                                                    if (val.getValue().getLogicPipeline().isMore(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
                                                     continue;
                                                 case EQUAL:
-                                                    if (val.getValue().getLogicPipeline().isEqual(constraint.getVal())) {
+                                                    if (val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
                                                     continue;
                                                 case NOT_EQUAL:
-                                                    if (!val.getValue().getLogicPipeline().isEqual(constraint.getVal())) {
+                                                    if (!val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
                                                     continue;
                                                 case LESS_OR_EQUAL:
-                                                    if (val.getValue().getLogicPipeline().isLessOrEqual(constraint.getVal())) {
+                                                    if (val.getValue().getLogicPipeline().isLessOrEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
                                                     continue;
                                                 case MORE_OR_EQUAL:
-                                                    if (val.getValue().getLogicPipeline().isMoreOrEqual(constraint.getVal())) {
+                                                    if (val.getValue().getLogicPipeline().isMoreOrEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
@@ -431,14 +431,14 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                                         if (val.getType().getValType() == OTHER) {
                                             switch (constraint.getConditionType()) {
                                                 case EQUAL:
-                                                    if (val.getValue().getLogicPipeline().isEqual(constraint.getVal())) {
+                                                    if (val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
                                                     continue;
                                                 case NOT_EQUAL:
-                                                    if (!val.getValue().getLogicPipeline().isEqual(constraint.getVal())) {
+                                                    if (!val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
@@ -460,14 +460,14 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                                             if (type.getValType() == LOGICAL) {
                                                 switch (constraint.getConditionType()) {
                                                     case EQUAL:
-                                                        if (constrainedValue.getLogicPipeline().isEqual(val.getValue())) {
+                                                        if (constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
                                                         continue;
                                                     case NOT_EQUAL:
-                                                        if (!constrainedValue.getLogicPipeline().isEqual(val.getValue())) {
+                                                        if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
@@ -485,42 +485,42 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                                             if (type.getValType() == NUMBER) {
                                                 switch (constraint.getConditionType()) {
                                                     case LESS:
-                                                        if (constrainedValue.getLogicPipeline().isLess(val.getValue())) {
+                                                        if (constrainedValue.getLogicPipeline().isLess(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
                                                         continue;
                                                     case MORE:
-                                                        if (constrainedValue.getLogicPipeline().isMore(val.getValue())) {
+                                                        if (constrainedValue.getLogicPipeline().isMore(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
                                                         continue;
                                                     case EQUAL:
-                                                        if (constrainedValue.getLogicPipeline().isEqual(val.getValue())) {
+                                                        if (constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
                                                         continue;
                                                     case NOT_EQUAL:
-                                                        if (!constrainedValue.getLogicPipeline().isEqual(val.getValue())) {
+                                                        if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
                                                         continue;
                                                     case LESS_OR_EQUAL:
-                                                        if (constrainedValue.getLogicPipeline().isLessOrEqual(val.getValue())) {
+                                                        if (constrainedValue.getLogicPipeline().isLessOrEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
                                                         continue;
                                                     case MORE_OR_EQUAL:
-                                                        if (constrainedValue.getLogicPipeline().isMoreOrEqual(val.getValue())) {
+                                                        if (constrainedValue.getLogicPipeline().isMoreOrEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
@@ -538,14 +538,14 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                                             if (type.getValType() == OTHER) {
                                                 switch (constraint.getConditionType()) {
                                                     case EQUAL:
-                                                        if (constrainedValue.getLogicPipeline().isEqual(val.getValue())) {
+                                                        if (constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
                                                         continue;
                                                     case NOT_EQUAL:
-                                                        if (!constrainedValue.getLogicPipeline().isEqual(val.getValue())) {
+                                                        if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
@@ -569,7 +569,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                                         if (type.getValType() == LOGICAL) {
                                             switch (constraint.getConditionType()) {
                                                 case EQUAL:
-                                                    if (!constrainedValue.getLogicPipeline().isEqual(val.getValue())) {
+                                                    if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                         //noinspection unchecked
                                                         constrainedValue = (V) constrainedValue.asLogicalType()
                                                                 .createType(val.getValue().asLogicalType().asBoolean());
@@ -577,7 +577,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                                                     }
                                                     continue;
                                                 case NOT_EQUAL:
-                                                    if (constrainedValue.getLogicPipeline().isEqual(val.getValue())) {
+                                                    if (constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                         constrainedValue = processValueIfNotEqualConstraint(constrainedValue);
                                                         logConstraintRelationEnd(constraint);
                                                     }
@@ -594,7 +594,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                                         if (type.getValType() == NUMBER) {
                                             switch (constraint.getConditionType()) {
                                                 case LESS:
-                                                    if (!constrainedValue.getLogicPipeline().isLess(val.getValue())) {
+                                                    if (!constrainedValue.getLogicPipeline().isLess(val.getValue()).asBoolean()) {
                                                         //noinspection unchecked
                                                         constrainedValue = (V) constrainedValue.asNumberType().createType(
                                                                 val.getValue().getArithmeticPipeline().decrement()
@@ -604,7 +604,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                                                     }
                                                     continue;
                                                 case MORE:
-                                                    if (!constrainedValue.getLogicPipeline().isMore(val.getValue())) {
+                                                    if (!constrainedValue.getLogicPipeline().isMore(val.getValue()).asBoolean()) {
                                                         //noinspection unchecked
                                                         constrainedValue = (V) constrainedValue.asNumberType().createType(
                                                                 val.getValue().getArithmeticPipeline().increment()
@@ -614,7 +614,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                                                     }
                                                     continue;
                                                 case EQUAL:
-                                                    if (!constrainedValue.getLogicPipeline().isEqual(val.getValue())) {
+                                                    if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                         //noinspection unchecked
                                                         constrainedValue = (V) constrainedValue.asNumberType()
                                                                 .createType(val.getValue().asNumberType().asNumber());
@@ -622,13 +622,13 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                                                     }
                                                     continue;
                                                 case NOT_EQUAL:
-                                                    if (constrainedValue.getLogicPipeline().isEqual(val.getValue())) {
+                                                    if (constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                         constrainedValue = processValueIfNotEqualConstraint(constrainedValue);
                                                         logConstraintRelationEnd(constraint);
                                                     }
                                                     continue;
                                                 case LESS_OR_EQUAL:
-                                                    if (!constrainedValue.getLogicPipeline().isLessOrEqual(val.getValue())) {
+                                                    if (!constrainedValue.getLogicPipeline().isLessOrEqual(val.getValue()).asBoolean()) {
                                                         //noinspection unchecked
                                                         constrainedValue = (V) constrainedValue.asNumberType().createType(
                                                                 val.getValue().asNumberType().asNumber()
@@ -637,7 +637,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                                                     }
                                                     continue;
                                                 case MORE_OR_EQUAL:
-                                                    if (!constrainedValue.getLogicPipeline().isMoreOrEqual(val.getValue())) {
+                                                    if (!constrainedValue.getLogicPipeline().isMoreOrEqual(val.getValue()).asBoolean()) {
                                                         //noinspection unchecked
                                                         constrainedValue = (V) constrainedValue.asNumberType().createType(
                                                                 val.getValue().asNumberType().asNumber()
@@ -657,7 +657,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                                         if (type.getValType() == OTHER) {
                                             switch (constraint.getConditionType()) {
                                                 case EQUAL:
-                                                    if (!constrainedValue.getLogicPipeline().isEqual(val.getValue())) {
+                                                    if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                         //noinspection unchecked
                                                         constrainedValue = (V) constrainedValue.asOtherType()
                                                                 .createType(val.getValue().asOtherType().getValue());
@@ -665,7 +665,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                                                     }
                                                     continue;
                                                 case NOT_EQUAL:
-                                                    if (constrainedValue.getLogicPipeline().isEqual(val.getValue())) {
+                                                    if (constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                         constrainedValue = processValueIfNotEqualConstraint(constrainedValue);
                                                         logConstraintRelationEnd(constraint);
                                                     }

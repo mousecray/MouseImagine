@@ -12,7 +12,7 @@ import ru.mousecray.mouseproject.api.utils.MouseNumbers;
 
 public class StandardOperations {
 
-    public static void registerDefaults() {
+    @SuppressWarnings("unchecked") public static void registerDefaults() {
         OperationRegistry.registerCast(LogicalType.class, NumberType.class,
                 source -> IntegralType.create(source.asBoolean() ? 1L : 0L));
 
@@ -23,19 +23,19 @@ public class StandardOperations {
                 source -> StringType.create(source.toString()));
 
         OperationRegistry.registerCast(StringType.class, DecimalType.class,
-                source -> DecimalType.create(source.toString()));
+                source -> CustomType.parse(DecimalType.class, source.toString()));
 
         OperationRegistry.registerCast(StringType.class, IntegralType.class,
-                source -> IntegralType.create(source.toString()));
+                source -> CustomType.parse(IntegralType.class, source.toString()));
 
         OperationRegistry.registerCast(StringType.class, PercentType.class,
-                source -> PercentType.create(source.toString()));
+                source -> CustomType.parse(PercentType.class, source.toString()));
 
         OperationRegistry.registerCast(StringType.class, RandomQuantityType.class,
-                source -> RandomQuantityType.create(source.toString()));
+                source -> CustomType.parse(RandomQuantityType.class, source.toString()));
 
         OperationRegistry.registerCast(StringType.class, PlusMinusType.class,
-                source -> PlusMinusType.create(source.toString()));
+                source -> CustomType.parse(PlusMinusType.class, source.toString()));
 
         OperationRegistry.registerCast(StringType.class, MinecraftItem.class,
                 source -> MinecraftItem.create(source.toString()));

@@ -22,6 +22,7 @@ import ru.mousecray.mouseproject.api.config.values.base.list.simple.ConfigSimple
 import ru.mousecray.mouseproject.api.container.ImmutableDisplayNameMap;
 import ru.mousecray.mouseproject.api.customtype.range.Range;
 import ru.mousecray.mouseproject.api.customtype.range.RangeContainer;
+import ru.mousecray.mouseproject.api.customtype.values.PlusMinusType;
 import ru.mousecray.mouseproject.api.log.ConsoleColor;
 import ru.mousecray.mouseproject.api.log.MouseLogger;
 import ru.mousecray.mouseproject.api.utils.MouseNumbers;
@@ -192,9 +193,9 @@ public final class ConfigParser {
                     ConfigVal     key   = opened.getKey();
                     ConfigParBase owner = key.getOwner();
                     if (owner instanceof ConfigParDisabler) {
-                        key.setByConfig = ((ConfigParDisabler) owner).setDisabledRaw(opened.getValue().toString()) >= 0;
+                        key.setByConfig = ((ConfigParDisabler) owner).setDisabledRaw(opened.getValue().toString()).isCanBePassed();
                         if (owner.parent != null) owner.parent.setDisabled(key.isDisabled());
-                    } else key.setByConfig = key.setValueRaw(opened.getValue().toString()) >= 0;
+                    } else key.setByConfig = key.setValueRaw(opened.getValue().toString()).isCanBePassed();
                     openedValue.put(deep, null);
                 }
             }
@@ -205,9 +206,9 @@ public final class ConfigParser {
                     ConfigVal     key   = opened.getKey();
                     ConfigParBase owner = key.getOwner();
                     if (owner instanceof ConfigParDisabler) {
-                        key.setByConfig = ((ConfigParDisabler) owner).setDisabledRaw(opened.getValue().toString()) >= 0;
+                        key.setByConfig = ((ConfigParDisabler) owner).setDisabledRaw(opened.getValue().toString()).isCanBePassed();
                         if (owner.parent != null) owner.parent.setDisabled(key.isDisabled());
-                    } else key.setByConfig = key.setValueRaw(opened.getValue().toString()) >= 0;
+                    } else key.setByConfig = key.setValueRaw(opened.getValue().toString()).isCanBePassed();
                     openedGroupValue.put(deep, null);
                 }
             }
@@ -223,9 +224,9 @@ public final class ConfigParser {
                         ConfigVal     key   = value.getKey();
                         ConfigParBase owner = key.getOwner();
                         if (owner instanceof ConfigParDisabler) {
-                            key.setByConfig = ((ConfigParDisabler) owner).setDisabledRaw(value.getValue().toString()) >= 0;
+                            key.setByConfig = ((ConfigParDisabler) owner).setDisabledRaw(value.getValue().toString()).isCanBePassed();
                             if (owner.parent != null) owner.parent.setDisabled(key.isDisabled());
-                        } else key.setByConfig = key.setValueRaw(value.getValue().toString()) >= 0;
+                        } else key.setByConfig = key.setValueRaw(value.getValue().toString()).isCanBePassed();
                         iterator.remove();
                     }
                 }
@@ -240,9 +241,9 @@ public final class ConfigParser {
                         ConfigVal     key   = value.getKey();
                         ConfigParBase owner = key.getOwner();
                         if (owner instanceof ConfigParDisabler) {
-                            key.setByConfig = ((ConfigParDisabler) owner).setDisabledRaw(value.getValue().toString()) >= 0;
+                            key.setByConfig = ((ConfigParDisabler) owner).setDisabledRaw(value.getValue().toString()).isCanBePassed();
                             if (owner.parent != null) owner.parent.setDisabled(key.isDisabled());
-                        } else key.setByConfig = key.setValueRaw(value.getValue().toString()) >= 0;
+                        } else key.setByConfig = key.setValueRaw(value.getValue().toString()).isCanBePassed();
                         iterator.remove();
                     }
                 }
@@ -465,14 +466,11 @@ public final class ConfigParser {
                                     ConfigParDisabler disablePar = fullSect.disablePar;
 
                                     //Default
-                                    VariableValue<Boolean> def = disablePar.getValue().getDefaultValue();
-                                    PredefinedValue<?> configure = def.isPresent()
-                                            ? disablePar.getValue().getCurrConfigureFromValue(def.getValue())
-                                            : null;
+                                    PlusMinusType      def       = disablePar.getValue().getDefaultValue();
+                                    PredefinedValue<?> configure = disablePar.getValue().getCurrConfigureFromValue(def);
                                     String defString = configure != null
                                             ? configure.getDisplayName()
-                                            : MouseNumbers.formatObjectIfNumber(def.isPresent() ? def.getValue() : "",
-                                            false, true);
+                                            : MouseNumbers.formatObjectIfNumber(def.toString(), false, true);
                                     fileWriter.write(MouseStrings.format(
                                             "{0}{1}{2}{3} {4}{5} {6}", bordersTab, sectionBorder, delimiter,
                                             ConfigParser.comment, dictionary.getLocaleForLocale(disablePar.getValue().getDefaultLocaleType()),
@@ -482,18 +480,16 @@ public final class ConfigParser {
 
                                     //ConfigureValues
                                     if (disablePar.getValue().saveConfigureValues()) {
-                                        ImmutableList<PredefinedValue<Boolean>> configureValues = disablePar.getValue().getConfigureValues();
-                                        if (configureValues != null) {
-                                            for (String s : groupPredefinedBaseOnLength(
-                                                    dictionary.getLocaleForLocale(disablePar.getValue().getPredefinedLocaleType()),
-                                                    parEqual, delimiter, configureValues, 120
-                                            )) {
-                                                fileWriter.write(MouseStrings.format(
-                                                        "{0}{1}{2}{3} {4}", bordersTab, sectionBorder,
-                                                        delimiter, ConfigParser.comment, s
-                                                ));
-                                                fileWriter.newLine();
-                                            }
+                                        ImmutableList<PredefinedValue<PlusMinusType>> configureValues = disablePar.getValue().getConfigureValues();
+                                        for (String s : groupPredefinedBaseOnLength(
+                                                dictionary.getLocaleForLocale(disablePar.getValue().getPredefinedLocaleType()),
+                                                parEqual, delimiter, configureValues, 120
+                                        )) {
+                                            fileWriter.write(MouseStrings.format(
+                                                    "{0}{1}{2}{3} {4}", bordersTab, sectionBorder,
+                                                    delimiter, ConfigParser.comment, s
+                                            ));
+                                            fileWriter.newLine();
                                         }
                                     }
 
@@ -539,9 +535,9 @@ public final class ConfigParser {
                                             fileWriter.newLine();
                                         }
 
-                                        ICustomType type = configVal.getType();
+                                        IValType type = configVal.getType();
                                         String specificDataType = type == ConfigValType.LIST
-                                                ? dictionary.getLocaleForType(((ConfigSimpleListVal<?>) configVal).getListType())
+                                                ? dictionary.getLocaleForType(((ConfigSimpleListVal<?>) configVal).getListComponentType())
                                                 : configVal.getSpecificDataType();
 
                                         fileWriter.write(MouseStrings.format(
